@@ -15,7 +15,12 @@
 	<br /><br />
 	<img class="card" src={getHighResImage(card)} alt={card?.attributes.title} />
 	<br /><br />
-	<a href={`${NRDB_API_URL}/cards/${card.id}`} target="_blank">View on NetrunnerDB</a>
+	<a
+		href={`${NRDB_API_URL}/cards/${card.id}`}
+		target="_blank"
+		data-sveltekit-noscroll
+		data-sveltekit-preload-data>View on NetrunnerDB</a
+	>
 	<br />
 	<a href="/">Back to search</a>
 {/if}
