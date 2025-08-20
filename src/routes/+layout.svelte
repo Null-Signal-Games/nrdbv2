@@ -1,12 +1,11 @@
 <script lang="ts">
 	import '../app.css';
-	import favicon from '$lib/assets/favicon.png';
-	import faviconDev from '$lib/assets/favicon-dev.png';
 	import { onMount } from 'svelte';
 	import { LOCAL_STORAGE_ALL_CARDS_KEY, NRDB_API_URL } from '$lib/utils';
 	import lz from 'lz-string';
 	import type { Card } from '$lib/types';
 	import { setContext } from 'svelte';
+	import PageTitle from '$lib/components/PageTitle.svelte';
 
 	const store = $state({
 		allCards: [] as Card[]
@@ -32,14 +31,6 @@
 	});
 </script>
 
-<svelte:head>
-	{#if import.meta.env.DEV}
-		<title>(DEV) NetrunnerDB v2</title>
-		<link rel="icon" href={faviconDev} />
-	{:else}
-		<title>NetrunnerDB v2</title>
-		<link rel="icon" href={favicon} />
-	{/if}
-</svelte:head>
+<PageTitle />
 
 {@render children?.()}
