@@ -12,9 +12,7 @@
 	});
 	setContext('store', store);
 
-	let { children, data } = $props();
-
-	store.allCards = data.cards;
+	let { children } = $props();
 
 	const fetchAllCards = async () => {
 		const cardsResponse = await fetch(`${NRDB_API_URL}/cards?page[size]=10000`);

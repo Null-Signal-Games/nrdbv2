@@ -20,6 +20,9 @@ export default ts.config(
 	prettier,
 	...svelte.configs.prettier,
 	{
+		ignores: ['src/stories/**']
+	},
+	{
 		languageOptions: {
 			globals: { ...globals.browser, ...globals.node }
 		},

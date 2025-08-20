@@ -17,7 +17,8 @@ export const filterCards = (cards: Card[], search: string) => {
 };
 
 export const rankCards = (cards: Card[], search: string) => {
-	cards.sort((a, b) => {
+	const cardsCopy = [...cards];
+	cardsCopy.sort((a, b) => {
 		const aStartsWith = normalize(a.attributes.title).startsWith(normalize(search));
 		const bStartsWith = normalize(b.attributes.title).startsWith(normalize(search));
 
@@ -27,7 +28,7 @@ export const rankCards = (cards: Card[], search: string) => {
 		return 0;
 	});
 
-	return cards;
+	return cardsCopy;
 };
 
 export const filterAndRankCards = (cards: Card[], search: string) => {

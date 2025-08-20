@@ -4,6 +4,11 @@
 	import { getContext } from 'svelte';
 
 	const store = getContext<{ allCards: Card[] }>('store');
+	const { data } = $props();
+
+	if (store.allCards.length === 0) {
+		store.allCards = data.cards;
+	}
 
 	let search = $state('');
 
@@ -15,7 +20,7 @@
 </div>
 
 <ul>
-	{#each filteredCards as card}
+	{#each filteredCards as card (card.id)}
 		<li>
 			<a href={`/cards/${card.id}`}>{card.attributes.title}</a>
 		</li>
