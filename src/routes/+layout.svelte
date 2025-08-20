@@ -1,5 +1,6 @@
 <script lang="ts">
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.png';
+	import faviconDev from '$lib/assets/favicon-dev.png';
 	import { onMount } from 'svelte';
 	import { LOCAL_STORAGE_ALL_CARDS_KEY, NRDB_API_URL } from '$lib/utils';
 	import lz from 'lz-string';
@@ -33,7 +34,13 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	{#if import.meta.env.DEV}
+		<title>(DEV) NetrunnerDB v2</title>
+		<link rel="icon" href={faviconDev} />
+	{:else}
+		<title>NetrunnerDB v2</title>
+		<link rel="icon" href={favicon} />
+	{/if}
 </svelte:head>
 
 {@render children?.()}
