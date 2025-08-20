@@ -4,10 +4,10 @@
 
 ```sh
 # install dependencies
-npm install
+pnpm install
 
 # start the dev server
-npm run dev
+pnpm run dev
 ```
 
 ## Deploying
