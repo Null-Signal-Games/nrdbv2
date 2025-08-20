@@ -1,2 +1,14 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import type { Card } from '$lib/types';
+	import { getContext } from 'svelte';
+
+	const store = getContext<{ allCards: Card[] }>('store');
+</script>
+
+<ul>
+	{#each store.allCards as card}
+		<li>
+			{card.attributes.title}
+		</li>
+	{/each}
+</ul>
