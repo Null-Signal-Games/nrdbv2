@@ -20,3 +20,11 @@ img.card {
 	max-width: 300px;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+
+@media (prefers-reduced-motion) {
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}
