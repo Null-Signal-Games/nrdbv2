@@ -6,13 +6,14 @@
 	const { data } = $props();
 
 	const card = data.card;
+	const backUrl = data.searchParams ? `/?${data.searchParams}` : '/';
 </script>
 
 <PageTitle subtitle={card?.attributes.title} />
 
 {#if card}
 	<h1>{card?.attributes.title}</h1>
-	<a href="/">Back to search</a>
+	<a href={backUrl}>Back to search</a>
 	<br /><br />
 	<CardImage {card} />
 	<br /><br />
@@ -23,5 +24,5 @@
 		data-sveltekit-preload-data>View on NetrunnerDB</a
 	>
 	<br />
-	<a href="/">Back to search</a>
+	<a href={backUrl}>Back to search</a>
 {/if}
