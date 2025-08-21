@@ -18,38 +18,64 @@
 	const filteredCards = $derived(filterAndRankCards(store.allCards, getSearch()).slice(0, 5));
 </script>
 
-<div>
-	<input
-		type="text"
-		value={getSearch()}
-		oninput={async (e) => {
-			const input = e.target as HTMLInputElement;
+<div class="search-container">
+	<span class="search-input-container">
+		<input
+			type="text"
+			value={getSearch()}
+			oninput={async (e) => {
+				const input = e.target as HTMLInputElement;
 
-			const url = new URL(location.href);
-			url.searchParams.set('q', input.value);
-			await goto(url.href, { replaceState: true, keepFocus: true });
-		}}
-	/>
+				const url = new URL(location.href);
+				url.searchParams.set('q', input.value);
+				await goto(url.href, { replaceState: true, keepFocus: true });
+			}}
+		/></span
+	>
+	{#if getSearch().length > 0}
+		<div class="card-grid">
+			{#each filteredCards as card (card.id)}
+				<div class="card-grid-item">
+					<a href={`/cards/${card.id}?${page.url.searchParams.toString()}`}>
+						<CardImage {card} loading="lazy" boxShadow={false} />
+					</a>
+				</div>
+			{/each}
+		</div>
+	{/if}
 </div>
-{#if getSearch().length > 0}
-	<div class="card-grid">
-		{#each filteredCards as card (card.id)}
-			<a href={`/cards/${card.id}?${page.url.searchParams.toString()}`} class="card-grid-item">
-				<CardImage {card} loading="lazy" />
-			</a>
-		{/each}
-	</div>
-{/if}
 
 <style>
-	.card-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	.search-input-container {
+		display: flex;
+		flex-direction: row;
 		gap: 1rem;
 	}
 
+	input {
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #ccc;
+		font-size: 1rem;
+		line-height: 1.5;
+	}
+
+	.search-container {
+		width: 100%;
+		max-width: 800px;
+		margin: 0 auto;
+	}
+
+	.card-grid {
+		padding: 0.5rem;
+		display: flex;
+		gap: 1rem;
+		overflow-x: scroll;
+	}
+
 	.card-grid-item {
-		min-height: 400px;
+		max-width: 200px;
 		display: block;
+		flex: 0 0 auto;
 	}
 </style>

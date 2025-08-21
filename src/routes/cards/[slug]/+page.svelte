@@ -15,7 +15,9 @@
 	<h1>{card?.attributes.title}</h1>
 	<a href={backUrl}>Back to search</a>
 	<br /><br />
-	<CardImage {card} />
+	<div class="card-container">
+		<CardImage {card} />
+	</div>
 	<br /><br />
 	<a
 		href={`${NRDB_API_URL}/cards/${card.id}`}
@@ -26,3 +28,9 @@
 	<br />
 	<a href={backUrl}>Back to search</a>
 {/if}
+
+<style>
+	.card-container {
+		max-width: 300px;
+	}
+</style>
