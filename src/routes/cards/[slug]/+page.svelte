@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { getHighResImage, NRDB_API_URL } from '$lib/utils';
+	import { NRDB_API_URL } from '$lib/utils';
 	import PageTitle from '$lib/components/PageTitle.svelte';
+	import CardImage from '$lib/components/CardImage.svelte';
 
 	const { data } = $props();
 
@@ -13,7 +14,7 @@
 	<h1>{card?.attributes.title}</h1>
 	<a href="/">Back to search</a>
 	<br /><br />
-	<img class="card" src={getHighResImage(card)} alt={card?.attributes.title} />
+	<CardImage {card} />
 	<br /><br />
 	<a
 		href={`${NRDB_API_URL}/cards/${card.id}`}

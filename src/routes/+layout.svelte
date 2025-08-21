@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from 'svelte';
+	import { onNavigate } from '$app/navigation';
 	import { LOCAL_STORAGE_ALL_CARDS_KEY, NRDB_API_URL } from '$lib/utils';
 	import lz from 'lz-string';
 	import type { Card } from '$lib/types';
@@ -13,6 +14,17 @@
 	setContext('store', store);
 
 	let { children } = $props();
+
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 
 	const fetchAllCards = async () => {
 		const cardsResponse = await fetch(`${NRDB_API_URL}/cards?page[size]=10000`);

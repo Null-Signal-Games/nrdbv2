@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { filterAndRankCards } from '$lib/search';
 	import type { Card } from '$lib/types';
-	import { getHighResImage } from '$lib/utils.js';
 	import { getContext } from 'svelte';
+	import CardImage from '$lib/components/CardImage.svelte';
 
 	const store = getContext<{ allCards: Card[] }>('store');
 	const { data } = $props();
@@ -13,20 +13,21 @@
 
 	let search = $state('');
 
-	const filteredCards = $derived(filterAndRankCards(store.allCards, search));
+	const filteredCards = $derived(filterAndRankCards(store.allCards, search).slice(0, 5));
 </script>
 
 <div>
 	<input type="text" bind:value={search} />
 </div>
-
-<div class="card-grid">
-	{#each filteredCards as card (card.id)}
-		<a href={`/cards/${card.id}`} class="card-grid-item">
-			<img class="card" src={getHighResImage(card)} alt={card.attributes.title} loading="lazy" />
-		</a>
-	{/each}
-</div>
+{#if search.length > 0}
+	<div class="card-grid">
+		{#each filteredCards as card (card.id)}
+			<a href={`/cards/${card.id}`} class="card-grid-item">
+				<CardImage {card} loading="lazy" />
+			</a>
+		{/each}
+	</div>
+{/if}
 
 <style>
 	.card-grid {
