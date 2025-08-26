@@ -16,20 +16,24 @@
 <a href={`${NRDB_CLASSIC_URL}/decklist/${decklist.id}`} target="_blank">
 	<div class="decklist-preview">
 		<div class="decklist-preview-identity-card">
-			<CardImage card={identityCard} />
+			<CardImage card={identityCard} boxShadow={false} />
 		</div>
-		<p>
-			{decklist.attributes.name} - {decklist.attributes.user_id}
-		</p>
+		<div class="decklist-preview-info">
+			<p>
+				{decklist.attributes.name}
+			</p>
+			<p>
+				{decklist.attributes.user_id}
+			</p>
+		</div>
 	</div>
 </a>
 
 <style>
 	.decklist-preview {
-		border: 1px solid #ccc;
+		display: flex;
+		gap: 1rem;
 		padding: 1rem;
-		border-radius: 0.5rem;
-		margin-bottom: 1rem;
 	}
 
 	.decklist-preview-identity-card {

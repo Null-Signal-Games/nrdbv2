@@ -33,6 +33,7 @@
 	>
 	{#if getSearch().length > 0}
 		<div class="card-dropdown">
+			<h2>Cards</h2>
 			<div class="card-grid">
 				{#each filteredCards as card (card.id)}
 					<div class="card-grid-item">
