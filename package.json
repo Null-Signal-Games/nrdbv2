@@ -68,5 +68,8 @@
 		"*.{json,md,css,html}": [
 			"prettier --write"
 		]
+	},
+	"dependencies": {
+		"dexie": "^4.2.0"
 	}
 }
