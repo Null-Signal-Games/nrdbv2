@@ -16,7 +16,7 @@
 	<a href={backUrl}>Back to search</a>
 	<br /><br />
 	<div class="card-container">
-		<CardImage {card} />
+		<CardImage {card} hasTransition={true} />
 	</div>
 	<br /><br />
 	<a

@@ -38,7 +38,7 @@
 				{#each filteredCards as card (card.id)}
 					<div class="card-grid-item">
 						<a href={`/cards/${card.id}?${page.url.searchParams.toString()}`}>
-							<CardImage {card} loading="lazy" boxShadow={false} />
+							<CardImage {card} loading="lazy" boxShadow={false} hasTransition={true} />
 						</a>
 					</div>
 				{/each}

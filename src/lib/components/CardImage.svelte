@@ -7,9 +7,16 @@
 		loading?: 'lazy' | 'eager';
 		class?: string;
 		boxShadow?: boolean;
+		hasTransition?: boolean;
 	}
 
-	const { card, loading = 'eager', class: className = '', boxShadow = true }: Props = $props();
+	const {
+		card,
+		loading = 'eager',
+		class: className = '',
+		boxShadow = true,
+		hasTransition = false
+	}: Props = $props();
 </script>
 
 <img
@@ -18,7 +25,7 @@
 	src={getHighResImage(card)}
 	alt={card.attributes.title}
 	{loading}
-	style="view-transition-name: card-{card.id}"
+	style:view-transition-name={hasTransition ? `card-${card.id}` : ''}
 />
 
 <style>
