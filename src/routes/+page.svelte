@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { filterAndRankCards } from '$lib/search';
-	import type { Card } from '$lib/types';
+	import type { Card as TCard } from '$lib/types';
 	import { getContext } from 'svelte';
+	import Card from '$lib/components/Card.svelte';
 
-	const store = getContext<{ allCards: Card[] }>('store');
+	const store = getContext<{ cards: TCard[] }>('store');
 	const { data } = $props();
 
-	if (store.allCards.length === 0) {
-		store.allCards = data.cards;
+	if (store.cards.length === 0) {
+		store.cards = data.cards;
 	}
 
 	let search = $state('');
 
-	const filteredCards = $derived(filterAndRankCards(store.allCards, search));
+	const filteredCards = $derived(filterAndRankCards(store.cards, search));
 </script>
 
 <div>
@@ -22,7 +23,8 @@
 <ul>
 	{#each filteredCards as card (card.id)}
 		<li>
-			<a href={`/cards/${card.id}`}>{card.attributes.title}</a>
+			<!-- <a href={`/cards/${card.id}`}>{card.attributes.title}</a> -->
+			<Card data={card} />
 		</li>
 	{/each}
 </ul>
