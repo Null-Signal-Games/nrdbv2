@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { filterAndRankCards } from '$lib/search';
-	import type { Card } from '$lib/types';
-	import { getContext } from 'svelte';
 	import CardImage from '$lib/components/CardImage.svelte';
+	import DecklistSuggestions from '$lib/components/DecklistSuggestions.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { setupStore, store } from '$lib/store/index.svelte';
 
-	const store = getContext<{ allCards: Card[] }>('store');
 	const { data } = $props();
 
 	if (store.allCards.length === 0) {
-		store.allCards = data.cards;
+		setupStore(data.cards);
 	}
 
 	const getSearch = () => page.url.searchParams.get('q') || '';
@@ -33,14 +32,17 @@
 		/></span
 	>
 	{#if getSearch().length > 0}
-		<div class="card-grid">
-			{#each filteredCards as card (card.id)}
-				<div class="card-grid-item">
-					<a href={`/cards/${card.id}?${page.url.searchParams.toString()}`}>
-						<CardImage {card} loading="lazy" boxShadow={false} />
-					</a>
-				</div>
-			{/each}
+		<div class="card-dropdown">
+			<div class="card-grid">
+				{#each filteredCards as card (card.id)}
+					<div class="card-grid-item">
+						<a href={`/cards/${card.id}?${page.url.searchParams.toString()}`}>
+							<CardImage {card} loading="lazy" boxShadow={false} />
+						</a>
+					</div>
+				{/each}
+			</div>
+			<DecklistSuggestions firstCard={filteredCards[0]} />
 		</div>
 	{/if}
 </div>
@@ -64,6 +66,10 @@
 		width: 100%;
 		max-width: 800px;
 		margin: 0 auto;
+	}
+
+	.card-dropdown {
+		position: relative;
 	}
 
 	.card-grid {

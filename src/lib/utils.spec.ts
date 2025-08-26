@@ -1,16 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { getHighResImage, NRDB_API_URL, LOCAL_STORAGE_ALL_CARDS_KEY } from './utils';
+import { getHighResImage } from './utils';
 import type { Card } from './types';
-
-describe('constants', () => {
-	it('should export correct API URL', () => {
-		expect(NRDB_API_URL).toBe('https://api.netrunnerdb.com/api/v3/public');
-	});
-
-	it('should export correct local storage key', () => {
-		expect(LOCAL_STORAGE_ALL_CARDS_KEY).toBe('allCards');
-	});
-});
 
 describe('getHighResImage', () => {
 	const baseMockCard: Card = {
