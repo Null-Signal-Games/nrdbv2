@@ -1,48 +1,56 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages.js';
+	import { locales, setLocale } from '$lib/paraglide/runtime.js';
+
 	const navigation = [
 		{
-			title: 'Home',
+			title: m.home(),
 			url: '/'
 		},
 		{
-			title: 'My Decks',
+			title: m.my_decks(),
 			url: '/decks'
 		},
 		{
-			title: 'Decklists',
+			title: m.decklists(),
 			url: '/decklists'
 		},
 		{
-			title: 'Factions',
+			title: m.factions(),
 			url: '/factions'
 		},
 		{
-			title: 'Formats',
+			title: m.formats(),
 			url: '/formats'
 		},
 		{
-			title: 'Reviews',
+			title: m.reviews(),
 			url: '/reviews'
 		},
 		{
-			title: 'Rulings',
+			title: m.rulings(),
 			url: '/rulings'
 		},
 		{
-			title: 'Illustrators',
+			title: m.illustrators(),
 			url: '/illustrators'
 		}
 	];
 </script>
 
 <nav>
+	{m.agenda()}
 	<div>
 		<p>Logo</p>
 		<input type="search" />
-		<button>Register</button>
-		<button>Login</button>
-		<button>Language select</button>
-		<button>Theme toggle</button>
+		<button>{m.register()}</button>
+		<button>{m.login()}</button>
+		<select onchange={(e: Event) => setLocale(e.target.value)}>
+			{#each locales as locale (locale)}
+				<option value={locale}>{locale}</option>
+			{/each}
+		</select>
+		<button>{m.theme()}</button>
 	</div>
 	<ul>
 		{#each navigation as item (item.url)}
