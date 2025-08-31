@@ -1,23 +1,20 @@
 <script lang="ts">
 	import { NRDB_API_URL } from '$lib/utils';
 	import PageTitle from '$lib/components/PageTitle.svelte';
-	import { getContext } from 'svelte';
 	import { page } from '$app/state';
 	import type { PageProps } from './$types';
 	import Card from '$lib/components/Card.svelte';
 	import type { Card as TCard } from '$lib/types';
+	import { cards } from '$lib/store';
 
 	let { data }: PageProps = $props();
 
-	// Get the store from context
-	const store = getContext('store') as { cards: TCard[] };
-
-	let card = $state(store.cards.find((c: TCard) => c.id === page.params.slug));
+	let card = $derived($cards.find((card: TCard) => card.id === page.params.slug));
 </script>
 
-<PageTitle subtitle={card?.attributes.title} />
-
 {#if card}
+	<PageTitle subtitle={card?.attributes.title} />
+
 	<h1>{card?.attributes.title}</h1>
 	<a href="/">Back to search</a>
 	<br /><br />
@@ -32,15 +29,15 @@
 	<br />
 	<a href="/">Back to search</a>
 	<br />
-{/if}
 
-{#await data.reviews}
-	Loading reviews...
-{:then reviews}
-	<pre>{JSON.stringify(reviews, null, 2)}</pre>
-{:catch error}
-	<p>error loading comments: {error.message}</p>
-{/await}
+	{#await data.reviews}
+		Loading reviews...
+	{:then reviews}
+		<pre>{JSON.stringify(reviews, null, 2)}</pre>
+	{:catch error}
+		<p>error loading comments: {error.message}</p>
+	{/await}
+{/if}
 
 <br />
 <hr />

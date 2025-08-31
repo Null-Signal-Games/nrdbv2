@@ -30,3 +30,11 @@
 		{/if}
 	</div>
 </a>
+
+<style>
+	/* Temporary styles */
+	img {
+		width: 100%;
+		max-width: 300px;
+	}
+</style>

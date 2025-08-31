@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			try {
 				// Prefix fetch URL with `https://app.requestly.io/delay/5000/` to simulate artifical latency
 				const response = await fetch(
-					`${NRDB_API_URL}/reviews?filter[card_id]=${params.slug}&page[size]=1000`
+					`${NRDB_API_URL}/reviews?filter[card_id]=${params.slug}&page[size]=10`
 				);
 				const json = await response.json();
 				resolve(json.data);

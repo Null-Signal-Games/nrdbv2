@@ -70,6 +70,7 @@
 		]
 	},
 	"dependencies": {
-		"dexie": "^4.2.0"
+		"dexie": "^4.2.0",
+		"fuse.js": "^7.1.0"
 	}
 }
