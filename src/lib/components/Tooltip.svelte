@@ -67,21 +67,18 @@
 	data-visible={$tooltip.visible}
 >
 	{#if $tooltip?.card}
-		<div class="w-28">
+		<div>
 			<Card data={$tooltip.card} />
 		</div>
-		<div class="grid gap-2 grid-rows-[auto_1fr]">
+		<div>
 			<div>
 				<p>{$tooltip.card?.attributes.title}</p>
-				<span class="icon-label text-sm">
+				<span>
 					{$tooltip.card?.attributes.card_type_id}
 				</span>
 			</div>
 			{#if $tooltip.card.attributes?.text}
-				<div
-					data-faction-theme={$tooltip.card.attributes.faction_id}
-					class="pl-2 border-l border-l-(--theme)"
-				>
+				<div data-faction-theme={$tooltip.card.attributes.faction_id}>
 					{$tooltip.card.attributes.text}
 				</div>
 			{/if}

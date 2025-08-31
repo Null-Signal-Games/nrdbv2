@@ -10,7 +10,7 @@
 </script>
 
 <a class="card" href={`/cards/${data.id}`}>
-	<div class="relative aspect-[6.3/8.8]">
+	<div>
 		{#if data.attributes?.printing_ids?.[0]}
 			<picture>
 				<!-- <source srcset={getHighResImage(data, 'large')} type="image/webp" media="(max-width:936px)"> -->

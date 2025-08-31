@@ -24,9 +24,9 @@
 	<Header title={`Decklist: ${data.decklist.attributes.name}`} />
 
 	{#each grouped_cards as group (group.type)}
-		<div class="group">
+		<div>
 			<div>
-				<h2 class="text-2xl">{group.type} ({count[group.type]})</h2>
+				<h2>{group.type} ({count[group.type]})</h2>
 			</div>
 			<ul>
 				{#each group.data as card (card.id)}
