@@ -1,0 +1,21 @@
+<script lang="ts">
+	import type { Card } from '$lib/types';
+	import { cards } from '$lib/store';
+	import Header from '$lib/components/Header.svelte';
+
+	let data = $derived<Card[]>($cards);
+</script>
+
+{#if data}
+	<Header title="Factions" />
+
+	<ul>
+		{#each data as card (card.id)}
+			<li>
+				<a href={`/cards/${card.id}`}>
+					{card.attributes.title}
+				</a>
+			</li>
+		{/each}
+	</ul>
+{/if}
