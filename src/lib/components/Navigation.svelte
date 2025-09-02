@@ -45,7 +45,10 @@
 		<input type="search" />
 		<button>{m.register()}</button>
 		<button>{m.login()}</button>
-		<select onchange={(e: Event) => setLocale(e.target.value)}>
+		<select
+			onchange={(e: Event) =>
+				setLocale((e.target as HTMLSelectElement).value as (typeof locales)[number])}
+		>
 			{#each locales as locale (locale)}
 				<option value={locale}>{locale}</option>
 			{/each}

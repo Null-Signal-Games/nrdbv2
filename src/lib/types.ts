@@ -365,29 +365,6 @@ export interface Decklist {
 		identity_card_id: string;
 		name: string;
 		notes: string;
-		tags: string;
-		side_id: string;
-		created_at: string;
-		updated_at: string;
-		faction_id: string;
-		card_slots: {
-			[key: string]: number;
-		};
-		num_cards: number;
-		influence_spent: number;
-	};
-	relationships: Relationships;
-	links: Links;
-}
-
-export interface Decklist {
-	id: string;
-	attributes: {
-		user_id: string;
-		follows_basic_deckbuilding_rules: boolean;
-		identity_card_id: string;
-		name: string;
-		notes: string;
 		tags: string[] | null;
 		side_id: 'corp' | 'runner';
 		created_at: string;
@@ -397,4 +374,6 @@ export interface Decklist {
 		num_cards: number;
 		influence_spent: number;
 	};
+	relationships: Relationships;
+	links: Links;
 }

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Ruling } from '$lib/types';
+	import type { Illustrator } from '$lib/types';
 	import Header from '$lib/components/Header.svelte';
 
-	let { data }: { data: { illustrators: Ruling[] } } = $props();
+	let { data }: { data: { illustrators: Illustrator[] } } = $props();
 </script>
 
 {#if data.illustrators}

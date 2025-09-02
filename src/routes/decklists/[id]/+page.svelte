@@ -22,7 +22,7 @@
 	<Header title={`Decklist: ${data.decklist.attributes.name}`} />
 
 	{#each grouped_cards as group (group.type)}
-		<div>
+		<div class="group">
 			<div>
 				<h2>{group.type} ({count[group.type]})</h2>
 			</div>
