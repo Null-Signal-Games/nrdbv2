@@ -4,17 +4,11 @@
 	import DecklistSuggestions from '$lib/components/DecklistSuggestions.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { setupStore, store } from '$lib/store/index.svelte';
-
-	const { data } = $props();
-
-	if (store.allCards.length === 0) {
-		setupStore(data.cards);
-	}
+	import { cards } from '$lib/store';
 
 	const getSearch = () => page.url.searchParams.get('q') || '';
 
-	const filteredCards = $derived(filterAndRankCards(store.allCards, getSearch()).slice(0, 5));
+	const filteredCards = $derived(filterAndRankCards($cards, getSearch()).slice(0, 5));
 </script>
 
 <div class="search-container">

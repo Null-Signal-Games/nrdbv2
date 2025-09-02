@@ -2,16 +2,20 @@
 	import { NRDB_API_URL } from '$lib/utils';
 	import PageTitle from '$lib/components/PageTitle.svelte';
 	import CardImage from '$lib/components/CardImage.svelte';
+	import { page } from '$app/state';
+	import type { PageProps } from './$types';
+	import type { Card as TCard } from '$lib/types';
+	import { cards } from '$lib/store';
 
-	const { data } = $props();
+	let { data }: PageProps = $props();
 
-	const card = data.card;
-	const backUrl = data.searchParams ? `/?${data.searchParams}` : '/';
+	let card = $derived($cards.find((card: TCard) => card.id === page.params.slug));
+	const backUrl = page.url.searchParams.size > 0 ? `/?${page.url.searchParams.toString()}` : '/';
 </script>
 
-<PageTitle subtitle={card?.attributes.title} />
-
 {#if card}
+	<PageTitle subtitle={card?.attributes.title} />
+
 	<h1>{card?.attributes.title}</h1>
 	<a href={backUrl}>Back to search</a>
 	<br /><br />
@@ -27,6 +31,15 @@
 	>
 	<br />
 	<a href={backUrl}>Back to search</a>
+	<br />
+
+	{#await data.reviews}
+		Loading reviews...
+	{:then reviews}
+		<pre>{JSON.stringify(reviews, null, 2)}</pre>
+	{:catch error}
+		<p>error loading comments: {error.message}</p>
+	{/await}
 {/if}
 
 <style>
