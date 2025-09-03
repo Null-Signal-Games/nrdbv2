@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import CardElement from '$lib/components/Card.svelte';
+	import CardImage from '$lib/components/CardImage.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import type { Faction, Card } from '$lib/types';
 	import { factions, cards } from '$lib/store';
@@ -21,7 +21,7 @@
 	<ul>
 		{#each cards_data as card (card.id)}
 			<li>
-				<CardElement data={card} />
+				<CardImage {card} />
 			</li>
 		{/each}
 	</ul>

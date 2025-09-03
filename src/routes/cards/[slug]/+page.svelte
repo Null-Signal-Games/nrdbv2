@@ -20,7 +20,7 @@
 	<a href={backUrl}>Back to search</a>
 	<br /><br />
 	<div class="card-container">
-		<CardImage {card} hasTransition={true} />
+		<CardImage {card} hasTransition={true} href={null} />
 	</div>
 	<br /><br />
 	<a

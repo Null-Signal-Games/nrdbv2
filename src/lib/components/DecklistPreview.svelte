@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Decklist, Card } from '$lib/types';
+	import type { Decklist, Card as TCard } from '$lib/types';
 	import { NRDB_CLASSIC_URL } from '$lib/utils';
 	import CardImage from './CardImage.svelte';
 	import { cards } from '$lib/store';
@@ -11,7 +11,7 @@
 	const { decklist }: Props = $props();
 
 	const identityCard = $derived(
-		$cards.find((card: Card) => card.id === decklist.attributes.identity_card_id)
+		$cards.find((card: TCard) => card.id === decklist.attributes.identity_card_id)
 	);
 </script>
 
@@ -19,7 +19,7 @@
 	<div class="decklist-preview">
 		{#if identityCard}
 			<div class="decklist-preview-identity-card">
-				<CardImage card={identityCard} boxShadow={false} />
+				<CardImage card={identityCard} boxShadow={false} href={null} />
 			</div>
 		{/if}
 		<div class="decklist-preview-info">

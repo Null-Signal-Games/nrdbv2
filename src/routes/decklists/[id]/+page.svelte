@@ -3,7 +3,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import { group_cards_by_type, card_quantity } from '$lib/utils';
 	import { tooltip } from '$lib/actions';
-	import Card from '$lib/components/Card.svelte';
+	import CardImage from '$lib/components/CardImage.svelte';
 
 	interface Props {
 		data: {
@@ -29,7 +29,7 @@
 			<ul>
 				{#each group.data as card (card.id)}
 					<li use:tooltip={card}>
-						<Card data={card} />
+						<CardImage {card} />
 					</li>
 				{/each}
 			</ul>
