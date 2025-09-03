@@ -7,7 +7,6 @@ export const sets = writable<Set[]>([]);
 export const factions = writable<Faction[]>([]);
 export const formats = writable<Format[]>([]);
 
-// Global search query state (replaces URL-based search param handling)
 export const searchQuery = writable<string>('');
 
 export const tooltip = writable<{

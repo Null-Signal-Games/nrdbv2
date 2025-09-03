@@ -3,23 +3,37 @@
 	import { filterAndRankCards } from '$lib/search';
 	import CardImage from '$lib/components/CardImage.svelte';
 	import DecklistSuggestions from '$lib/components/DecklistSuggestions.svelte';
-
-	interface Props {
-		placeholder?: string;
-	}
-
-	const { placeholder = 'Search…' }: Props = $props();
+	import { afterNavigate } from '$app/navigation';
 
 	let inputEl: HTMLInputElement | null = null;
+	let isOpen = $state(false);
+	let dropdownEl = $state<HTMLDivElement | null>(null);
 	const filteredCards = $derived(filterAndRankCards($cards, $searchQuery).slice(0, 5));
+
+	afterNavigate(() => {
+		isOpen = false;
+	});
 </script>
 
 <div class="search-input-root">
 	<span class="search-input-container">
-		<input bind:this={inputEl} type="text" {placeholder} bind:value={$searchQuery} />
+		<input
+			bind:this={inputEl}
+			type="text"
+			placeholder="Search"
+			bind:value={$searchQuery}
+			onfocus={() => (isOpen = true)}
+			onblur={(e) => {
+				const next = (e as FocusEvent).relatedTarget as Node | null;
+				const focusInside = dropdownEl && next ? dropdownEl.contains(next) : false;
+				if (!focusInside) {
+					isOpen = false;
+				}
+			}}
+		/>
 	</span>
-	{#if $searchQuery.length > 0}
-		<div class="search-dropdown">
+	{#if isOpen && $searchQuery.length > 0}
+		<div class="search-dropdown" bind:this={dropdownEl}>
 			<h2>Cards</h2>
 			<div class="card-grid">
 				{#each filteredCards as card (card.id)}

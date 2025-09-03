@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Decklist, Card as TCard } from '$lib/types';
-	import { NRDB_CLASSIC_URL } from '$lib/utils';
 	import CardImage from './CardImage.svelte';
 	import { cards } from '$lib/store';
 
@@ -15,7 +14,7 @@
 	);
 </script>
 
-<a href={`${NRDB_CLASSIC_URL}/decklist/${decklist.id}`} target="_blank">
+<a href={`/decklists/${decklist.id}`} data-sveltekit-preload-data>
 	<div class="decklist-preview">
 		{#if identityCard}
 			<div class="decklist-preview-identity-card">
