@@ -3,6 +3,7 @@
 	import PageTitle from '$lib/components/PageTitle.svelte';
 	import CardImage from '$lib/components/CardImage.svelte';
 	import { page } from '$app/state';
+	import { searchQuery } from '$lib/store';
 	import type { PageProps } from './$types';
 	import type { Card as TCard } from '$lib/types';
 	import { cards } from '$lib/store';
@@ -10,7 +11,7 @@
 	let { data }: PageProps = $props();
 
 	let card = $derived($cards.find((card: TCard) => card.id === page.params.slug));
-	const backUrl = page.url.searchParams.size > 0 ? `/?${page.url.searchParams.toString()}` : '/';
+	const backUrl = $derived($searchQuery.length > 0 ? '/' : '/');
 </script>
 
 {#if card}
