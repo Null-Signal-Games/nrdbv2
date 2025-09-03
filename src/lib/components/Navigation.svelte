@@ -83,8 +83,6 @@
 		width: 500px;
 	}
 
-	/* input styles handled inside SearchInput component */
-
 	ul {
 		display: flex;
 		flex-direction: row;
