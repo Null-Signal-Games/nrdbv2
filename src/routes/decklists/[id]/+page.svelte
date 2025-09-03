@@ -29,7 +29,7 @@
 			<ul>
 				{#each group.data as card (card.id)}
 					<li use:tooltip={card}>
-						<CardImage {card} />
+						<CardImage hasTransition {card} />
 					</li>
 				{/each}
 			</ul>
