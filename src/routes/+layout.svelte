@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from 'svelte';
+	import { onNavigate } from '$app/navigation';
 	import { initialize_app_data } from '$lib/utils';
 	import { cards, cycles, sets, factions, formats } from '$lib/store';
 	import PageTitle from '$lib/components/PageTitle.svelte';
@@ -13,6 +14,17 @@
 	import Tooltip from '$lib/components/Tooltip.svelte';
 
 	let { children } = $props();
+
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 
 	onMount(async () => {
 		const stores = [cards, cycles, sets, factions, formats];

@@ -7,6 +7,8 @@ export const sets = writable<Set[]>([]);
 export const factions = writable<Faction[]>([]);
 export const formats = writable<Format[]>([]);
 
+export const searchQuery = writable<string>('');
+
 export const tooltip = writable<{
 	element: HTMLElement | null;
 	visible: boolean;

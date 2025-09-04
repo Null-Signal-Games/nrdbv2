@@ -1,8 +1,9 @@
 import { NRDB_API_URL } from '$lib/utils';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, url }) => {
 	return {
+		searchParams: url.searchParams.toString(),
 		// https://svelte.dev/docs/kit/load#Streaming-with-promises
 
 		// eslint-disable-next-line no-async-promise-executor

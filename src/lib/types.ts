@@ -127,6 +127,14 @@ export interface Card {
 			universal_faction_cost: object;
 		};
 		latest_printing_id: string;
+		latest_printing_images: {
+			nrdb_classic: {
+				tiny: string;
+				small: string;
+				medium: string;
+				large: string;
+			};
+		};
 	};
 	relationships: Relationships;
 	links: Links;
@@ -357,14 +365,12 @@ export interface Decklist {
 		identity_card_id: string;
 		name: string;
 		notes: string;
-		tags: string;
-		side_id: string;
+		tags: string[] | null;
+		side_id: 'corp' | 'runner';
 		created_at: string;
 		updated_at: string;
 		faction_id: string;
-		card_slots: {
-			[key: string]: number;
-		};
+		card_slots: Record<string, number>;
 		num_cards: number;
 		influence_spent: number;
 	};

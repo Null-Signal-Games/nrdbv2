@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tooltip } from '$lib/store';
 	import { onMount } from 'svelte';
-	import Card from '$lib/components/Card.svelte';
+	import CardImage from '$lib/components/CardImage.svelte';
 	import { page } from '$app/state';
 
 	let tooltip_element: HTMLElement;
@@ -68,7 +68,7 @@
 >
 	{#if $tooltip?.card}
 		<div>
-			<Card data={$tooltip.card} />
+			<CardImage card={$tooltip.card} />
 		</div>
 		<div>
 			<div>

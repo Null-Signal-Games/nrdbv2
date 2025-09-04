@@ -1,16 +1,14 @@
 <script lang="ts">
-	import type { Decklist, Card as TCard, Set } from '$lib/types';
+	import type { Decklist, Card as TCard } from '$lib/types';
 	import Header from '$lib/components/Header.svelte';
 	import { group_cards_by_type, card_quantity } from '$lib/utils';
 	import { tooltip } from '$lib/actions';
-	import Card from '$lib/components/Card.svelte';
+	import CardImage from '$lib/components/CardImage.svelte';
 
 	interface Props {
 		data: {
 			decklist: Decklist;
-			identity: TCard;
 			cards: TCard[];
-			sets: Set[];
 		};
 	}
 
@@ -24,14 +22,14 @@
 	<Header title={`Decklist: ${data.decklist.attributes.name}`} />
 
 	{#each grouped_cards as group (group.type)}
-		<div>
+		<div class="group">
 			<div>
 				<h2>{group.type} ({count[group.type]})</h2>
 			</div>
 			<ul>
 				{#each group.data as card (card.id)}
 					<li use:tooltip={card}>
-						<Card data={card} />
+						<CardImage hasTransition {card} />
 					</li>
 				{/each}
 			</ul>

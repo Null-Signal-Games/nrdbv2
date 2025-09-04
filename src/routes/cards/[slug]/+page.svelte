@@ -1,24 +1,28 @@
 <script lang="ts">
 	import { NRDB_API_URL } from '$lib/utils';
 	import PageTitle from '$lib/components/PageTitle.svelte';
+	import CardImage from '$lib/components/CardImage.svelte';
 	import { page } from '$app/state';
+	import { searchQuery } from '$lib/store';
 	import type { PageProps } from './$types';
-	import Card from '$lib/components/Card.svelte';
 	import type { Card as TCard } from '$lib/types';
 	import { cards } from '$lib/store';
 
 	let { data }: PageProps = $props();
 
 	let card = $derived($cards.find((card: TCard) => card.id === page.params.slug));
+	const backUrl = $derived($searchQuery.length > 0 ? '/' : '/');
 </script>
 
 {#if card}
 	<PageTitle subtitle={card?.attributes.title} />
 
 	<h1>{card?.attributes.title}</h1>
-	<a href="/">Back to search</a>
+	<a href={backUrl}>Back to search</a>
 	<br /><br />
-	<Card data={card} />
+	<div class="card-container">
+		<CardImage {card} hasTransition={true} href={null} />
+	</div>
 	<br /><br />
 	<a
 		href={`${NRDB_API_URL}/cards/${card.id}`}
@@ -27,7 +31,7 @@
 		data-sveltekit-preload-data>View on NetrunnerDB</a
 	>
 	<br />
-	<a href="/">Back to search</a>
+	<a href={backUrl}>Back to search</a>
 	<br />
 
 	{#await data.reviews}
@@ -39,8 +43,8 @@
 	{/await}
 {/if}
 
-<br />
-<hr />
-<br />
-
-<pre>{JSON.stringify(card, null, 2)}</pre>
+<style>
+	.card-container {
+		max-width: 300px;
+	}
+</style>
