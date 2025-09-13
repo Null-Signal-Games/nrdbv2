@@ -87,7 +87,7 @@
 
 	let { name, size = 'lg', class: class_list = '', label = name, fill = 'theme' }: Props = $props();
 
-	const icons: Record<string, string> = {
+	const icons: Record<Props['name'], string> = {
 		adam: 'faction-adam',
 		anarch: 'faction-anarch',
 		apex: 'faction-apex',
