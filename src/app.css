@@ -14,6 +14,40 @@
 		sans-serif;
 }
 
+[data-fill='theme'] {
+	color: var(--theme, currentColor);
+	fill: var(--theme, currentColor);
+}
+
+.icon {
+	width: var(--icon-size);
+	height: var(--icon-size);
+}
+
+.icon--xs {
+	--icon-size: 0.75rem;
+}
+
+.icon--sm {
+	--icon-size: 1rem;
+}
+
+.icon--md {
+	--icon-size: 1.25rem;
+}
+
+.icon--lg {
+	--icon-size: 1.5rem;
+}
+
+.icon--xl {
+	--icon-size: 1.75rem;
+}
+
+.icon--fill {
+	fill: currentColor;
+}
+
 @media (prefers-reduced-motion) {
 	::view-transition-group(*),
 	::view-transition-old(*),
