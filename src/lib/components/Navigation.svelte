@@ -48,32 +48,34 @@
 </script>
 
 <nav>
-	<div>
-		<div class="logo">
-			<p>Logo</p>
+	<div class="container">
+		<div>
+			<div class="logo">
+				<p>Logo</p>
+			</div>
+			<div class="search-input-container">
+				<SearchInput />
+			</div>
+			<button>{m.register()}</button>
+			<button>{m.login()}</button>
+			<select
+				onchange={(e: Event) =>
+					setLocale((e.target as HTMLSelectElement).value as (typeof locales)[number])}
+			>
+				{#each locales as locale (locale)}
+					<option value={locale}>{locale}</option>
+				{/each}
+			</select>
+			<button>{m.theme()}</button>
 		</div>
-		<div class="search-input-container">
-			<SearchInput />
-		</div>
-		<button>{m.register()}</button>
-		<button>{m.login()}</button>
-		<select
-			onchange={(e: Event) =>
-				setLocale((e.target as HTMLSelectElement).value as (typeof locales)[number])}
-		>
-			{#each locales as locale (locale)}
-				<option value={locale}>{locale}</option>
+		<ul>
+			{#each navigation as item (item.url)}
+				<li>
+					<a href={item.url}>{item.title}</a>
+				</li>
 			{/each}
-		</select>
-		<button>{m.theme()}</button>
+		</ul>
 	</div>
-	<ul>
-		{#each navigation as item (item.url)}
-			<li>
-				<a href={item.url}>{item.title}</a>
-			</li>
-		{/each}
-	</ul>
 </nav>
 
 <style>

@@ -1,4 +1,6 @@
-<footer>Footer</footer>
+<footer>
+	<div class="container">Footer</div>
+</footer>
 
 <style>
 	/* Temporary styles */
