@@ -17,6 +17,14 @@
 			url: '/decklists'
 		},
 		{
+			title: m.sets(),
+			url: '/sets'
+		},
+		{
+			title: m.cycles(),
+			url: '/cycles'
+		},
+		{
 			title: m.factions(),
 			url: '/factions'
 		},
