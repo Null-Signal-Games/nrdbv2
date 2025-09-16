@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { SignIn, SignOut } from '@auth/sveltekit/components';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 </script>
 
 <h1>Home</h1>
-{#if $page.data.session}
-	{#if $page.data.session.user?.image}
-		<img src={$page.data.session.user.image} class="avatar" alt="User Avatar" />
+{#if page.data.session}
+	{#if page.data.session.user?.image}
+		<img src={page.data.session.user.image} class="avatar" alt="User Avatar" />
 	{/if}
 	<span class="signedInText">
 		<small>Signed in as</small><br />
-		<strong>{$page.data.session.user?.name ?? 'User'}</strong>
+		<strong>{page.data.session.user?.name ?? 'User'}</strong>
 	</span>
 	<SignOut>
 		<div slot="submitButton" class="buttonPrimary">Sign out</div>
