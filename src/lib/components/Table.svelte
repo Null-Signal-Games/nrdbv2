@@ -11,7 +11,7 @@
 	const { data }: Props = $props();
 </script>
 
-<table class="results mt-5">
+<table>
 	<thead>
 		<tr>
 			<th>{m.name()}</th>
