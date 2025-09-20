@@ -3,6 +3,8 @@
 	import type { Card } from '$lib/types';
 	import Icon from './Icon.svelte';
 	import { tooltip } from '$lib/actions';
+	import { factions } from '$lib/i18n';
+	import type { FactionIds } from '$lib/types';
 
 	interface Props {
 		data: Card[];
@@ -22,7 +24,7 @@
 			<th>{m.cost()}</th>
 			<th>{m.trash()}</th>
 			<th>{m.strength()}</th>
-		</tr>
+		</tr>.
 	</thead>
 	<tbody>
 		{#each data as card (card.id)}
@@ -41,7 +43,7 @@
 					<span data-faction-theme={card.attributes.faction_id}>
 						<Icon name={card.attributes.faction_id} size="sm" />
 					</span>
-					{m[card.attributes.faction_id]()}
+					{factions[card.attributes.faction_id as FactionIds]?.()}
 				</td>
 				<td>
 					<Icon name={card.attributes.card_type_id} size="sm" />
