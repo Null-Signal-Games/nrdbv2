@@ -11,6 +11,21 @@ export type CardTypeIds =
 	| 'runner_identity'
 	| 'upgrade';
 
+export type FactionIds =
+	| 'anarch'
+	| 'criminal'
+	| 'shaper'
+	| 'adam'
+	| 'apex'
+	| 'sunny_lebeau'
+	| 'sunny_lebeau'
+	| 'haas_bioroid'
+	| 'jinteki'
+	| 'nbn'
+	| 'weyland_consortium'
+	| 'neutral_corp'
+	| 'neutral_runner';
+
 export interface IndexedDBStore {
 	cards: Card[];
 	cycles: Cycle[];
