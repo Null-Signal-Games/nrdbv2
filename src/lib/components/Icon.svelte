@@ -1,88 +1,13 @@
 <script lang="ts">
+	import type { FactionIds, CardTypeIds } from '$lib/types';
+
 	interface Props {
-		name:
-			| 'adam'
-			| 'anarch'
-			| 'apex'
-			| 'criminal'
-			| 'haas_bioroid'
-			| 'jinteki'
-			| 'nbn'
-			| 'neutral_corp'
-			| 'neutral_runner'
-			| 'neutral'
-			| 'shaper'
-			| 'sunny_lebeau'
-			| 'weyland_consortium'
-			| 'agenda_points_simple'
-			| 'agenda_points'
-			| 'click'
-			| 'credit'
-			| 'interrupt'
-			| 'link'
-			| 'mu'
-			| 'rez_cost'
-			| 'strength'
-			| 'subroutine'
-			| 'trash_ability'
-			| 'trash_cost'
-			| 'ashes'
-			| 'borealis'
-			| 'core_set'
-			| 'creation_and_control'
-			| 'data_and_destiny'
-			| 'draft'
-			| 'flashpoint'
-			| 'genesis'
-			| 'honor_and_profit'
-			| 'kitara'
-			| 'liberation'
-			| 'lunar'
-			| 'magnum_opus_reprint'
-			| 'magnum_opus'
-			| 'mumbad'
-			| 'napd_multiplayer'
-			| 'order_and_chaos'
-			| 'red_sand'
-			| 'reign_and_reverie'
-			| 'revised_core_set'
-			| 'salvaged_memories'
-			| 'sansan'
-			| 'spin'
-			| 'system_core_2019'
-			| 'system_gateway'
-			| 'system_update_2021'
-			| 'terminal_directive'
-			| 'agenda'
-			| 'asset'
-			| 'event'
-			| 'hardware'
-			| 'ice'
-			| 'identity'
-			| 'operation'
-			| 'program'
-			| 'resource'
-			| 'upgrade'
-			| 'null_signal_games'
-			| 'nsg'
-			| 'fantasy_flight_games'
-			| 'ffg'
-			| 'certificate'
-			| 'rotation'
-			| 'heart'
-			| 'star'
-			| 'comment'
-			| 'alwaysberunning'
-			| 'external'
-			| 'crimson_dust'
-			| 'uprising'
-			| 'system_update_2019'
-			| 'system_update_2021'
-			| string;
+		// TODO: refactor `string` to specific icon names later
+		name: FactionIds | CardTypeIds | string;
 		size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'fill' | 'none';
 		class?: string;
-		label: string;
-		fill: 'theme' | 'current';
+		label?: string;
+		fill?: 'theme' | 'current';
 	}
 
 	let { name, size = 'lg', class: class_list = '', label = name, fill = 'theme' }: Props = $props();
@@ -97,7 +22,6 @@
 		nbn: 'faction-nbn',
 		neutral_corp: 'faction-neutral',
 		neutral_runner: 'faction-neutral',
-		neutral: 'faction-neutral',
 		shaper: 'faction-shaper',
 		sunny_lebeau: 'faction-sunny-lebeau',
 		weyland_consortium: 'faction-weyland-consortium',
