@@ -24,7 +24,7 @@
 			<th>{m.cost()}</th>
 			<th>{m.trash()}</th>
 			<th>{m.strength()}</th>
-		</tr>.
+		</tr>
 	</thead>
 	<tbody>
 		{#each data as card (card.id)}
