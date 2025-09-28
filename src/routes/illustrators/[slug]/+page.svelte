@@ -11,7 +11,7 @@
 	<ul>
 		{#each data.printings as printing (printing.id)}
 			<li>
-				<a href={`/cards/${printing.attributes.card_id}`}>
+				<a href={`/card/${printing.attributes.card_id}`}>
 					{printing.attributes.card_id}
 				</a>
 			</li>
