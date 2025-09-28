@@ -1,21 +1,25 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
-	import type { Card } from '$lib/types';
+	import type { Decklist, Card } from '$lib/types';
 	import Icon from './Icon.svelte';
 	import { tooltip } from '$lib/actions';
 	import { factions } from '$lib/i18n';
 	import type { FactionIds } from '$lib/types';
 
 	interface Props {
-		data: Card[];
+		decklist?: Decklist;
+		cards: Card[];
 	}
 
-	const { data }: Props = $props();
+	const { decklist, cards }: Props = $props();
 </script>
 
 <table>
 	<thead>
 		<tr>
+			{#if decklist}
+				<th>{m.quantity()}</th>
+			{/if}
 			<th>{m.name()}</th>
 			<th>{m.influence()}</th>
 			<th>{m.faction()}</th>
@@ -27,10 +31,15 @@
 		</tr>
 	</thead>
 	<tbody>
-		{#each data as card (card.id)}
+		{#each cards as card (card.id)}
 			<tr>
+				{#if decklist}
+					<td>
+						{decklist.attributes.card_slots[card.id] ?? '0'}
+					</td>
+				{/if}
 				<td>
-					<a href="/cards/{card.id}" use:tooltip={card}>
+					<a href="/card/{card.id}" use:tooltip={card}>
 						{card.attributes.title}
 					</a>
 				</td>
@@ -43,7 +52,7 @@
 					<span data-faction-theme={card.attributes.faction_id}>
 						<Icon name={card.attributes.faction_id} size="sm" />
 					</span>
-					{factions[card.attributes.faction_id as FactionIds]?.()}
+					{factions[card.attributes.faction_id as FactionIds]}
 				</td>
 				<td>
 					<Icon name={card.attributes.card_type_id} size="sm" />
@@ -56,18 +65,24 @@
 					{#if card.attributes.cost}
 						{card.attributes.cost}
 						<Icon name="credit" size="sm" />
+					{:else}
+						<span class="not-applicable">N/A</span>
 					{/if}
 				</td>
 				<td>
 					{#if card.attributes.trash_cost}
 						{card.attributes.trash_cost}
 						<Icon name="trash" size="sm" />
+					{:else}
+						<span class="not-applicable">N/A</span>
 					{/if}
 				</td>
 				<td>
 					{#if card.attributes.strength}
 						{card.attributes.strength}
 						<Icon name="strength" size="sm" />
+					{:else}
+						<span class="not-applicable">N/A</span>
 					{/if}
 				</td>
 			</tr>
