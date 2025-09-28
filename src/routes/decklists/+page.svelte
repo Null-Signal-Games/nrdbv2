@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Decklist } from '$lib/types';
 	import Header from '$lib/components/Header.svelte';
+	import DecklistItem from '$lib/components/decklist/Item.svelte';
 
 	let { data }: { data: { decklists: Decklist[] } } = $props();
 </script>
@@ -10,11 +11,7 @@
 
 	<ul>
 		{#each data.decklists as decklist (decklist.id)}
-			<li>
-				<a href={`/decklists/${decklist.id}`}>
-					{decklist.attributes.name}
-				</a>
-			</li>
+			<DecklistItem {decklist} />
 		{/each}
 	</ul>
 {/if}

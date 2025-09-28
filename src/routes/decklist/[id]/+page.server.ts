@@ -32,7 +32,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	return {
 		decklist: decklist_data.data[0],
-		identity: identity_data.data[0],
+		identity: identity_data.data,
 		cards: cards_data.data,
 		sets: sets_data.data
 	};
