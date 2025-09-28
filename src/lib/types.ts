@@ -1,5 +1,7 @@
 export type SidesIds = 'corp' | 'runner';
 
+export type Publishers = 'null_signal_games' | 'fantasy_flight_games';
+
 export type CardTypeIds =
 	| 'agenda'
 	| 'asset'
