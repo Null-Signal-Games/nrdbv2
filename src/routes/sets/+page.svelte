@@ -1,10 +1,11 @@
 <script lang="ts">
-	import type { Cycle, Set } from '$lib/types';
+	import type { Cycle, Set, Publishers } from '$lib/types';
 	import { sets, cycles } from '$lib/store';
 	import Header from '$lib/components/Header.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { format_date } from '$lib/utils';
+	import { publishers } from '$lib/i18n';
 
 	let data_cycles = $derived<Cycle[]>(
 		$cycles.slice().sort((a, b) => (a.attributes.date_release > b.attributes.date_release ? -1 : 1))
@@ -41,7 +42,7 @@
 					<td>
 						<label class="icon-label">
 							<Icon name={cycle.attributes.released_by} size="sm" />
-							{cycle.attributes.released_by}
+							{publishers[cycle.attributes.released_by as Publishers]}
 						</label>
 					</td>
 					<td>Standard</td>
@@ -63,7 +64,7 @@
 								<td>
 									<span class="icon-label">
 										<Icon name={set.attributes.released_by} size="sm" />
-										{set.attributes.released_by}
+										{publishers[set.attributes.released_by as Publishers]}
 									</span>
 								</td>
 								<td>Standard</td>

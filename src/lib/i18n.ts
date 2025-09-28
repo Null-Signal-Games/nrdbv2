@@ -1,5 +1,5 @@
 import { m } from './paraglide/messages.js';
-import type { FactionIds, CardTypeIds } from './types.js';
+import type { FactionIds, CardTypeIds, Publishers } from './types.js';
 
 export const factions: Record<FactionIds, string> = {
 	anarch: m.anarch(),
@@ -28,4 +28,9 @@ export const card_types: Record<CardTypeIds, string> = {
 	resource: m.resource(),
 	runner_identity: m.runner_identity(),
 	upgrade: m.upgrade()
+};
+
+export const publishers: Record<Publishers, string> = {
+	null_signal_games: m.null_signal_games(),
+	fantasy_flight_games: m.fantasy_flight_games()
 };
