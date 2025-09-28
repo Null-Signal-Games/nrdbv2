@@ -14,7 +14,7 @@
 	);
 </script>
 
-<a href={`/decklists/${decklist.id}`} data-sveltekit-preload-data>
+<a href={`/decklist/${decklist.id}`} data-sveltekit-preload-data>
 	<div class="decklist-preview">
 		{#if identityCard}
 			<div class="decklist-preview-identity-card">
