@@ -12,7 +12,7 @@
 	<ul>
 		{#each data as card (card.id)}
 			<li>
-				<a href={`/cards/${card.id}`}>
+				<a href={`/card/${card.id}`}>
 					{card.attributes.title}
 				</a>
 			</li>
