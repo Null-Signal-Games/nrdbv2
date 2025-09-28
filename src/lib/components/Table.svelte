@@ -6,6 +6,7 @@
 	import { factions } from '$lib/i18n';
 	import type { FactionIds } from '$lib/types';
 
+	// TODO: refactor this component to be more generic and extensible (e.g. allow custom columns, not specific to cards/decklists)
 	interface Props {
 		decklist?: Decklist;
 		cards: Card[];
