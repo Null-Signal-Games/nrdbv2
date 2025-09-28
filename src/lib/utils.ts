@@ -71,8 +71,13 @@ export const getHighResImage = (card: Card, size: 'small' | 'medium' | 'large' =
 	// if the card includes one of the card cycles that are released by null signal games, use the nsg image
 	const nsgCardCycles = ['elevation', 'liberation', 'borealis', 'ashes', 'system_gateway'];
 
+	// If the card is from a NSG cycle, or doesn't have a NRDB classic image, use the NRDB image
 	if (nsgCardCycles.some((cycle) => card.attributes.card_cycle_ids.includes(cycle))) {
 		return `https://card-images.netrunnerdb.com/v2/xlarge/${card.attributes.latest_printing_id}.webp`;
+	}
+
+	if (!card.attributes.latest_printing_images?.nrdb_classic) {
+		return `https://card-images.netrunnerdb.com/v2/large/${card.attributes.latest_printing_id}.jpg`;
 	}
 
 	return card.attributes.latest_printing_images.nrdb_classic[size];
