@@ -103,3 +103,8 @@ table td {
 .not-applicable {
 	opacity: 0.25;
 }
+
+/* Temporary styles */
+pre {
+	max-width: 600px;
+}
