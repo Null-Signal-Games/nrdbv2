@@ -1,4 +1,33 @@
 :root {
+	color-scheme: light dark;
+
+	--background: light-dark(#ffffff, #101010);
+	--text: light-dark(#000000, #ffffff);
+
+	/* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
+	--adam: light-dark(#a89c33, #a89c33);
+	--anarch: light-dark(#e26b35, #e26b35);
+	--apex: light-dark(#000, #fff);
+	--criminal: light-dark(#194c9b, #194c9b);
+	--neutral_corp: light-dark(#5e5e5e, #5e5e5e);
+	--neutral_runner: light-dark(#919191, #919191);
+	--sunny_lebeau: light-dark(#939598, #939598);
+	--haas_bioroid: light-dark(#794d94, #794d94);
+	--jinteki: light-dark(#ba3339, #ba3339);
+	--nbn: light-dark(darkorange, #ffde00);
+	--shaper: light-dark(#4cb148, #4cb148);
+	--weyland_consortium: light-dark(#516751, #516751);
+}
+
+@media (prefers-reduced-motion) {
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}
+
+body {
 	font-family:
 		'Atkinson Hyperlegible',
 		-apple-system,
@@ -12,6 +41,8 @@
 		'Droid Sans',
 		'Helvetica Neue',
 		sans-serif;
+	background-color: var(--background);
+	color: var(--text);
 }
 
 .container {
@@ -26,6 +57,7 @@
 }
 
 .icon {
+	fill: currentColor;
 	width: var(--icon-size);
 	height: var(--icon-size);
 }
@@ -50,14 +82,11 @@
 	--icon-size: 1.75rem;
 }
 
-.icon--fill {
-	fill: currentColor;
+th {
+	text-align: left;
 }
 
-@media (prefers-reduced-motion) {
-	::view-transition-group(*),
-	::view-transition-old(*),
-	::view-transition-new(*) {
-		animation: none !important;
-	}
+/* TODO(style): Review colour contrast for accessibility concerns */
+.not-applicable {
+	opacity: 0.25;
 }
