@@ -82,8 +82,21 @@ body {
 	--icon-size: 1.75rem;
 }
 
-th {
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+table th {
 	text-align: left;
+}
+
+table tr:nth-child(2n) {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+table td {
+	padding: 0.5rem;
 }
 
 /* TODO(style): Review colour contrast for accessibility concerns */
