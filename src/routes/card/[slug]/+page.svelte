@@ -4,11 +4,18 @@
 	import CardImage from '$lib/components/CardImage.svelte';
 	import { page } from '$app/state';
 	import { searchQuery } from '$lib/store';
-	import type { PageProps } from './$types';
-	import type { Card as TCard } from '$lib/types';
+	import type { Card as TCard, Review as TReview } from '$lib/types';
 	import { cards } from '$lib/store';
+	import Review from '$lib/components/review/Item.svelte';
 
-	let { data }: PageProps = $props();
+	interface Props {
+		data: {
+			searchParams: string;
+			reviews: TReview[];
+		};
+	}
+
+	let { data }: Props = $props();
 
 	let card = $derived($cards.find((card: TCard) => card.id === page.params.slug));
 	const backUrl = $derived($searchQuery.length > 0 ? '/' : '/');
@@ -37,14 +44,24 @@
 	{#await data.reviews}
 		Loading reviews...
 	{:then reviews}
-		<pre>{JSON.stringify(reviews, null, 2)}</pre>
+		<div class="reviews">
+			{#each reviews as review (review.id)}
+				<Review {review} />
+			{/each}
+		</div>
 	{:catch error}
 		<p>error loading comments: {error.message}</p>
 	{/await}
 {/if}
 
 <style>
+	/* Temporary styles */
 	.card-container {
 		max-width: 300px;
+	}
+
+	.reviews {
+		display: grid;
+		gap: 1rem;
 	}
 </style>
