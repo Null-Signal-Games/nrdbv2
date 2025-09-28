@@ -67,10 +67,10 @@
 	data-visible={$tooltip.visible}
 >
 	{#if $tooltip?.card}
-		<div>
+		<div class="tooltip__image">
 			<CardImage card={$tooltip.card} />
 		</div>
-		<div>
+		<div class="tooltip__meta">
 			<div>
 				<p>{$tooltip.card?.attributes.title}</p>
 				<span>
@@ -107,6 +107,9 @@
 		opacity: 0;
 		transition: opacity 120ms ease;
 		max-width: 400px;
+		padding: 1rem;
+		border: 2px solid red;
+		border-radius: 0.25rem;
 	}
 
 	.tooltip[data-visible='true'] {
@@ -132,5 +135,9 @@
 	.tooltip::after {
 		border-width: calc(var(--spacing) * 2.5);
 		border-color: black transparent transparent transparent;
+	}
+
+	.tooltip__image {
+		max-width: 200px;
 	}
 </style>
