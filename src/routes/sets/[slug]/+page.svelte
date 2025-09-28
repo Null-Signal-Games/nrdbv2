@@ -16,5 +16,5 @@
 {#if set_data && cards_data}
 	<Header title={`Set: ${set_data.attributes.name}`} />
 
-	<Table data={cards_data} />
+	<Table cards={cards_data} />
 {/if}
