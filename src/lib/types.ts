@@ -395,3 +395,11 @@ export interface Decklist {
 	relationships: Relationships;
 	links: Links;
 }
+
+export interface Comment {
+	id: number;
+	body: string;
+	user: string;
+	created_at: string;
+	updated_at: string;
+}
