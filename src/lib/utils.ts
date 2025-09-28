@@ -121,3 +121,17 @@ export const card_quantity = (decklist: Decklist, cards: CardGroup[]) => {
 		return accumulator;
 	}, {});
 };
+
+export const format_date = (iso: string, options?: Intl.DateTimeFormatOptions) => {
+	const date: Date = new Date(iso);
+
+	return date.toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		// hour: 'numeric',
+		// minute: 'numeric',
+		// second: 'numeric'
+		...options
+	});
+};
