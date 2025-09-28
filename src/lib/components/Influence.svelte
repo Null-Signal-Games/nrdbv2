@@ -19,13 +19,15 @@
 	{/if}
 	<span class="influence">
 		<span>
-			{#each Array(count) as pip (pip)}
+			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+			{#each Array(count) as pip, index (index)}
 				●
 			{/each}
 		</span>
 		{#if total}
 			<span>
-				{#each Array(5 - count) as pip (pip)}
+				<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+				{#each Array(5 - count) as max, index (index)}
 					○
 				{/each}
 			</span>
