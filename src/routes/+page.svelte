@@ -3,6 +3,7 @@
 	import { factions } from '$lib/i18n';
 	import DecklistSummary from '$lib/components/decklist/Summary.svelte';
 	import DecklistBreakdown from '$lib/components/decklist/Breakdown.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 
 	interface Props {
 		data: {
@@ -31,6 +32,7 @@
 <div class="factions">
 	{#each display_factions as faction (faction)}
 		<a href={'/faction/' + faction}>
+			<Icon name={faction} />
 			{factions[faction]}
 		</a>
 	{/each}
