@@ -1,4 +1,4 @@
-import { cards, cycles, sets, factions, formats } from '$lib/store';
+import { cards, cycles, sets, factions, formats, printings } from '$lib/store';
 import type {
 	ApiResponse,
 	Card,
@@ -7,7 +7,8 @@ import type {
 	Faction,
 	Format,
 	CardTypeIds,
-	Decklist
+	Decklist,
+	Printing
 } from '$lib/types';
 import { db } from '$lib/db';
 
@@ -17,26 +18,35 @@ export const SEARCH_LIMIT = 20;
 export const LOCAL_STORAGE_ALL_CARDS_KEY = 'allCards';
 
 export const initialize_app_data = async () => {
-	const [cards_response, cycles_response, sets_response, factions_response, formats_response] =
-		await Promise.all([
-			fetch(`${NRDB_API_URL}/cards?page[size]=10000`),
-			fetch(`${NRDB_API_URL}/card_cycles?page[size]=100`),
-			fetch(`${NRDB_API_URL}/card_sets?page[size]=100`),
-			fetch(`${NRDB_API_URL}/factions?page[size]=100`),
-			fetch(`${NRDB_API_URL}/formats?page[size]=20`)
-		]);
+	const [
+		cards_response,
+		cycles_response,
+		sets_response,
+		factions_response,
+		formats_response,
+		printings_response
+	] = await Promise.all([
+		fetch(`${NRDB_API_URL}/cards?page[size]=10000`),
+		fetch(`${NRDB_API_URL}/card_cycles?page[size]=100`),
+		fetch(`${NRDB_API_URL}/card_sets?page[size]=100`),
+		fetch(`${NRDB_API_URL}/factions?page[size]=100`),
+		fetch(`${NRDB_API_URL}/formats?page[size]=20`),
+		fetch(`${NRDB_API_URL}/printings?page[size]=10000`)
+	]);
 
 	const cards_data: ApiResponse<Card> = await cards_response.json();
 	const cycles_data: ApiResponse<Cycle> = await cycles_response.json();
 	const sets_data: ApiResponse<Set> = await sets_response.json();
 	const factions_data: ApiResponse<Faction> = await factions_response.json();
 	const formats_data: ApiResponse<Format> = await formats_response.json();
+	const printings_data: ApiResponse<Printing> = await printings_response.json();
 
 	cards.set(cards_data.data);
 	cycles.set(cycles_data.data);
 	sets.set(sets_data.data);
 	factions.set(factions_data.data);
 	formats.set(formats_data.data);
+	printings.set(printings_data.data);
 
 	// Clear and store all cards in IndexedDB
 	await db.cards.clear();
@@ -53,6 +63,9 @@ export const initialize_app_data = async () => {
 
 	await db.formats.clear();
 	await db.formats.bulkAdd(formats_data.data);
+
+	await db.printings.clear();
+	await db.printings.bulkAdd(printings_data.data);
 };
 
 export const reset_indexeddb_data = async () => {
@@ -60,6 +73,8 @@ export const reset_indexeddb_data = async () => {
 	await db.cycles.clear();
 	await db.sets.clear();
 	await db.factions.clear();
+	await db.formats.clear();
+	await db.printings.clear();
 
 	console.info('IndexedDB cleared');
 

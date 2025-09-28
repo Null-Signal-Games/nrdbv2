@@ -1,11 +1,12 @@
 import { writable } from 'svelte/store';
-import type { Card, Cycle, Set, Faction, Format } from './types';
+import type { Card, Cycle, Set, Faction, Format, Printing } from './types';
 
 export const cards = writable<Card[]>([]);
 export const cycles = writable<Cycle[]>([]);
 export const sets = writable<Set[]>([]);
 export const factions = writable<Faction[]>([]);
 export const formats = writable<Format[]>([]);
+export const printings = writable<Printing[]>([]);
 
 export const searchQuery = writable<string>('');
 
