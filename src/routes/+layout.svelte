@@ -82,6 +82,15 @@
 		window.addEventListener('scroll', () => {
 			document.body.style.setProperty('--scroll', `${window.scrollY}px`);
 		});
+
+		// Handle light/dark theme
+		// TODO(theme): review, as currently we utilise `light-dark` in CSS, which us purely based on user preference
+		const user_prefers_dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		const theme = localStorage.getItem('theme');
+		document.documentElement.setAttribute(
+			'data-theme',
+			theme === 'dark' || (!theme && user_prefers_dark) ? 'dark' : 'light'
+		);
 	});
 </script>
 

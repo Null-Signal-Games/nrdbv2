@@ -27,3 +27,5 @@ export const tooltip = writable<{
 		y: 0
 	}
 });
+
+export const theme = writable<'light' | 'dark'>('light');
