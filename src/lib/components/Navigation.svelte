@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
-	import { locales, setLocale } from '$lib/paraglide/runtime.js';
+	import { locales, getLocale, setLocale } from '$lib/paraglide/runtime.js';
 	import SearchInput from '$lib/components/SearchInput.svelte';
 
 	const navigation = [
@@ -63,7 +63,7 @@
 					setLocale((e.target as HTMLSelectElement).value as (typeof locales)[number])}
 			>
 				{#each locales as locale (locale)}
-					<option value={locale}>{locale}</option>
+					<option value={locale} selected={locale === getLocale()}>{locale}</option>
 				{/each}
 			</select>
 			<button>{m.theme()}</button>
