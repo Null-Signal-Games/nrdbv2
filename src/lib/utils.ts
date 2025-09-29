@@ -8,7 +8,8 @@ import type {
 	Format,
 	CardTypeIds,
 	Decklist,
-	Printing
+	Printing,
+	FileFormat
 } from '$lib/types';
 import { db } from '$lib/db';
 
@@ -149,4 +150,69 @@ export const format_date = (iso: string, options?: Intl.DateTimeFormatOptions) =
 		// second: 'numeric'
 		...options
 	});
+};
+
+export const print = () => {
+	window.print();
+};
+
+export const share = async (config: ShareData) => {
+	try {
+		await navigator.share({
+			title: config.title,
+			text: config.text,
+			url: config.url
+		});
+	} catch (err) {
+		console.error('Error sharing:', err);
+	}
+};
+
+export const content_type: Record<FileFormat, string> = {
+	json: 'application/json',
+	txt: 'text/plain',
+	otcgn: 'application/x-otcgn',
+	bbcode: 'text/plain',
+	md: 'text/markdown',
+	'jinteki.net': 'text/plain'
+};
+
+export const export_format = (data: object | object[], format: FileFormat) => {
+	switch (format) {
+		case 'json':
+			return data;
+
+		// TODO: Implement logic for other formats
+		case 'txt':
+			return data;
+		case 'otcgn':
+			return data;
+		case 'bbcode':
+			return data;
+		case 'md':
+			return data;
+		case 'jinteki.net':
+			return data;
+	}
+};
+
+/**
+ *
+ * @param data string - you will need to format the data before passing it in using JSON.stringify() or similar
+ * @param name string - name of the file without extension
+ * @param extension - file extension, must be one of the FileFormat types
+ */
+export const download_file = (data: string, name: string, extension: FileFormat) => {
+	const blob = new Blob([data], { type: content_type[extension] });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+
+	// Assign the URL to the anchor element and trigger a click to start the download
+	a.href = url;
+	a.download = `${name}.${extension}`;
+	a.click();
+
+	// Clean-up the URL object and remove the anchor element
+	URL.revokeObjectURL(url);
+	a.remove();
 };

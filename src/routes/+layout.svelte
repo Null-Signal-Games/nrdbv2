@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { onNavigate } from '$app/navigation';
 	import { initialize_app_data } from '$lib/utils';
 	import { cards, cycles, sets, factions, formats, printings } from '$lib/store';
@@ -13,7 +13,11 @@
 	import type { Card, Cycle, Set, Faction, Format, Printing } from '$lib/types';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 
-	let { children } = $props();
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;

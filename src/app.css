@@ -51,6 +51,10 @@ body {
 	padding-inline: 2.5vw;
 }
 
+a {
+	color: inherit;
+}
+
 [data-fill='theme'] {
 	color: var(--theme, currentColor);
 	fill: var(--theme, currentColor);
@@ -107,4 +111,40 @@ table td {
 /* Temporary styles */
 pre {
 	max-width: 600px;
+}
+
+@media print {
+	* {
+		print-color-adjust: exact;
+	}
+
+	body :not(body > div > main, .printer):not(.printer > *) {
+		display: none;
+	}
+
+	.printer {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 10.5mm;
+	}
+}
+
+@media not print {
+	.printer {
+		display: none;
+		visibility: hidden;
+	}
+}
+
+.printer > div {
+	text-align: center;
+	color: #fff;
+	background-size: cover;
+	border-radius: 2.5mm;
+	justify-content: center;
+	align-items: center;
+	width: 63mm;
+	height: 88mm;
+	font-size: 2rem;
+	display: flex;
 }

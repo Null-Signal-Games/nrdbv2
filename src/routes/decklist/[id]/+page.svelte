@@ -1,7 +1,15 @@
 <script lang="ts">
-	import type { Decklist, Card as TCard } from '$lib/types';
+	import type { Decklist, FileFormat, Card as TCard } from '$lib/types';
 	import Header from '$lib/components/Header.svelte';
-	import { group_cards_by_type, card_quantity, format_date } from '$lib/utils';
+	import {
+		group_cards_by_type,
+		card_quantity,
+		format_date,
+		print,
+		share,
+		download_file,
+		export_format
+	} from '$lib/utils';
 	import { tooltip } from '$lib/actions';
 	import CardImage from '$lib/components/CardImage.svelte';
 	import Table from '$lib/components/Table.svelte';
@@ -9,6 +17,7 @@
 	import { card_types } from '$lib/i18n';
 	import DeckListSummary from '$lib/components/decklist/Summary.svelte';
 	import DecklistBreakdown from '$lib/components/decklist/Breakdown.svelte';
+	import Printer from '$lib/components/Printer.svelte';
 
 	interface Props {
 		data: {
@@ -23,6 +32,11 @@
 	const grouped_cards = group_cards_by_type(data.cards);
 	const count = card_quantity(data.decklist, grouped_cards);
 	// const total_cards = Object.values(count).reduce((sum, n) => sum + n, 0);
+
+	const export_and_download = async (format: FileFormat = 'json') => {
+		const data_formatted = export_format(data.decklist, format as FileFormat);
+		download_file(JSON.stringify(data_formatted, null, 2), data.decklist.attributes.name, format);
+	};
 </script>
 
 {#if data.decklist}
@@ -33,6 +47,26 @@
 	/>
 	<p>Created at: {format_date(data.decklist.attributes.created_at)}</p>
 	<p>Updated at: {format_date(data.decklist.attributes.updated_at)}</p>
+
+	<div>
+		<h2>Actions</h2>
+		<p>Download as:</p>
+		{#each ['json', 'txt', 'otcgn', 'bbcode', 'md', 'jinteki.net'] as format, index (index)}
+			<button onclick={() => export_and_download(format as FileFormat)}>
+				{format}
+			</button>
+		{/each}
+		<hr />
+		<button onclick={() => print()}>print</button>
+		<button
+			onclick={() =>
+				share({
+					title: data.decklist.attributes.name,
+					text: `Decklist by ${data.decklist.attributes.user_id}`,
+					url: window.location.href
+				})}>share</button
+		>
+	</div>
 
 	<div class="wrapper">
 		<div class="temp">
@@ -68,6 +102,8 @@
 			<Table decklist={data.decklist} cards={data.cards} />
 		</div>
 	</div>
+
+	<Printer decklist={data.decklist} cards={data.cards} />
 
 	<pre>{JSON.stringify(data, null, 2)}</pre>
 {/if}

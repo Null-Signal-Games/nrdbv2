@@ -5,6 +5,7 @@
 	import { tooltip } from '$lib/actions';
 	import { factions } from '$lib/i18n';
 	import type { FactionIds } from '$lib/types';
+	import Influence from './Influence.svelte';
 
 	// TODO: refactor this component to be more generic and extensible (e.g. allow custom columns, not specific to cards/decklists)
 	interface Props {
@@ -47,6 +48,9 @@
 				<td>
 					{#if card.attributes.influence_cost}
 						{card.attributes.influence_cost}
+						<Influence count={card.attributes.influence_cost} />
+					{:else}
+						<span class="not-applicable">N/A</span>
 					{/if}
 				</td>
 				<td>
@@ -60,12 +64,16 @@
 					{m[card.attributes.card_type_id]()}
 				</td>
 				<td>
-					{card.attributes.display_subtypes}
+					{#if card.attributes.display_subtypes}
+						{card.attributes.display_subtypes}
+					{:else}
+						<span class="not-applicable">N/A</span>
+					{/if}
 				</td>
 				<td>
 					{#if card.attributes.cost}
-						{card.attributes.cost}
 						<Icon name="credit" size="sm" />
+						{card.attributes.cost}
 					{:else}
 						<span class="not-applicable">N/A</span>
 					{/if}
