@@ -1,4 +1,4 @@
-import { NRDB_API_URL } from '$lib/utils';
+import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import type { Card } from '$lib/types';
@@ -32,7 +32,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	return {
 		decklist: decklist_data.data[0],
-		identity: identity_data.data[0],
+		identity: identity_data.data,
 		cards: cards_data.data,
 		sets: sets_data.data
 	};

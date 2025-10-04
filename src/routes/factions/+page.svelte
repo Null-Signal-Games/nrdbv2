@@ -12,7 +12,7 @@
 	<ul>
 		{#each data as faction (faction.id)}
 			<li>
-				<a href={`/factions/${faction.id}`}>
+				<a href={`/faction/${faction.id}`}>
 					{faction.attributes.name}
 				</a>
 			</li>

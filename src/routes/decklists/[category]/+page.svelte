@@ -1,20 +1,29 @@
 <script lang="ts">
-	import type { Decklist } from '$lib/types';
 	import Header from '$lib/components/Header.svelte';
+	import type { Decklist } from '$lib/types';
 	import DecklistItem from '$lib/components/decklist/Item.svelte';
 
-	let { data }: { data: { decklists: Decklist[] } } = $props();
+	interface Props {
+		data: {
+			title: string;
+			decklists: Decklist[];
+		};
+	}
+
+	let { data }: Props = $props();
 </script>
 
-{#if data.decklists}
-	<Header title="Decklists" />
+<Header title={data.title} />
 
+{#if data.decklists}
 	<ul>
 		{#each data.decklists as decklist (decklist.id)}
 			<DecklistItem {decklist} />
 		{/each}
 	</ul>
 {/if}
+
+<pre>{JSON.stringify(data, null, 2)}</pre>
 
 <style>
 	/* Temporary styles */

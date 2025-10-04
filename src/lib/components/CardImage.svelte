@@ -24,7 +24,7 @@
 
 	// Generate href for navigation if provided
 	const navigationHref =
-		href === null ? undefined : href || (card ? `/cards/${card.id}` : undefined);
+		href === null ? undefined : href || (card ? `/card/${card.id}` : undefined);
 </script>
 
 {#if card?.attributes?.printing_ids?.[0]}

@@ -1,3 +1,9 @@
+export type SidesIds = 'corp' | 'runner';
+
+export type Publishers = 'null_signal_games' | 'fantasy_flight_games';
+
+export type FileFormat = 'json' | 'txt' | 'otcgn' | 'bbcode' | 'md' | 'jinteki.net';
+
 export type CardTypeIds =
 	| 'agenda'
 	| 'asset'
@@ -17,7 +23,6 @@ export type FactionIds =
 	| 'shaper'
 	| 'adam'
 	| 'apex'
-	| 'sunny_lebeau'
 	| 'sunny_lebeau'
 	| 'haas_bioroid'
 	| 'jinteki'
@@ -384,11 +389,19 @@ export interface Decklist {
 		side_id: 'corp' | 'runner';
 		created_at: string;
 		updated_at: string;
-		faction_id: string;
+		faction_id: FactionIds;
 		card_slots: Record<string, number>;
 		num_cards: number;
 		influence_spent: number;
 	};
 	relationships: Relationships;
 	links: Links;
+}
+
+export interface Comment {
+	id: number;
+	body: string;
+	user: string;
+	created_at: string;
+	updated_at: string;
 }

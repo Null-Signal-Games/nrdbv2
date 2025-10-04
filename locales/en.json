@@ -56,5 +56,8 @@
 	"trash": "Trash",
 	"register": "register",
 	"login": "login",
-	"theme": "theme"
+	"theme": "theme",
+	"standard": "Standard",
+	"startup": "Startup",
+	"eternal": "Eternal"
 }

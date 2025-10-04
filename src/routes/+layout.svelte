@@ -1,19 +1,23 @@
 <script lang="ts">
 	import '../app.css';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { onNavigate } from '$app/navigation';
 	import { initialize_app_data } from '$lib/utils';
-	import { cards, cycles, sets, factions, formats } from '$lib/store';
+	import { cards, cycles, sets, factions, formats, printings } from '$lib/store';
 	import PageTitle from '$lib/components/PageTitle.svelte';
 	import { db } from '$lib/db';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { dev } from '$app/environment';
 	import Debug from '$lib/components/Debug.svelte';
-	import type { Card, Cycle, Set, Faction, Format } from '$lib/types';
+	import type { Card, Cycle, Set, Faction, Format, Printing } from '$lib/types';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 
-	let { children } = $props();
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
@@ -27,7 +31,7 @@
 	});
 
 	onMount(async () => {
-		const stores = [cards, cycles, sets, factions, formats];
+		const stores = [cards, cycles, sets, factions, formats, printings];
 		let cached: boolean = false;
 
 		// Check if Svelte store has data
@@ -51,6 +55,7 @@
 		const cached_sets: Set[] = await db.sets.toArray();
 		const cached_factions: Faction[] = await db.factions.toArray();
 		const cached_formats: Format[] = await db.formats.toArray();
+		const cached_printings: Printing[] = await db.printings.toArray();
 
 		// If cached data is found, use it
 		if (
@@ -65,6 +70,7 @@
 			sets.set(cached_sets);
 			factions.set(cached_factions);
 			formats.set(cached_formats);
+			printings.set(cached_printings);
 		} else {
 			console.info('No complete cached data found, fetching from API.');
 			await initialize_app_data();
@@ -76,6 +82,15 @@
 		window.addEventListener('scroll', () => {
 			document.body.style.setProperty('--scroll', `${window.scrollY}px`);
 		});
+
+		// Handle light/dark theme
+		// TODO(theme): review, as currently we utilise `light-dark` in CSS, which us purely based on user preference
+		const user_prefers_dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		const theme = localStorage.getItem('theme');
+		document.documentElement.setAttribute(
+			'data-theme',
+			theme === 'dark' || (!theme && user_prefers_dark) ? 'dark' : 'light'
+		);
 	});
 </script>
 

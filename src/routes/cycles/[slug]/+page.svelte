@@ -18,5 +18,5 @@
 {#if cycle_data && cards_data}
 	<Header title={`Cycle: ${cycle_data.attributes.name}`} />
 
-	<Table data={cards_data} />
+	<Table cards={cards_data} />
 {/if}
