@@ -3,6 +3,10 @@
 
 	const categories = [
 		{
+			path: 'search',
+			title: 'Search'
+		},
+		{
 			path: 'recent',
 			title: 'Recent'
 		},
