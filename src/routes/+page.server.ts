@@ -1,4 +1,4 @@
-import { NRDB_API_URL } from '$lib/utils';
+import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
 import type { ApiResponse, Card, Decklist } from '$lib/types';
 

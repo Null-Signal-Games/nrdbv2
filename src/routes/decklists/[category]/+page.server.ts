@@ -1,4 +1,4 @@
-import { NRDB_API_URL } from '$lib/utils';
+import { NRDB_API_URL } from '$lib/constants';
 import { error } from '@sveltejs/kit';
 
 export async function load({ params }) {

@@ -1,4 +1,4 @@
-import { NRDB_API_URL } from '$lib/utils';
+import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
 import type { SidesIds, FactionIds, ApiResponse, Card, Decklist } from '$lib/types';
 
@@ -18,7 +18,6 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	return {
 		// https://svelte.dev/docs/kit/load#Streaming-with-promises
 
-		 
 		// identities: new Promise(async (resolve, reject) => {
 		//     try {
 		//         const identities_response = await fetch(
@@ -61,7 +60,7 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		})
 
 		// Returns any/all decklists for this faction, limited to 5 for now
-		 
+
 		// decklists: new Promise(async (resolve, reject) => {
 		//     try {
 		//         console.log(`${NRDB_API_URL}/decklists?filter[faction_id]=${params.slug}&page[size]=5`);

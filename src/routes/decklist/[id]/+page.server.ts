@@ -1,4 +1,4 @@
-import { NRDB_API_URL } from '$lib/utils';
+import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import type { Card } from '$lib/types';
