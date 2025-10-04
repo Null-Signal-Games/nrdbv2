@@ -33,6 +33,11 @@
 	const count = card_quantity(data.decklist, grouped_cards);
 	// const total_cards = Object.values(count).reduce((sum, n) => sum + n, 0);
 
+	// TODO(review): Ensure packs are unique and sorted by release date, and anything else useful
+	const packs = $derived(
+		Array.from(new Set(data.cards.flatMap((card) => card.attributes.card_set_ids)))
+	);
+
 	const export_and_download = async (format: FileFormat = 'json') => {
 		const data_formatted = export_format(data.decklist, format as FileFormat);
 		download_file(JSON.stringify(data_formatted, null, 2), data.decklist.attributes.name, format);
@@ -47,6 +52,24 @@
 	/>
 	<p>Created at: {format_date(data.decklist.attributes.created_at)}</p>
 	<p>Updated at: {format_date(data.decklist.attributes.updated_at)}</p>
+
+	<!-- TODO: get decklists likes count -->
+	<p>
+		<Icon name="heart" />
+		Likes: [NUMBER]
+	</p>
+
+	<!-- TODO: get decklists favourites count -->
+	<p>
+		<Icon name="star" />
+		Favourites: [NUMBER]
+	</p>
+
+	<!-- TODO: get decklists comments count -->
+	<p>
+		<Icon name="comment" />
+		Comments: [NUMBER]
+	</p>
 
 	<div>
 		<h2>Actions</h2>
@@ -99,7 +122,43 @@
 
 		<div class="temp">
 			<p>Table layout</p>
-			<Table decklist={data.decklist} cards={data.cards} />
+			{#each grouped_cards as group (group.type)}
+				<div class="group">
+					<div>
+						<Icon name={group.type} />
+						<h2>{card_types[group.type]} ({count[group.type]})</h2>
+					</div>
+					<Table decklist={data.decklist} cards={group.data} />
+				</div>
+			{/each}
+		</div>
+
+		<div class="temp">
+			<h2>Legality</h2>
+			<!-- TODO: get decklists legality(s) -->
+		</div>
+
+		<div class="temp">
+			<h2>Rotation</h2>
+			<!-- TODO: get decklists rotation(s) -->
+		</div>
+
+		<div class="temp">
+			<h2>Packs</h2>
+			{#if packs.length > 0}
+				<ul>
+					<!-- TODO(i18n): ensure pack names are translated and use i18n values (currently uses API ID) -->
+					{#each packs as pack (pack)}
+						<li>
+							<a href="/sets/{pack}">
+								{pack}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<p>No packs found</p>
+			{/if}
 		</div>
 	</div>
 
