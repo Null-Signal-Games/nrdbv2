@@ -1,4 +1,4 @@
-import { NRDB_PRIVATE_API_URL } from '$lib/utils';
+import { NRDB_PRIVATE_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 

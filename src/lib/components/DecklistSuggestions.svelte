@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Card, Decklist } from '$lib/types';
-	import { NRDB_API_URL } from '$lib/utils';
+	import { NRDB_API_URL } from '$lib/constants';
 	import DecklistPreview from './DecklistPreview.svelte';
 
 	interface Props {

@@ -2,7 +2,7 @@
 	import type { FactionIds, CardTypeIds } from '$lib/types';
 
 	interface Props {
-		// TODO: refactor `string` to specific icon names later
+		// TODO(types): refactor `string` to specific icon names later
 		name: FactionIds | CardTypeIds | string;
 		size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'fill' | 'none';
 		class?: string;

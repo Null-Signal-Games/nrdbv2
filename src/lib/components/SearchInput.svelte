@@ -43,7 +43,7 @@
 							loading="lazy"
 							boxShadow={false}
 							hasTransition={true}
-							href={`/cards/${card.id}`}
+							href={`/card/${card.id}`}
 						/>
 					</div>
 				{/each}

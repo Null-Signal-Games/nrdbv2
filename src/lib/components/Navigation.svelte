@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
-	import { locales, setLocale } from '$lib/paraglide/runtime.js';
+	import { locales, getLocale, setLocale } from '$lib/paraglide/runtime.js';
 	import SearchInput from '$lib/components/SearchInput.svelte';
+	import { theme as current_theme } from '$lib/store';
 
 	const navigation = [
 		{
@@ -45,6 +46,12 @@
 			url: '/illustrators'
 		}
 	];
+
+	// TODO(theme): review, as currently we utilise `light-dark` in CSS, which us purely based on user preference
+	const set_theme = (theme: 'light' | 'dark') => {
+		document.documentElement.setAttribute('data-theme', theme);
+		localStorage.setItem('theme', theme);
+	};
 </script>
 
 <nav>
@@ -63,7 +70,16 @@
 					setLocale((e.target as HTMLSelectElement).value as (typeof locales)[number])}
 			>
 				{#each locales as locale (locale)}
-					<option value={locale}>{locale}</option>
+					<option value={locale} selected={locale === getLocale()}>{locale}</option>
+				{/each}
+			</select>
+
+			<select
+				onchange={(e: Event) =>
+					set_theme((e.target as HTMLSelectElement).value as 'light' | 'dark')}
+			>
+				{#each ['light', 'dark'] as theme, index (index)}
+					<option value={theme} selected={theme === $current_theme}>{theme}</option>
 				{/each}
 			</select>
 			<button>{m.theme()}</button>
