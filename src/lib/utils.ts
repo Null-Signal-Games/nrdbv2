@@ -12,6 +12,7 @@ import type {
 	FileFormat
 } from '$lib/types';
 import { db } from '$lib/db';
+
 import { NRDB_API_URL } from '$lib/constants';
 
 export const initialize_app_data = async () => {
