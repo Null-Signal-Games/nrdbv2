@@ -3,6 +3,8 @@
 	import { locales, getLocale, setLocale } from '$lib/paraglide/runtime.js';
 	import SearchInput from '$lib/components/SearchInput.svelte';
 	import { theme as current_theme } from '$lib/store';
+	import { SignIn, SignOut } from '@auth/sveltekit/components';
+	import { page } from '$app/state';
 
 	const navigation = [
 		{
@@ -63,8 +65,27 @@
 			<div class="search-input-container">
 				<SearchInput />
 			</div>
-			<button>{m.register()}</button>
-			<button>{m.login()}</button>
+
+			<div>
+				{#if page.data.session}
+					{#if page.data.session.user?.image}
+						<img src={page.data.session.user.image} class="avatar" alt="User Avatar" />
+					{/if}
+					<span class="signedInText">
+						<small>Signed in as</small><br />
+						<strong>{page.data.session.user?.name ?? 'User'}</strong>
+					</span>
+					<SignOut>
+						<div slot="submitButton" class="buttonPrimary">{m.logout()}</div>
+					</SignOut>
+				{:else}
+					<!-- <span class="notSignedInText">You are not signed in</span>	 -->
+					<SignIn provider="nsg-keycloak">
+						<div slot="submitButton">{m.login()}/{m.register()}</div>
+					</SignIn>
+				{/if}
+			</div>
+
 			<select
 				onchange={(e: Event) =>
 					setLocale((e.target as HTMLSelectElement).value as (typeof locales)[number])}
