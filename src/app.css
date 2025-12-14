@@ -1,150 +1,164 @@
-:root {
-	color-scheme: light dark;
+@layer thmee, base;
 
-	--background: light-dark(#ffffff, #101010);
-	--text: light-dark(#000000, #ffffff);
+@layer theme {
+	:root {
+		color-scheme: light dark;
 
-	/* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
-	--adam: light-dark(#a89c33, #a89c33);
-	--anarch: light-dark(#e26b35, #e26b35);
-	--apex: light-dark(#000, #fff);
-	--criminal: light-dark(#194c9b, #194c9b);
-	--neutral_corp: light-dark(#5e5e5e, #5e5e5e);
-	--neutral_runner: light-dark(#919191, #919191);
-	--sunny_lebeau: light-dark(#939598, #939598);
-	--haas_bioroid: light-dark(#794d94, #794d94);
-	--jinteki: light-dark(#ba3339, #ba3339);
-	--nbn: light-dark(darkorange, #ffde00);
-	--shaper: light-dark(#4cb148, #4cb148);
-	--weyland_consortium: light-dark(#516751, #516751);
-}
+		&[data-theme='light'] {
+			color-scheme: light;
+		}
 
-@media (prefers-reduced-motion) {
-	::view-transition-group(*),
-	::view-transition-old(*),
-	::view-transition-new(*) {
-		animation: none !important;
+		&[data-theme='dark'] {
+			color-scheme: dark;
+		}
+
+		--background: light-dark(#ffffff, #101010);
+		--text: light-dark(#000000, #ffffff);
+
+		/* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
+		--adam: light-dark(#a89c33, #a89c33);
+		--anarch: light-dark(#e26b35, #e26b35);
+		--apex: light-dark(#000, #fff);
+		--criminal: light-dark(#194c9b, #194c9b);
+		--neutral_corp: light-dark(#5e5e5e, #5e5e5e);
+		--neutral_runner: light-dark(#919191, #919191);
+		--sunny_lebeau: light-dark(#939598, #939598);
+		--haas_bioroid: light-dark(#794d94, #794d94);
+		--jinteki: light-dark(#ba3339, #ba3339);
+		--nbn: light-dark(darkorange, #ffde00);
+		--shaper: light-dark(#4cb148, #4cb148);
+		--weyland_consortium: light-dark(#516751, #516751);
+	}
+
+	body {
+		font-family:
+			'Atkinson Hyperlegible',
+			-apple-system,
+			BlinkMacSystemFont,
+			'Segoe UI',
+			'Roboto',
+			'Oxygen',
+			'Ubuntu',
+			'Cantarell',
+			'Fira Sans',
+			'Droid Sans',
+			'Helvetica Neue',
+			sans-serif;
+		background-color: var(--background);
+		color: var(--text);
 	}
 }
 
-body {
-	font-family:
-		'Atkinson Hyperlegible',
-		-apple-system,
-		BlinkMacSystemFont,
-		'Segoe UI',
-		'Roboto',
-		'Oxygen',
-		'Ubuntu',
-		'Cantarell',
-		'Fira Sans',
-		'Droid Sans',
-		'Helvetica Neue',
-		sans-serif;
-	background-color: var(--background);
-	color: var(--text);
-}
-
-.container {
-	max-width: 980px;
-	margin-inline: auto;
-	padding-inline: 2.5vw;
-}
-
-a {
-	color: inherit;
-}
-
-[data-fill='theme'] {
-	color: var(--theme, currentColor);
-	fill: var(--theme, currentColor);
-}
-
-.icon {
-	fill: currentColor;
-	width: var(--icon-size);
-	height: var(--icon-size);
-}
-
-.icon--xs {
-	--icon-size: 0.75rem;
-}
-
-.icon--sm {
-	--icon-size: 1rem;
-}
-
-.icon--md {
-	--icon-size: 1.25rem;
-}
-
-.icon--lg {
-	--icon-size: 1.5rem;
-}
-
-.icon--xl {
-	--icon-size: 1.75rem;
-}
-
-table {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-table th {
-	text-align: left;
-}
-
-table tr:nth-child(2n) {
-	background: rgba(255, 255, 255, 0.05);
-}
-
-table td {
-	padding: 0.5rem;
-}
-
-/* TODO(style): Review colour contrast for accessibility concerns */
-.not-applicable {
-	opacity: 0.25;
-}
-
-/* Temporary styles */
-pre {
-	max-width: 600px;
-}
-
-@media print {
-	* {
-		print-color-adjust: exact;
+@layer base {
+	@media (prefers-reduced-motion) {
+		::view-transition-group(*),
+		::view-transition-old(*),
+		::view-transition-new(*) {
+			animation: none !important;
+		}
 	}
 
-	body :not(body > div > main, .printer):not(.printer > *) {
-		display: none;
+	.container {
+		max-width: 980px;
+		margin-inline: auto;
+		padding-inline: 2.5vw;
 	}
 
-	.printer {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 10.5mm;
+	a {
+		color: inherit;
 	}
-}
 
-@media not print {
-	.printer {
-		display: none;
-		visibility: hidden;
+	[data-fill='theme'] {
+		color: var(--theme, currentColor);
+		fill: var(--theme, currentColor);
 	}
-}
 
-.printer > div {
-	text-align: center;
-	color: #fff;
-	background-size: cover;
-	border-radius: 2.5mm;
-	justify-content: center;
-	align-items: center;
-	width: 63mm;
-	height: 88mm;
-	font-size: 2rem;
-	display: flex;
+	.icon {
+		fill: currentColor;
+		width: var(--icon-size);
+		height: var(--icon-size);
+	}
+
+	.icon--xs {
+		--icon-size: 0.75rem;
+	}
+
+	.icon--sm {
+		--icon-size: 1rem;
+	}
+
+	.icon--md {
+		--icon-size: 1.25rem;
+	}
+
+	.icon--lg {
+		--icon-size: 1.5rem;
+	}
+
+	.icon--xl {
+		--icon-size: 1.75rem;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	table th {
+		text-align: left;
+	}
+
+	table tr:nth-child(2n) {
+		background: rgba(255, 255, 255, 0.05);
+	}
+
+	table td {
+		padding: 0.5rem;
+	}
+
+	/* TODO(style): Review colour contrast for accessibility concerns */
+	.not-applicable {
+		opacity: 0.25;
+	}
+
+	/* Temporary styles */
+	pre {
+		max-width: 600px;
+	}
+
+	@media print {
+		* {
+			print-color-adjust: exact;
+		}
+
+		body :not(body > div > main, .printer):not(.printer > *) {
+			display: none;
+		}
+
+		.printer {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 10.5mm;
+		}
+	}
+
+	@media not print {
+		.printer {
+			display: none;
+			visibility: hidden;
+		}
+	}
+
+	.printer > div {
+		text-align: center;
+		color: #fff;
+		background-size: cover;
+		border-radius: 2.5mm;
+		justify-content: center;
+		align-items: center;
+		width: 63mm;
+		height: 88mm;
+		font-size: 2rem;
+		display: flex;
+	}
 }
