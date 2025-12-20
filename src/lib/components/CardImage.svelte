@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { localizeHref } from '$lib/paraglide/runtime';
 	import type { Card } from '$lib/types';
 	import { getHighResImage } from '$lib/utils';
 
@@ -24,7 +25,7 @@
 
 	// Generate href for navigation if provided
 	const navigationHref =
-		href === null ? undefined : href || (card ? `/card/${card.id}` : undefined);
+		href === null ? undefined : href || (card ? localizeHref(`/card/${card.id}`) : undefined);
 </script>
 
 {#if card?.attributes?.printing_ids?.[0]}
@@ -94,6 +95,7 @@
 	}
 
 	img.card {
+		display: flex;
 		aspect-ratio: 0.718 / 1;
 		border-radius: 4.55% / 3.5%;
 		width: 100%;

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { localizeHref } from '$lib/paraglide/runtime';
+
 	let { children } = $props();
 
 	const categories = [
@@ -40,7 +42,7 @@
 <div class="wrapper">
 	<aside>
 		{#each categories as category (category.path)}
-			<a href={`/decklists/${category.path}`}>
+			<a href={localizeHref(`/decklists/${category.path}`)}>
 				<h3>{category.title}</h3>
 			</a>
 		{/each}

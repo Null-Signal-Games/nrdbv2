@@ -6,6 +6,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { format_date } from '$lib/utils';
 	import { publishers } from '$lib/i18n';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let data_cycles = $derived<Cycle[]>(
 		$cycles.slice().sort((a, b) => (a.attributes.date_release > b.attributes.date_release ? -1 : 1))
@@ -35,7 +36,7 @@
 			{#each data_cycles as cycle (cycle.id)}
 				<tr>
 					<td>
-						<a href={`/cycles/${cycle.id}`}>{cycle.attributes.name}</a>
+						<a href={localizeHref(`/cycles/${cycle.id}`)}>{cycle.attributes.name}</a>
 					</td>
 					<!-- <td>{cycle.attributes.size}</td> -->
 					<td>{format_date(cycle.attributes.date_release)}</td>
@@ -56,7 +57,7 @@
 								<td>
 									<span class="icon-label">
 										<Icon name="subroutine" size="sm" />
-										<a href="/sets/{set.id}">{set.attributes.name}</a>
+										<a href={localizeHref(`/sets/${set.id}`)}>{set.attributes.name}</a>
 									</span>
 								</td>
 								<!-- <td>{set.attributes.size}</td> -->

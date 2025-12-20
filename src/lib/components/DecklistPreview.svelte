@@ -2,6 +2,7 @@
 	import type { Decklist, Card as TCard } from '$lib/types';
 	import CardImage from './CardImage.svelte';
 	import { cards } from '$lib/store';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	interface Props {
 		decklist: Decklist;
@@ -14,7 +15,7 @@
 	);
 </script>
 
-<a href={`/decklist/${decklist.id}`} data-sveltekit-preload-data>
+<a href={localizeHref(`/decklist/${decklist.id}`)} data-sveltekit-preload-data>
 	<div class="decklist-preview">
 		{#if identityCard}
 			<div class="decklist-preview-identity-card">

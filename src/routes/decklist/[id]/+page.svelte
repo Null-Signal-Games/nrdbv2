@@ -18,6 +18,7 @@
 	import DeckListSummary from '$lib/components/decklist/Summary.svelte';
 	import DecklistBreakdown from '$lib/components/decklist/Breakdown.svelte';
 	import Printer from '$lib/components/Printer.svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	interface Props {
 		data: {
@@ -150,7 +151,7 @@
 					<!-- TODO(i18n): ensure pack names are translated and use i18n values (currently uses API ID) -->
 					{#each packs as pack (pack)}
 						<li>
-							<a href="/sets/{pack}">
+							<a href={localizeHref(`/sets/${pack}`)}>
 								{pack}
 							</a>
 						</li>

@@ -5,6 +5,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { format_date } from '$lib/utils';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let data_cycles = $derived<Cycle[]>($cycles);
 </script>
@@ -29,7 +30,7 @@
 			{#each data_cycles as cycle (cycle.id)}
 				<tr>
 					<td>
-						<a href={`/cycles/${cycle.id}`}>{cycle.attributes.name}</a>
+						<a href={localizeHref(`/cycles/${cycle.id}`)}>{cycle.attributes.name}</a>
 					</td>
 					<!-- <td>{cycle.attributes.size}</td> -->
 					<td>{format_date(cycle.attributes.date_release)}</td>

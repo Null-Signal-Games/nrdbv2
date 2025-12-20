@@ -2,6 +2,7 @@
 	import type { Faction } from '$lib/types';
 	import { factions } from '$lib/store';
 	import Header from '$lib/components/Header.svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let data = $derived<Faction[]>($factions);
 </script>
@@ -12,7 +13,7 @@
 	<ul>
 		{#each data as faction (faction.id)}
 			<li>
-				<a href={`/faction/${faction.id}`}>
+				<a href={localizeHref(`/faction/${faction.id}`)}>
 					{faction.attributes.name}
 				</a>
 			</li>

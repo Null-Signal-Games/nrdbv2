@@ -17,6 +17,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import { card_types, factions } from '$lib/i18n';
 	import Influence from '$lib/components/Influence.svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	interface Props {
 		data: {
@@ -49,12 +50,12 @@
 
 	<Header title={card_data?.attributes.title} />
 
-	{#if card_previous}
-		<a href={card_previous ? `/card/${card_previous.id}` : undefined}>Previous</a>
+	{#if card_previous?.id}
+		<a href={localizeHref(`/card/${card_previous.id}`)}>Previous</a>
 	{/if}
 
-	{#if card_next}
-		<a href={card_next ? `/card/${card_next.id}` : undefined}>Next</a>
+	{#if card_next?.id}
+		<a href={localizeHref(`/card/${card_next.id}`)}>Next</a>
 	{/if}
 
 	<div class="card-details">
@@ -80,7 +81,10 @@
 					<tr>
 						<td>Faction</td>
 						<td>
-							<a href="/faction/{card_data.attributes.faction_id}" class="icon-label">
+							<a
+								href={localizeHref(`/faction/${card_data.attributes.faction_id}`)}
+								class="icon-label"
+							>
 								<span data-faction-theme={card_data.attributes.faction_id}>
 									<Icon name={card_data.attributes.faction_id} size="sm" />
 								</span>
@@ -128,13 +132,16 @@
 			</div>
 
 			<p>
-				<a href="/illustrators/{printing_data[0].attributes.illustrator_ids[0]}" class="underline">
+				<a
+					href={localizeHref(`/illustrators/${printing_data[0].attributes.illustrator_ids[0]}`)}
+					class="underline"
+				>
 					Illustrated by {printing_data[0].attributes.display_illustrators}
 				</a>
 			</p>
 
 			<p>
-				<a href="/decklists/find?cards[]={card_data.id}" class="underline">
+				<a href={localizeHref(`/decklists/find?cards[]=${card_data.id}`)} class="underline">
 					Decklists with this card
 				</a>
 			</p>

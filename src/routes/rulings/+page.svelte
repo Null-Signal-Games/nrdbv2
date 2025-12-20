@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Ruling } from '$lib/types';
 	import Header from '$lib/components/Header.svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let { data }: { data: { rulings: Ruling[] } } = $props();
 </script>
@@ -11,7 +12,7 @@
 	<ul>
 		{#each data.rulings as ruling (ruling.id)}
 			<li>
-				<a href={`/rulings/${ruling.id}`}>
+				<a href={localizeHref(`/rulings/${ruling.id}`)}>
 					{ruling.attributes.question}
 				</a>
 			</li>

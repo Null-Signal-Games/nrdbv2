@@ -4,6 +4,7 @@
 	import CardImage from '$lib/components/CardImage.svelte';
 	import DecklistSuggestions from '$lib/components/DecklistSuggestions.svelte';
 	import { afterNavigate } from '$app/navigation';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let inputEl: HTMLInputElement | null = null;
 	let isOpen = $state(false);
@@ -43,7 +44,7 @@
 							loading="lazy"
 							boxShadow={false}
 							hasTransition={true}
-							href={`/card/${card.id}`}
+							href={localizeHref(`/card/${card.id}`)}
 						/>
 					</div>
 				{/each}

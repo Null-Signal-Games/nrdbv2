@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Illustrator, Printing } from '$lib/types';
 	import Header from '$lib/components/Header.svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 	// import CardImage from '$lib/components/CardImage.svelte';
 
 	let {
@@ -26,7 +27,7 @@
 				*/ -->
 				<!-- <CardImage card={printing} /> -->
 
-				<a href={`/card/${printing.attributes.card_id}`}>
+				<a href={localizeHref(`/card/${printing.attributes.card_id}`)}>
 					{printing.attributes.card_id}
 				</a>
 			</li>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Review } from '$lib/types';
 	import Header from '$lib/components/Header.svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let { data }: { data: { reviews: Review[] } } = $props();
 </script>
@@ -11,7 +12,7 @@
 	<ul>
 		{#each data.reviews as review (review.id)}
 			<li>
-				<a href={`/reviews/${review.attributes.card_id}`}>
+				<a href={localizeHref(`/reviews/${review.attributes.card_id}`)}>
 					{review.attributes.card}
 				</a>
 			</li>

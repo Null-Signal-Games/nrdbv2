@@ -3,6 +3,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Comment from '$lib/components/Comment.svelte';
 	import type { Review } from '$lib/types';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	interface Props {
 		review: Review;
@@ -18,7 +19,10 @@
 			7
 		</div>
 		<p>
-			By <a href="/profile/{review.attributes.username}">{review.attributes.username}</a> on
+			By <a href={localizeHref(`/profile/${review.attributes.username}`)}
+				>{review.attributes.username}</a
+			>
+			on
 			<time datetime={format_date(review.attributes.created_at)}
 				>{format_date(review.attributes.created_at)}</time
 			>

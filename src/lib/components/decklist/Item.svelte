@@ -4,6 +4,7 @@
 	import { factions } from '$lib/i18n';
 	import { format_date } from '$lib/utils';
 	import Badge from '$lib/components/Badge.svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	interface Props {
 		decklist: Decklist;
@@ -14,17 +15,17 @@
 
 <div class="item">
 	<div>
-		<a href="/faction/{decklist.attributes.faction_id}">
+		<a href={localizeHref(`/faction/${decklist.attributes.faction_id}`)}>
 			<span data-faction-theme={decklist.attributes.faction_id}>
 				<Icon name={decklist.attributes.faction_id} size="sm" />
 			</span>
 			{factions[decklist.attributes.faction_id]}
 		</a>
-		<a href="/decklist/{decklist.id}">
+		<a href={localizeHref(`/decklist/${decklist.id}`)}>
 			{decklist.attributes.name}
 		</a>
 		<div>
-			<a href="/profile/{decklist.attributes.user_id}">
+			<a href={localizeHref(`/profile/${decklist.attributes.user_id}`)}>
 				{decklist.attributes.user_id}
 				<!-- TODO(user): Get user rating -->
 				<span>(1337)</span>
