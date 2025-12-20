@@ -46,10 +46,12 @@
 						<h2>{group.identity.attributes.title}</h2>
 						<!-- TODO(i18n): use/create a locale -->
 						<!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
+						<!-- svelte-ignore a11y_invalid_attribute -->
 						<a href="#">Create deck with this identity</a>
 
 						<!-- TODO(i18n): use/create a locale -->
 						<!-- TODO(misc): add correct href url to search/find page with URL paramters to filter to this specific identity -->
+						<!-- svelte-ignore a11y_invalid_attribute -->
 						<a href="#">More decks</a>
 					</header>
 					<main>
