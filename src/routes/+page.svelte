@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { FactionIds, Card, Decklist } from '$lib/types';
-	import { factions } from '$lib/i18n';
+	import type { Card, Decklist } from '$lib/types';
 	import DecklistSummary from '$lib/components/decklist/Summary.svelte';
 	import DecklistBreakdown from '$lib/components/decklist/Breakdown.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import Factions from '$lib/components/Factions.svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	interface Props {
 		data: {
@@ -17,26 +17,9 @@
 	}
 
 	let { data }: Props = $props();
-
-	const display_factions: FactionIds[] = [
-		'anarch',
-		'criminal',
-		'haas_bioroid',
-		'jinteki',
-		'nbn',
-		'shaper',
-		'weyland_consortium'
-	];
 </script>
 
-<div class="factions">
-	{#each display_factions as faction (faction)}
-		<a href={'/faction/' + faction}>
-			<Icon name={faction} />
-			{factions[faction]}
-		</a>
-	{/each}
-</div>
+<Factions />
 
 <div class="home">
 	<div>
@@ -64,7 +47,7 @@
 			{:then decklists}
 				{#each decklists as decklist (decklist.id)}
 					<li>
-						<a href={`/decklist/${decklist.id}`}>
+						<a href={localizeHref(`/decklist/${decklist.id}`)}>
 							{decklist.attributes.name}
 						</a>
 					</li>
@@ -78,12 +61,6 @@
 
 <style>
 	/* Temporary styles */
-	.factions {
-		display: flex;
-		flex-direction: row;
-		gap: 0.5rem;
-	}
-
 	.home {
 		display: grid;
 		grid-template-columns: 3fr 1fr;
