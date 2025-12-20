@@ -12,8 +12,12 @@
 			color-scheme: dark;
 		}
 
-		--background: light-dark(#ffffff, #101010);
+		--container: 1280px;
+
+		--background: light-dark(#f4f4f6, #101010);
+		--foreground: light-dark(#ffffff, #141414);
 		--text: light-dark(#000000, #ffffff);
+		--border: light-dark(#e0e0e0, #222222);
 
 		/* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
 		--adam: light-dark(#a89c33, #a89c33);
@@ -34,6 +38,7 @@
 		font-family: sans-serif;
 		background-color: var(--background);
 		color: var(--text);
+		margin: unset;
 	}
 }
 
@@ -46,8 +51,19 @@
 		}
 	}
 
+	@media (prefers-contrast: more) {
+		a {
+			text-decoration: underline;
+		}
+
+		.table-cell--not-applicable::after {
+			content: 'N/A';
+			opacity: 1;
+		}
+	}
+
 	.container {
-		max-width: 980px;
+		max-width: var(--container, 1280px);
 		margin-inline: auto;
 		padding-inline: 2.5vw;
 	}
@@ -61,32 +77,6 @@
 		fill: var(--theme, currentColor);
 	}
 
-	.icon {
-		fill: currentColor;
-		width: var(--icon-size);
-		height: var(--icon-size);
-	}
-
-	.icon--xs {
-		--icon-size: 0.75rem;
-	}
-
-	.icon--sm {
-		--icon-size: 1rem;
-	}
-
-	.icon--md {
-		--icon-size: 1.25rem;
-	}
-
-	.icon--lg {
-		--icon-size: 1.5rem;
-	}
-
-	.icon--xl {
-		--icon-size: 1.75rem;
-	}
-
 	table {
 		width: 100%;
 		border-collapse: collapse;
@@ -97,15 +87,35 @@
 	}
 
 	table tr:nth-child(2n) {
-		background: rgba(255, 255, 255, 0.05);
+		background: var(--foreground);
+
+		& td {
+			border-top: 1px solid var(--border);
+		}
+	}
+
+	table th,
+	table td {
+		padding: 0.5rem 1rem;
 	}
 
 	table td {
-		padding: 0.5rem;
+		height: 2rem;
 	}
 
-	/* TODO(style): Review colour contrast for accessibility concerns */
-	.not-applicable {
+	table a {
+		text-decoration: none;
+	}
+
+	.table-cell {
+		display: inline-flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.table-cell--not-applicable::after {
+		content: '—';
 		opacity: 0.25;
 	}
 

@@ -7,10 +7,10 @@
 		size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'fill' | 'none';
 		class?: string;
 		label?: string;
-		fill?: 'theme' | 'current';
+		theme?: FactionIds;
 	}
 
-	let { name, size = 'lg', class: class_list = '', label = name, fill = 'theme' }: Props = $props();
+	let { name, size = 'lg', class: class_list = '', label = name, theme }: Props = $props();
 
 	const icons: Record<Props['name'], string> = {
 		adam: 'faction-adam',
@@ -94,7 +94,11 @@
 </script>
 
 {#snippet svg_path(value: string)}
-	<svg class={`icon icon--${size} ${class_list}`} data-theme={fill} aria-label={label}>
+	<svg
+		class={`icon icon--${size} ${class_list}`}
+		aria-label={label}
+		style={theme ? `color: var(--${theme})` : ''}
+	>
 		<use xlink:href="/icons.svg#{value}"></use>
 	</svg>
 {/snippet}
@@ -104,3 +108,31 @@
 {:else}
 	{@render svg_path(icons['neutral'])}
 {/if}
+
+<style>
+	.icon {
+		fill: currentColor;
+		width: var(--icon-size);
+		height: var(--icon-size);
+	}
+
+	.icon--xs {
+		--icon-size: 0.75rem;
+	}
+
+	.icon--sm {
+		--icon-size: 1rem;
+	}
+
+	.icon--md {
+		--icon-size: 1.25rem;
+	}
+
+	.icon--lg {
+		--icon-size: 1.5rem;
+	}
+
+	.icon--xl {
+		--icon-size: 1.75rem;
+	}
+</style>
