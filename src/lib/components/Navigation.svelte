@@ -94,8 +94,6 @@
 				{/each}
 			</select>
 
-			<button>{m.theme()}</button>
-
 			<div>
 				{#if page.data.session}
 					{#if page.data.session.user?.image}
