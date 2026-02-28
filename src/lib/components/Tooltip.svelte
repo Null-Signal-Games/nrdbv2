@@ -73,12 +73,12 @@
 
 		// Always show a bridge that extends down
 		bridge_svg_height = distance;
-		
+
 		// Create a wide trapezoid/triangle from tooltip bottom to trigger area
 		// Make it wider than just the cursor point for more forgiving hover
 		const trigger_left = Math.max(trigger_rect.left, tooltip_rect.left - 50);
 		const trigger_right = Math.min(trigger_rect.right, tooltip_rect.right + 50);
-		
+
 		const rel_left = trigger_left - tooltip_rect.left;
 		const rel_right = trigger_right - tooltip_rect.left;
 
@@ -199,16 +199,18 @@
 		</div>
 		<div class="tooltip__meta">
 			<div>
-				<p>{$tooltip.card?.attributes.title}</p>
+				<p>
+					<a href={`/card/${$tooltip.card?.id}`}>{$tooltip.card?.attributes.title}</a>
+				</p>
 				<span>
 					<Icon name={$tooltip.card.attributes.card_type_id} size="sm" />
 					{$tooltip.card?.attributes.card_type_id}
 				</span>
 				{#if $tooltip.card.attributes.influence_cost}
-					<Influence 
+					<Influence
 						text={true}
-						count={$tooltip.card.attributes.influence_cost} 
-						theme={$tooltip.card.attributes.faction_id as FactionIds} 
+						count={$tooltip.card.attributes.influence_cost}
+						theme={$tooltip.card.attributes.faction_id as FactionIds}
 						total={true}
 					/>
 				{/if}
@@ -222,11 +224,7 @@
 	{/if}
 
 	{#if $tooltip.visible && bridge_points}
-		<svg
-			class="tooltip-bridge"
-			width="100%"
-			height={bridge_svg_height}
-		>
+		<svg class="tooltip-bridge" width="100%" height={bridge_svg_height}>
 			<polygon
 				role="presentation"
 				points={bridge_points}
@@ -295,13 +293,13 @@
 	}
 
 	.tooltip-bridge {
-		position: absolute; 
-		left: 0; 
-		top: 100%; 
-		width: 100%; 
+		position: absolute;
+		left: 0;
+		top: 100%;
+		width: 100%;
 		pointer-events: all;
 	}
-	
+
 	.tooltip-bridge polygon {
 		fill: transparent;
 		pointer-events: auto;
