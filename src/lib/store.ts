@@ -28,4 +28,13 @@ export const tooltip = writable<{
 	}
 });
 
+// Track whether cursor is over tooltip or bridge (used by tooltip action)
+export const tooltip_hover = writable<{
+	is_over_tooltip: boolean;
+	is_over_bridge: boolean;
+}>({
+	is_over_tooltip: false,
+	is_over_bridge: false
+});
+
 export const theme = writable<'light' | 'dark'>('light');
