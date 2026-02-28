@@ -17,63 +17,124 @@ import { NRDB_API_URL } from '$lib/constants';
 
 export const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Returns items from the live store if it is populated, otherwise falls back to
+ * server-provided data. Use inside $derived() expressions.
+ */
+export function store_or_server<T>(
+    store_value: T[],
+    server_value: T[] | null | undefined,
+    label?: string
+): T[] {
+    if (store_value.length > 0) {
+        if (label) console.debug(`[cache] ${label}: using store`);
+        return store_value;
+    }
+    if (label) console.debug(`[cache] ${label}: using server data`);
+    return server_value ?? [];
+}
+
+/**
+ * Filters items from the live store if it is populated, otherwise falls back to
+ * server-provided data. The predicate is only applied when the store has data,
+ * preventing a false empty-result from masking a legitimately warm store.
+ * Use inside $derived() expressions.
+ */
+export function filter_or_server<T>(
+    store_value: T[],
+    predicate: (item: T) => boolean,
+    server_value: T[] | null | undefined,
+    label?: string
+): T[] {
+    if (store_value.length > 0) {
+        if (label) console.debug(`[cache] ${label}: filtering from store`);
+        return store_value.filter(predicate);
+    }
+    if (label) console.debug(`[cache] ${label}: using server data`);
+    return server_value ?? [];
+}
+
+/**
+ * Finds a single item from the live store if it is populated, otherwise returns
+ * the server-provided fallback. Use inside $derived() expressions.
+ */
+export function find_or_server<T>(
+    store_value: T[],
+    predicate: (item: T) => boolean,
+    server_value: T | null | undefined,
+    label?: string
+): T | undefined {
+    const found = store_value.find(predicate);
+    if (found !== undefined) {
+        if (label) console.debug(`[cache] ${label}: found in store`);
+        return found;
+    }
+    if (label) console.debug(`[cache] ${label}: using server data`);
+    return server_value ?? undefined;
+}
+
 export const initialize_app_data = async () => {
-    const [
-        cards_response,
-        cycles_response,
-        sets_response,
-        factions_response,
-        formats_response,
-        printings_response
-    ] = await Promise.all([
-        fetch(`${NRDB_API_URL}/cards?page[size]=10000`),
-        fetch(`${NRDB_API_URL}/card_cycles?page[size]=100`),
-        fetch(`${NRDB_API_URL}/card_sets?page[size]=100`),
-        fetch(`${NRDB_API_URL}/factions?page[size]=100`),
-        fetch(`${NRDB_API_URL}/formats?page[size]=20`),
-        fetch(`${NRDB_API_URL}/printings?page[size]=10000`)
-    ]);
+    try {
+        const [
+            cards_response,
+            cycles_response,
+            sets_response,
+            factions_response,
+            formats_response,
+            printings_response
+        ] = await Promise.all([
+            fetch(`${NRDB_API_URL}/cards?page[size]=10000`),
+            fetch(`${NRDB_API_URL}/card_cycles?page[size]=100`),
+            fetch(`${NRDB_API_URL}/card_sets?page[size]=100`),
+            fetch(`${NRDB_API_URL}/factions?page[size]=100`),
+            fetch(`${NRDB_API_URL}/formats?page[size]=20`),
+            fetch(`${NRDB_API_URL}/printings?page[size]=10000`)
+        ]);
 
-    const cards_data: ApiResponse<Card> = await cards_response.json();
-    const cycles_data: ApiResponse<Cycle> = await cycles_response.json();
-    const sets_data: ApiResponse<Set> = await sets_response.json();
-    const factions_data: ApiResponse<Faction> = await factions_response.json();
-    const formats_data: ApiResponse<Format> = await formats_response.json();
-    const printings_data: ApiResponse<Printing> = await printings_response.json();
+        const cards_data: ApiResponse<Card> = await cards_response.json();
+        const cycles_data: ApiResponse<Cycle> = await cycles_response.json();
+        const sets_data: ApiResponse<Set> = await sets_response.json();
+        const factions_data: ApiResponse<Faction> = await factions_response.json();
+        const formats_data: ApiResponse<Format> = await formats_response.json();
+        const printings_data: ApiResponse<Printing> = await printings_response.json();
 
-    cards.set(cards_data.data);
-    cycles.set(cycles_data.data);
-    sets.set(sets_data.data);
-    factions.set(factions_data.data);
-    formats.set(formats_data.data);
-    printings.set(printings_data.data);
+        cards.set(cards_data.data);
+        cycles.set(cycles_data.data);
+        sets.set(sets_data.data);
+        factions.set(factions_data.data);
+        formats.set(formats_data.data);
+        printings.set(printings_data.data);
 
-    // Atomically clear and repopulate all IndexedDB tables so a partial failure never leaves the cache in a half-written state
-    await db.transaction(
-        'rw',
-        [db.cards, db.cycles, db.sets, db.factions, db.formats, db.printings, db.meta],
-        async () => {
-            await db.cards.clear();
-            await db.cards.bulkAdd(cards_data.data);
+        // Atomically clear and repopulate all IndexedDB tables so a partial failure never leaves the cache in a half-written state
+        await db.transaction(
+            'rw',
+            [db.cards, db.cycles, db.sets, db.factions, db.formats, db.printings, db.meta],
+            async () => {
+                await db.cards.clear();
+                await db.cards.bulkAdd(cards_data.data);
 
-            await db.cycles.clear();
-            await db.cycles.bulkAdd(cycles_data.data);
+                await db.cycles.clear();
+                await db.cycles.bulkAdd(cycles_data.data);
 
-            await db.sets.clear();
-            await db.sets.bulkAdd(sets_data.data);
+                await db.sets.clear();
+                await db.sets.bulkAdd(sets_data.data);
 
-            await db.factions.clear();
-            await db.factions.bulkAdd(factions_data.data);
+                await db.factions.clear();
+                await db.factions.bulkAdd(factions_data.data);
 
-            await db.formats.clear();
-            await db.formats.bulkAdd(formats_data.data);
+                await db.formats.clear();
+                await db.formats.bulkAdd(formats_data.data);
 
-            await db.printings.clear();
-            await db.printings.bulkAdd(printings_data.data);
+                await db.printings.clear();
+                await db.printings.bulkAdd(printings_data.data);
 
-            await db.meta.put({ key: 'last_updated', value: String(Date.now()) });
-        }
-    );
+                await db.meta.put({ key: 'last_updated', value: String(Date.now()) });
+            }
+        );
+    } catch (err) {
+        console.error('Failed to fetch or cache app data:', err);
+        throw err;
+    }
 };
 
 export const reset_indexeddb_data = async () => {
@@ -83,6 +144,10 @@ export const reset_indexeddb_data = async () => {
     await db.factions.clear();
     await db.formats.clear();
     await db.printings.clear();
+    await db.meta.clear();
+
+    // Clear cache cookie
+    document.cookie = 'nrdb_cache=; max-age=0; path=/; SameSite=Lax';
 
     console.info('IndexedDB cleared');
 

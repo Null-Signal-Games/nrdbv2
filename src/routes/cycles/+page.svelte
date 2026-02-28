@@ -4,10 +4,16 @@
 	import Header from '$lib/components/Header.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { m } from '$lib/paraglide/messages.js';
-	import { format_date } from '$lib/utils';
+	import { format_date, store_or_server } from '$lib/utils';
 	import { localizeHref } from '$lib/paraglide/runtime';
 
-	let data_cycles = $derived<Cycle[]>($cycles);
+	interface Props {
+		data: { cycles: Cycle[] | null };
+	}
+
+	let { data }: Props = $props();
+
+	let data_cycles = $derived<Cycle[]>(store_or_server($cycles, data.cycles, 'cycles'));
 </script>
 
 {#if data_cycles}

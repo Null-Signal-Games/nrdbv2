@@ -19,15 +19,12 @@ const db = new Dexie('NRDB') as Dexie & {
 };
 
 db.version(1).stores({
-    cards: 'id',
+    cards: 'id, attributes.faction_id, attributes.card_type_id, attributes.side_id',
     cycles: 'id',
     sets: 'id',
     factions: 'id',
     formats: 'id',
-    printings: 'id'
-});
-
-db.version(2).stores({
+    printings: 'id, attributes.card_id, attributes.faction_id, attributes.card_type_id, attributes.side_id',
     meta: 'key'
 });
 

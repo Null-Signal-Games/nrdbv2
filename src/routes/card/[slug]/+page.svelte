@@ -18,10 +18,13 @@
 	import { card_types, factions } from '$lib/i18n';
 	import Influence from '$lib/components/Influence.svelte';
 	import { localizeHref } from '$lib/paraglide/runtime';
+	import { find_or_server, filter_or_server } from '$lib/utils';
 
 	interface Props {
 		data: {
 			searchParams: string;
+			card: TCard | null;
+			printings: Printing[] | null;
 			reviews: TReview[];
 			rulings: Ruling[];
 		};
@@ -30,10 +33,20 @@
 	let { data }: Props = $props();
 
 	let card_data = $derived<TCard | undefined>(
-		$cards.find((card: TCard) => card.id === page.params.slug)
+		find_or_server(
+			$cards,
+			(card) => card.id === page.params.slug,
+			data.card,
+			`card:${page.params.slug}`
+		)
 	);
 	let printing_data = $derived<Printing[]>(
-		$printings.filter((card: Printing) => card.attributes.title === card_data?.attributes.title)
+		filter_or_server(
+			$printings,
+			(p) => p.attributes.title === card_data?.attributes.title,
+			data.printings,
+			`printings:${page.params.slug}`
+		)
 	);
 
 	// TODO: handle edge cases (first/last card), where there is no previous/next card, likely just wrap button in {#if} block instead?

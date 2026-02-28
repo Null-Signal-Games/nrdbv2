@@ -3,9 +3,21 @@
 	import Header from '$lib/components/Header.svelte';
 	import type { Format } from '$lib/types';
 	import { formats } from '$lib/store';
+	import { find_or_server } from '$lib/utils';
 
-	let format_data: Format | undefined = $derived(
-		$formats.find((format: Format) => format.id === page.params.slug)
+	interface Props {
+		data: { format: Format | null };
+	}
+
+	let { data }: Props = $props();
+
+	let format_data = $derived<Format | undefined>(
+		find_or_server(
+			$formats,
+			(f) => f.id === page.params.slug,
+			data.format,
+			`format:${page.params.slug}`
+		)
 	);
 </script>
 

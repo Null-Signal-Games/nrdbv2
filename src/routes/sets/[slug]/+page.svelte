@@ -4,11 +4,23 @@
 	import type { Set, Card } from '$lib/types';
 	import { sets, cards } from '$lib/store';
 	import Table from '$lib/components/Table.svelte';
+	import { find_or_server, filter_or_server } from '$lib/utils';
 
-	let set_data = $derived<Set | undefined>($sets.find((set: Set) => set.id === page.params.slug));
+	interface Props {
+		data: { set: Set | null; cards: Card[] | null };
+	}
+
+	let { data }: Props = $props();
+
+	let set_data = $derived<Set | undefined>(
+		find_or_server($sets, (s) => s.id === page.params.slug, data.set, `set:${page.params.slug}`)
+	);
 	let cards_data = $derived<Card[]>(
-		$cards.filter((card: Card) =>
-			page.params.slug ? card.attributes.card_set_ids.includes(page.params.slug) : false
+		filter_or_server(
+			$cards,
+			(card) => card.attributes.card_set_ids.includes(page.params.slug),
+			data.cards,
+			`set-cards:${page.params.slug}`
 		)
 	);
 </script>

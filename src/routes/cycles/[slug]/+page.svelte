@@ -4,13 +4,28 @@
 	import type { Cycle, Card } from '$lib/types';
 	import { cycles, cards } from '$lib/store';
 	import Table from '$lib/components/Table.svelte';
+	import { find_or_server, filter_or_server } from '$lib/utils';
+
+	interface Props {
+		data: { cycle: Cycle | null; cards: Card[] | null };
+	}
+
+	let { data }: Props = $props();
 
 	let cycle_data = $derived<Cycle | undefined>(
-		$cycles.find((cycle: Cycle) => cycle.id === page.params.slug)
+		find_or_server(
+			$cycles,
+			(c) => c.id === page.params.slug,
+			data.cycle,
+			`cycle:${page.params.slug}`
+		)
 	);
 	let cards_data = $derived<Card[]>(
-		$cards.filter((card: Card) =>
-			page.params.slug ? card.attributes.card_cycle_ids.includes(page.params.slug) : false
+		filter_or_server(
+			$cards,
+			(card) => card.attributes.card_cycle_ids.includes(page.params.slug),
+			data.cards,
+			`cycle-cards:${page.params.slug}`
 		)
 	);
 </script>

@@ -7,9 +7,12 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import DecklistItem from '$lib/components/decklist/Item.svelte';
 	import { tooltip } from '$lib/actions';
+	import { find_or_server, filter_or_server } from '$lib/utils';
 
 	interface Props {
 		data: {
+			faction: Faction | null;
+			faction_cards: Card[] | null;
 			// identities: Card[];
 			decklists: {
 				identity: Card;
@@ -21,12 +24,20 @@
 	let { data }: Props = $props();
 
 	let faction_data = $derived<Faction | undefined>(
-		$factions.find((faction: Faction) => faction.id === page.params.slug)
+		find_or_server(
+			$factions,
+			(f) => f.id === page.params.slug,
+			data.faction,
+			`faction:${page.params.slug}`
+		)
 	);
 
 	let cards_data = $derived<Card[]>(
-		$cards.filter((card: Card) =>
-			page.params.slug ? card.attributes.faction_id === page.params.slug : false
+		filter_or_server(
+			$cards,
+			(card) => card.attributes.faction_id === page.params.slug,
+			data.faction_cards,
+			`faction-cards:${page.params.slug}`
 		)
 	);
 </script>

@@ -32,62 +32,68 @@
 
 	onMount(async () => {
 		const stores = [cards, cycles, sets, factions, formats, printings];
-		let cached: boolean = false;
+		let all_populated: boolean = true;
 
-		// Check if Svelte store has data
+		// Only skip loading if ALL stores already have data
 		const unsubs = stores.map((store) =>
 			store.subscribe((value) => {
-				if (value && value.length > 0) cached = true;
+				if (!value || value.length === 0) all_populated = false;
 			})
 		);
 
 		// Unsubscribe from all stores
 		unsubs.forEach((unsub) => unsub());
 
-		if (cached) {
+		if (all_populated) {
 			// console.info('Using in-memory store data');
 			return;
 		}
 
 		// If no data found in Svelte store, check if cached data is fresh
-		const cached_meta = await db.meta.get('last_updated');
-		const is_stale = !cached_meta || Date.now() - Number(cached_meta.value) > CACHE_TTL_MS;
+		try {
+			const cached_meta = await db.meta.get('last_updated');
+			const is_stale = !cached_meta || Date.now() - Number(cached_meta.value) > CACHE_TTL_MS;
 
-		if (is_stale) {
-			console.info('Cache is stale or missing, fetching from API.');
-			await initialize_app_data();
-		} else {
-			// Load all tables from IndexedDB
-			const cached_cards: Card[] = await db.cards.toArray();
-			const cached_cycles: Cycle[] = await db.cycles.toArray();
-			const cached_sets: Set[] = await db.sets.toArray();
-			const cached_factions: Faction[] = await db.factions.toArray();
-			const cached_formats: Format[] = await db.formats.toArray();
-			const cached_printings: Printing[] = await db.printings.toArray();
-
-			// If cached data is found, use it
-			if (
-				cached_cards.length > 0 &&
-				cached_cycles.length > 0 &&
-				cached_sets.length > 0 &&
-				cached_factions.length > 0 &&
-				cached_formats.length > 0 &&
-				cached_printings.length > 0
-			) {
-				console.info('Using cached data from IndexedDB.');
-				cards.set(cached_cards);
-				cycles.set(cached_cycles);
-				sets.set(cached_sets);
-				factions.set(cached_factions);
-				formats.set(cached_formats);
-				printings.set(cached_printings);
-			} else {
-				console.info('Incomplete cached data, fetching from API.');
+			if (is_stale) {
+				console.info('Cache is stale or missing, fetching from API.');
 				await initialize_app_data();
+			} else {
+				// Load all tables from IndexedDB
+				const cached_cards: Card[] = await db.cards.toArray();
+				const cached_cycles: Cycle[] = await db.cycles.toArray();
+				const cached_sets: Set[] = await db.sets.toArray();
+				const cached_factions: Faction[] = await db.factions.toArray();
+				const cached_formats: Format[] = await db.formats.toArray();
+				const cached_printings: Printing[] = await db.printings.toArray();
+
+				// If cached data is found, use it
+				if (
+					cached_cards.length > 0 &&
+					cached_cycles.length > 0 &&
+					cached_sets.length > 0 &&
+					cached_factions.length > 0 &&
+					cached_formats.length > 0 &&
+					cached_printings.length > 0
+				) {
+					console.info('Using cached data from IndexedDB.');
+					cards.set(cached_cards);
+					cycles.set(cached_cycles);
+					sets.set(cached_sets);
+					factions.set(cached_factions);
+					formats.set(cached_formats);
+					printings.set(cached_printings);
+				} else {
+					console.info('Incomplete cached data, fetching from API.');
+					await initialize_app_data();
+				}
 			}
+
+			// Pass cookie to the server that cache is warm
+			document.cookie = `nrdb_cache=1; max-age=${Math.floor(CACHE_TTL_MS / 1000)}; path=/; SameSite=Lax`;
+		} catch (err) {
+			console.error('Failed to load app data:', err);
 		}
 
-		// Scroll state
 		document.body.style.setProperty('--scroll', `${window.scrollY}px`);
 
 		window.addEventListener('scroll', () => {

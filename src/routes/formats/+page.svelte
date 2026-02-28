@@ -3,15 +3,22 @@
 	import { formats } from '$lib/store';
 	import Header from '$lib/components/Header.svelte';
 	import { localizeHref } from '$lib/paraglide/runtime';
+	import { store_or_server } from '$lib/utils';
 
-	let data = $derived<Format[]>($formats);
+	interface Props {
+		data: { formats: Format[] | null };
+	}
+
+	let { data }: Props = $props();
+
+	let formats_list = $derived<Format[]>(store_or_server($formats, data.formats, 'formats'));
 </script>
 
-{#if data}
+{#if formats_list.length > 0}
 	<Header title="Formats" />
 
 	<ul>
-		{#each data as format (format.id)}
+		{#each formats_list as format (format.id)}
 			<li>
 				<a href={localizeHref(`/formats/${format.id}`)}>
 					{format.attributes.name}

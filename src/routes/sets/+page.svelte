@@ -4,15 +4,25 @@
 	import Header from '$lib/components/Header.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { m } from '$lib/paraglide/messages.js';
-	import { format_date } from '$lib/utils';
+	import { format_date, store_or_server } from '$lib/utils';
 	import { publishers } from '$lib/i18n';
 	import { localizeHref } from '$lib/paraglide/runtime';
 
+	interface Props {
+		data: { sets: Set[] | null; cycles: Cycle[] | null };
+	}
+
+	let { data }: Props = $props();
+
 	let data_cycles = $derived<Cycle[]>(
-		$cycles.slice().sort((a, b) => (a.attributes.date_release > b.attributes.date_release ? -1 : 1))
+		store_or_server($cycles, data.cycles, 'cycles')
+			.slice()
+			.sort((a, b) => (a.attributes.date_release > b.attributes.date_release ? -1 : 1))
 	);
 	let data_sets = $derived<Set[]>(
-		$sets.slice().sort((a, b) => (a.attributes.date_release > b.attributes.date_release ? -1 : 1))
+		store_or_server($sets, data.sets, 'sets')
+			.slice()
+			.sort((a, b) => (a.attributes.date_release > b.attributes.date_release ? -1 : 1))
 	);
 </script>
 
