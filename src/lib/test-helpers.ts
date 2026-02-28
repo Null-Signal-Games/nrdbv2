@@ -1,4 +1,5 @@
 import type { Card } from './types';
+import { NRDB_API_URL } from '$lib/constants';
 
 /**
  * Helper function to create mock Card objects with all required properties.
@@ -101,3 +102,10 @@ export const createMockCard = (
 	},
 	links: { self: '' }
 });
+
+export const create_mock_deck = async () => {
+	const decklist = await fetch(`${NRDB_API_URL}/decklists?page[size]=1`);
+	const decklist_data = await decklist.json();
+
+	return decklist_data.data[0];
+}
