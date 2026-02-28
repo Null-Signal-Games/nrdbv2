@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { onMount, type Snippet } from 'svelte';
 	import { onNavigate } from '$app/navigation';
-	import { initialize_app_data } from '$lib/utils';
+	import { initialize_app_data, CACHE_TTL_MS } from '$lib/utils';
 	import { cards, cycles, sets, factions, formats, printings } from '$lib/store';
 	import PageTitle from '$lib/components/PageTitle.svelte';
 	import { db } from '$lib/db';
@@ -49,31 +49,42 @@
 			return;
 		}
 
-		// If no data found in Svelte store, check IndexedDB
-		const cached_cards: Card[] = await db.cards.toArray();
-		const cached_cycles: Cycle[] = await db.cycles.toArray();
-		const cached_sets: Set[] = await db.sets.toArray();
-		const cached_factions: Faction[] = await db.factions.toArray();
-		const cached_formats: Format[] = await db.formats.toArray();
-		const cached_printings: Printing[] = await db.printings.toArray();
+		// If no data found in Svelte store, check if cached data is fresh
+		const cached_meta = await db.meta.get('last_updated');
+		const is_stale = !cached_meta || Date.now() - Number(cached_meta.value) > CACHE_TTL_MS;
 
-		// If cached data is found, use it
-		if (
-			cached_cards.length > 0 &&
-			cached_cycles.length > 0 &&
-			cached_sets.length > 0 &&
-			cached_factions.length > 0
-		) {
-			console.info('Using cached data from IndexedDB.');
-			cards.set(cached_cards);
-			cycles.set(cached_cycles);
-			sets.set(cached_sets);
-			factions.set(cached_factions);
-			formats.set(cached_formats);
-			printings.set(cached_printings);
-		} else {
-			console.info('No complete cached data found, fetching from API.');
+		if (is_stale) {
+			console.info('Cache is stale or missing, fetching from API.');
 			await initialize_app_data();
+		} else {
+			// Load all tables from IndexedDB
+			const cached_cards: Card[] = await db.cards.toArray();
+			const cached_cycles: Cycle[] = await db.cycles.toArray();
+			const cached_sets: Set[] = await db.sets.toArray();
+			const cached_factions: Faction[] = await db.factions.toArray();
+			const cached_formats: Format[] = await db.formats.toArray();
+			const cached_printings: Printing[] = await db.printings.toArray();
+
+			// If cached data is found, use it
+			if (
+				cached_cards.length > 0 &&
+				cached_cycles.length > 0 &&
+				cached_sets.length > 0 &&
+				cached_factions.length > 0 &&
+				cached_formats.length > 0 &&
+				cached_printings.length > 0
+			) {
+				console.info('Using cached data from IndexedDB.');
+				cards.set(cached_cards);
+				cycles.set(cached_cycles);
+				sets.set(cached_sets);
+				factions.set(cached_factions);
+				formats.set(cached_formats);
+				printings.set(cached_printings);
+			} else {
+				console.info('Incomplete cached data, fetching from API.');
+				await initialize_app_data();
+			}
 		}
 
 		// Scroll state
