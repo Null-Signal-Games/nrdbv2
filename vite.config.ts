@@ -7,12 +7,7 @@ export default defineConfig({
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',
-			strategy: [
-				'url', 
-				'localStorage', 
-				'baseLocale', 
-				'preferredLanguage'
-			]
+			strategy: ['url', 'localStorage', 'baseLocale', 'preferredLanguage']
 		}),
 		sveltekit()
 	],
@@ -27,9 +22,11 @@ export default defineConfig({
 					browser: {
 						enabled: true,
 						provider: 'playwright',
-						instances: [{
-							browser: 'chromium'
-						}]
+						instances: [
+							{
+								browser: 'chromium'
+							}
+						]
 					},
 					include: [
 						'src/**/*.svelte.{test,spec}.{js,ts}',

@@ -108,4 +108,4 @@ export const create_mock_deck = async () => {
 	const decklist_data = await decklist.json();
 
 	return decklist_data.data[0];
-}
+};

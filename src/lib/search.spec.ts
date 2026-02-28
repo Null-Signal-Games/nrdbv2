@@ -110,7 +110,10 @@ describe('filterCards', () => {
 describe('rankCards', () => {
 	it('should prioritize cards that start with search term', () => {
 		const cards = [
-			{ ...mockCards[0], attributes: { ...mockCards[0].attributes, title: 'Light Something' } },
+			{
+				...mockCards[0],
+				attributes: { ...mockCards[0].attributes, title: 'Light Something' }
+			},
 			{ ...mockCards[1], attributes: { ...mockCards[1].attributes, title: 'Another Light' } }
 		];
 
@@ -121,7 +124,10 @@ describe('rankCards', () => {
 
 	it('should handle case insensitive ranking', () => {
 		const cards = [
-			{ ...mockCards[0], attributes: { ...mockCards[0].attributes, title: 'Some Lightning' } },
+			{
+				...mockCards[0],
+				attributes: { ...mockCards[0].attributes, title: 'Some Lightning' }
+			},
 			{ ...mockCards[1], attributes: { ...mockCards[1].attributes, title: 'Lightning Fast' } }
 		];
 

@@ -23,7 +23,9 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	const _sets = [
 		...new Set(
-			cards_data.data?.flatMap((card: Card) => card.attributes.card_set_ids).filter(Boolean) ?? []
+			cards_data.data
+				?.flatMap((card: Card) => card.attributes.card_set_ids)
+				.filter(Boolean) ?? []
 		)
 	];
 

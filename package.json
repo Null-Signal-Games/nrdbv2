@@ -1,7 +1,7 @@
 {
     "name": "conduit",
-    "private": true,
     "version": "0.0.1",
+    "private": true,
     "type": "module",
     "scripts": {
         "dev": "vite dev",
@@ -20,6 +20,13 @@
         "lint:fix": "oxlint --fix src e2e",
         "fmt": "oxfmt src e2e",
         "fmt:check": "oxfmt --check src e2e"
+    },
+    "dependencies": {
+        "@auth/sveltekit": "^1.10.0",
+        "@nsg/common-components": "workspace:../common-components/dist",
+        "dexie": "^4.2.0",
+        "oxfmt": "^0.35.0",
+        "oxlint": "^1.50.0"
     },
     "devDependencies": {
         "@chromatic-com/storybook": "^4.1.0",
@@ -59,11 +66,6 @@
         "vitest": "^3.2.3",
         "vitest-browser-svelte": "^0.1.0"
     },
-    "pnpm": {
-        "onlyBuiltDependencies": [
-            "esbuild"
-        ]
-    },
     "lint-staged": {
         "*.{js,ts,svelte}": [
             "prettier --write",
@@ -73,11 +75,9 @@
             "prettier --write"
         ]
     },
-    "dependencies": {
-        "@auth/sveltekit": "^1.10.0",
-        "@nsg/common-components": "workspace:../common-components/dist",
-        "dexie": "^4.2.0",
-        "oxfmt": "^0.35.0",
-        "oxlint": "^1.50.0"
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "esbuild"
+        ]
     }
 }
