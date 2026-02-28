@@ -5,8 +5,6 @@ import type { Card, Printing } from '$lib/types';
 export const load: PageServerLoad = async ({ params, url, cookies, fetch }) => {
     const has_cache = cookies.get('nrdb_cache') === '1';
 
-    console.log(has_cache ? 'Cache cookie present, using cached data' : 'Cache cookie not present, fetching data from API on server side');
-
     const [card, printings] = has_cache
         ? [null, null]
         : await Promise.all([
