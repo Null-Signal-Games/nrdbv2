@@ -1,7 +1,7 @@
 <script lang="ts">
     import { NRDB_API_URL } from "$lib/constants";
     import PageTitle from "$lib/components/PageTitle.svelte";
-    import CardImage from "$lib/components/CardImage.svelte";
+    import CardImage from "$lib/components/card/CardImage.svelte";
     import { page } from "$app/state";
     import type {
         CardTypeIds,

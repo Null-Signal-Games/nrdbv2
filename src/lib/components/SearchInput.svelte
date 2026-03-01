@@ -1,7 +1,7 @@
 <script lang="ts">
     import { cards, searchQuery } from "$lib/store";
     import { filterAndRankCards } from "$lib/search";
-    import CardImage from "$lib/components/CardImage.svelte";
+    import CardImage from "$lib/components/card/CardImage.svelte";
     import DecklistSuggestions from "$lib/components/DecklistSuggestions.svelte";
     import { afterNavigate } from "$app/navigation";
     import { localizeHref } from "$lib/paraglide/runtime";

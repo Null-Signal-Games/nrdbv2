@@ -1,47 +1,47 @@
 <script lang="ts">
-	import type { Card, Decklist } from '$lib/types';
-	import CardImage from '$lib/components/CardImage.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import { localizeHref } from '$lib/paraglide/runtime';
+    import type { Card, Decklist } from "$lib/types";
+    import CardImage from "$lib/components/card/CardImage.svelte";
+    import Icon from "$lib/components/Icon.svelte";
+    import { localizeHref } from "$lib/paraglide/runtime";
 
-	interface Props {
-		identity: Card;
-		decklist: Decklist;
-	}
+    interface Props {
+        identity: Card;
+        decklist: Decklist;
+    }
 
-	let { identity, decklist }: Props = $props();
+    let { identity, decklist }: Props = $props();
 </script>
 
 <div class="summary">
-	<div>
-		<CardImage card={identity} />
-	</div>
-	<div>
-		<h3>
-			<a href={localizeHref(`/decklist/${decklist.id}`)}>
-				{decklist.attributes.name}
-			</a>
-		</h3>
-		{#if identity?.attributes?.title}
-			<p>
-				<Icon name={decklist.attributes.faction_id} />
-				{identity.attributes.title}
-			</p>
-		{/if}
+    <div>
+        <CardImage card={identity} />
+    </div>
+    <div>
+        <h3>
+            <a href={localizeHref(`/decklist/${decklist.id}`)}>
+                {decklist.attributes.name}
+            </a>
+        </h3>
+        {#if identity?.attributes?.title}
+            <p>
+                <Icon name={decklist.attributes.faction_id} />
+                {identity.attributes.title}
+            </p>
+        {/if}
 
-		<p>
-			by <a href={localizeHref(`/profile/${decklist.attributes.user_id}`)}
-				>{decklist.attributes.user_id}</a
-			>
-		</p>
-	</div>
+        <p>
+            by <a href={localizeHref(`/profile/${decklist.attributes.user_id}`)}
+                >{decklist.attributes.user_id}</a
+            >
+        </p>
+    </div>
 </div>
 
 <style>
-	/* Temporary styles */
-	.summary {
-		display: grid;
-		grid-template-columns: 1fr 3fr;
-		gap: 1rem;
-	}
+    /* Temporary styles */
+    .summary {
+        display: grid;
+        grid-template-columns: 1fr 3fr;
+        gap: 1rem;
+    }
 </style>

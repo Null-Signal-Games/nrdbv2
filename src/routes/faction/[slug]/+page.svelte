@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from "$app/state";
-    import CardImage from "$lib/components/CardImage.svelte";
+    import CardImage from "$lib/components/card/CardImage.svelte";
     import Header from "$lib/components/Header.svelte";
     import type { Decklist, Faction, Card } from "$lib/types";
     import { factions, cards } from "$lib/store";

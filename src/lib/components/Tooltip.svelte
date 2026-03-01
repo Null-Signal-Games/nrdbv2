@@ -1,7 +1,7 @@
 <script lang="ts">
     import { tooltip, tooltip_hover } from "$lib/store";
     import { onMount, tick } from "svelte";
-    import CardImage from "$lib/components/CardImage.svelte";
+    import CardImage from "$lib/components/card/CardImage.svelte";
     import { page } from "$app/state";
     import { dev } from "$app/environment";
     import Icon from "./Icon.svelte";
