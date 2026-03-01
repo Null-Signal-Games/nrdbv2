@@ -6,10 +6,10 @@ import type {
 	Set,
 	Faction,
 	Format,
-	CardTypeIds,
 	Decklist,
 	Printing,
-	FileFormat
+	FileFormat,
+	CardGroup
 } from '$lib/types';
 import { db } from '$lib/db';
 
@@ -169,11 +169,6 @@ export const getHighResImage = (card: Card, size: 'small' | 'medium' | 'large' =
 	}
 
 	return card.attributes.latest_printing_images.nrdb_classic[size];
-};
-
-type CardGroup = {
-	type: CardTypeIds;
-	data: Card[];
 };
 
 export const group_cards_by_type = (cards: Card[]): CardGroup[] => {
