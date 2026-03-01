@@ -9,6 +9,7 @@
     import { tooltip } from "$lib/actions";
     import { find_or_server, filter_or_server } from "$lib/utils";
     import Ghost from "$lib/components/Ghost.svelte";
+    import Container from "$lib/components/Container.svelte";
 
     interface Props {
         data: {
@@ -44,59 +45,60 @@
 </script>
 
 {#if faction_data && cards_data}
-    <Icon name={faction_data.id} />
-    <Header title={`Faction: ${faction_data.attributes.name}`} />
+    <Header title={`Faction: ${faction_data.attributes.name}`}>
+        <Icon name={faction_data.id} />
+    </Header>
 
-    <!-- Streamed in decklists for the current faction (per identity) -->
-    {#await data.decklists}
-        {#each Array(5) as _}
-            <Ghost />
-        {/each}
-    {:then decklists}
-        <div class="group">
-            {#each decklists as group (group.identity)}
-                <article>
-                    <header>
-                        <h2>{group.identity.attributes.title}</h2>
-                        <!-- TODO(i18n): use/create a locale -->
-                        <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
-                        <!-- svelte-ignore a11y_invalid_attribute -->
-                        <a href="#">Create deck with this identity</a>
-
-                        <!-- TODO(i18n): use/create a locale -->
-                        <!-- TODO(misc): add correct href url to search/find page with URL paramters to filter to this specific identity -->
-                        <!-- svelte-ignore a11y_invalid_attribute -->
-                        <a href="#">More decks</a>
-                    </header>
-                    <main>
-                        <div use:tooltip={group.identity}>
-                            <CardImage card={group.identity} />
-                        </div>
-                        <ul>
-                            {#each group.decklists as decklist (decklist.id)}
-                                <DecklistItem {decklist} />
-                            {/each}
-                        </ul>
-                    </main>
-                </article>
+    <Container>
+        <!-- Streamed in decklists for the current faction (per identity) -->
+        {#await data.decklists}
+            {#each Array(5) as _}
+                <Ghost />
             {/each}
-        </div>
-    {:catch error}
-        <p>error loading decklists: {error.message}</p>
-    {/await}
+        {:then decklists}
+            <div class="group">
+                {#each decklists as group (group.identity)}
+                    <article>
+                        <header>
+                            <h2>{group.identity.attributes.title}</h2>
+                            <!-- TODO(i18n): use/create a locale -->
+                            <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
+                            <!-- svelte-ignore a11y_invalid_attribute -->
+                            <a href="#">Create deck with this identity</a>
 
-    <!-- All cards from the current faction (IndexedDB data) -->
-    <h2>Cards from {faction_data.attributes.name}</h2>
-    <ul>
-        {#each cards_data as card (card.id)}
-            <li>
-                <CardImage {card} />
-            </li>
-        {/each}
-    </ul>
+                            <!-- TODO(i18n): use/create a locale -->
+                            <!-- TODO(misc): add correct href url to search/find page with URL paramters to filter to this specific identity -->
+                            <!-- svelte-ignore a11y_invalid_attribute -->
+                            <a href="#">More decks</a>
+                        </header>
+                        <main>
+                            <div use:tooltip={group.identity}>
+                                <CardImage card={group.identity} />
+                            </div>
+                            <ul>
+                                {#each group.decklists as decklist (decklist.id)}
+                                    <DecklistItem {decklist} />
+                                {/each}
+                            </ul>
+                        </main>
+                    </article>
+                {/each}
+            </div>
+        {:catch error}
+            <p>error loading decklists: {error.message}</p>
+        {/await}
+
+        <!-- All cards from the current faction (IndexedDB data) -->
+        <h2>Cards from {faction_data.attributes.name}</h2>
+        <ul>
+            {#each cards_data as card (card.id)}
+                <li>
+                    <CardImage {card} />
+                </li>
+            {/each}
+        </ul>
+    </Container>
 {/if}
-
-<pre>{JSON.stringify(data, null, 2)}</pre>
 
 <style>
     /* Temporary styles */

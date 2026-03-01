@@ -9,6 +9,6 @@
     let { children, class: classList }: Props = $props();
 </script>
 
-<div class={`container ${classList}`}>
+<article class="container {classList}">
     {@render children?.()}
-</div>
+</article>

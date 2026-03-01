@@ -11,7 +11,7 @@
     let { title, subtitle, children }: Props = $props();
 </script>
 
-<header>
+<header class="page-header">
     <Container>
         <h1>{title}</h1>
         {#if subtitle}

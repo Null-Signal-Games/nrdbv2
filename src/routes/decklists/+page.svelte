@@ -7,8 +7,6 @@
 </script>
 
 {#if data.decklists}
-    <Header title="Decklists" />
-
     <ul>
         {#each data.decklists as decklist (decklist.id)}
             <DecklistItem {decklist} />
