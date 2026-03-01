@@ -1,4 +1,4 @@
-@layer thmee, base;
+@layer theme, base;
 
 @layer theme {
 	:root {
@@ -43,6 +43,10 @@
 }
 
 @layer base {
+	/* [data-faction-theme] {
+        color: attr(data-faction-theme type(<color>));
+    } */
+
 	@media (prefers-reduced-motion) {
 		::view-transition-group(*),
 		::view-transition-old(*),
@@ -158,5 +162,11 @@
 		height: 88mm;
 		font-size: 2rem;
 		display: flex;
+	}
+
+	.group-header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 }

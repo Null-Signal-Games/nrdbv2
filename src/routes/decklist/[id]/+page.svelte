@@ -1,5 +1,10 @@
 <script lang="ts">
-    import type { Decklist, FileFormat, Card as TCard } from "$lib/types";
+    import type {
+        Decklist,
+        FileFormat,
+        Card as TCard,
+        CardGroup,
+    } from "$lib/types";
     import Header from "$lib/components/Header.svelte";
     import {
         group_cards_by_type,
@@ -11,7 +16,7 @@
         export_format,
     } from "$lib/utils";
     import { tooltip } from "$lib/actions";
-    import CardImage from "$lib/components/CardImage.svelte";
+    import CardImage from "$lib/components/card/CardImage.svelte";
     import Table from "$lib/components/Table.svelte";
     import Icon from "$lib/components/Icon.svelte";
     import { card_types } from "$lib/i18n";
@@ -20,6 +25,7 @@
     import Printer from "$lib/components/Printer.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
     import Container from "$lib/components/Container.svelte";
+    import CardMeta from "$lib/components/card/Meta.svelte";
 
     interface Props {
         data: {
@@ -31,7 +37,7 @@
 
     let { data }: Props = $props();
 
-    const grouped_cards = group_cards_by_type(data.cards);
+    const grouped_cards: CardGroup[] = group_cards_by_type(data.cards);
     const count = card_quantity(data.decklist, grouped_cards);
     // const total_cards = Object.values(count).reduce((sum, n) => sum + n, 0);
 
@@ -136,7 +142,7 @@
                 <p>Visual card layout</p>
                 {#each grouped_cards as group (group.type)}
                     <div class="group">
-                        <div>
+                        <div class="group-header">
                             <Icon name={group.type} />
                             <h2>
                                 {card_types[group.type]} ({count[group.type]})
@@ -145,7 +151,9 @@
                         <ul class="cards">
                             {#each group.data as card (card.id)}
                                 <li use:tooltip={card}>
-                                    <CardImage hasTransition {card} />
+                                    <CardMeta {card} quantity={card.quantity}>
+                                        <CardImage hasTransition {card} />
+                                    </CardMeta>
                                 </li>
                             {/each}
                         </ul>
@@ -155,6 +163,7 @@
 
             <div class="temp">
                 <p>Table layout</p>
+
                 {#each grouped_cards as group (group.type)}
                     <div class="group">
                         <div>
@@ -208,6 +217,10 @@
     .group {
         display: grid;
         gap: 1rem;
+
+        & h2 {
+            margin: unset;
+        }
     }
 
     ul {
@@ -217,7 +230,11 @@
     }
 
     .cards {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
+        /* TODO: review <ul>/<ol> globally, as they are often used for layout, having to reset/remove list-style, padding and margin often is repetitive */
+        list-style: none;
+        padding: unset;
+        margin: unset;
     }
 
     .wrapper {
@@ -228,5 +245,7 @@
     .temp {
         border: 1px solid red;
         padding: 1rem;
+        display: grid;
+        gap: 2rem;
     }
 </style>
