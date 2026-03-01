@@ -8,6 +8,7 @@
     import Influence from "./Influence.svelte";
     import type { FactionIds } from "$lib/types";
     import FormatText from "./FormatText.svelte";
+    import { localizeHref } from "$lib/paraglide/runtime";
 
     let tooltip_element: HTMLElement | undefined = $state();
     let is_over_tooltip = $state(false);
@@ -208,7 +209,7 @@
         <div class="tooltip__meta">
             <div>
                 <p>
-                    <a href={`/card/${$tooltip.card?.id}`}
+                    <a href={localizeHref(`/card/${$tooltip.card?.id}`)}
                         >{$tooltip.card?.attributes.title}</a
                     >
                 </p>

@@ -22,7 +22,7 @@
 
 <Factions />
 
-<div class="home">
+<div class="home container">
     <div>
         {#await data.decklist_of_the_week}
             <p>Loading deck of the week...</p>
