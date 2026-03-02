@@ -1,6 +1,7 @@
 <script lang="ts">
     import { NRDB_API_URL } from "$lib/constants";
     import Meta from "$lib/components/Meta.svelte";
+    import CardMeta from "$lib/components/card/Meta.svelte";
     import CardImage from "$lib/components/card/CardImage.svelte";
     import { page } from "$app/state";
     import type {
@@ -206,16 +207,28 @@
 
         <!-- PRINTINGS -->
         {#if printing_data.length > 1}
+            <!-- TODO: i18n value for header -->
+            <h2>Printings</h2>
             <div>
                 <h2>Printings/alt arts</h2>
-                {#each printing_data as printing (printing.id)}
-                    <p>
-                        <!-- TODO: ensure image correctly gets pulled through, although <CardImage> uses `Card` type, and currently does not support `Printing` type -->
-                        <!-- <CardImage data={printing} /> -->
-                        <!-- <pre>{JSON.stringify(printing, null, 2)}</pre> -->
-                        {printing.id}
-                    </p>
-                {/each}
+                <div
+                    style="display: grid; grid-template-columns: repeat(5, minmax(auto, 1fr)); gap: 1rem;"
+                >
+                    {#each printing_data as printing (printing.id)}
+                        <CardMeta card={printing}>
+                            <CardImage card={printing} />
+                            {#snippet content()}
+                                Illusrated by <a
+                                    href={localizeHref(
+                                        `/illustrators/${printing.attributes.illustrator_ids[0]}`,
+                                    )}
+                                    >{printing.attributes
+                                        .display_illustrators}</a
+                                >
+                            {/snippet}
+                        </CardMeta>
+                    {/each}
+                </div>
             </div>
         {/if}
 
@@ -225,6 +238,7 @@
         {:then rulings}
             <pre>{JSON.stringify(rulings, null, 2)}</pre>
             <div class="rulings">
+                <!-- TODO: i18n value for header -->
                 <h2>Rulings</h2>
                 {#if rulings.length > 0}
                     {#each rulings as ruling (ruling.id)}
