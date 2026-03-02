@@ -6,6 +6,7 @@
     import { store_or_server, filter_or_server } from "$lib/utils";
     import { onMount } from "svelte";
     import DecklistBuilder from "$lib/components/decklist/Builder.svelte";
+    import Icon from "$lib/components/Icon.svelte";
 
     interface Props {
         data: {
@@ -97,12 +98,45 @@
     onMount(() => {
         const params = new URLSearchParams(window.location.search);
 
+        const side = params.get("side");
+        if (side && is_side_id(side)) selected_side = side;
+
+        const faction = params.get("faction");
+        if (faction && is_faction_id(faction))
+            selected_faction = faction as FactionIds;
+
         const identity = params.get("identity");
         if (identity) selected_identity = identity as Card["id"];
     });
 </script>
 
-<Header title="Choose decklist" subtitle="" />
+<Header title="Choose decklist" subtitle="">
+    {#snippet icon()}
+        {#if selected_faction}
+            <Icon name={selected_faction} size="xl" />
+        {/if}
+    {/snippet}
+
+    <p>
+        {#if selected_side}
+            <span>{selected_side} - </span>
+        {/if}
+
+        {#if selected_faction}
+            <span
+                >{factions_list.find((f) => f.id === selected_faction)
+                    ?.attributes.name} -
+            </span>
+        {/if}
+
+        {#if selected_identity}
+            <span
+                >{identities_list.find((i) => i.id === selected_identity)
+                    ?.attributes.title}</span
+            >
+        {/if}
+    </p>
+</Header>
 
 <Container>
     {#if !selected_side}
