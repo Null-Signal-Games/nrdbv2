@@ -9,6 +9,7 @@
     import type { FactionIds } from "$lib/types";
     import FormatText from "./FormatText.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
+    import { card_types } from "$lib/i18n";
 
     let tooltip_element: HTMLElement | undefined = $state();
     let is_over_tooltip = $state(false);
@@ -218,7 +219,7 @@
                         name={$tooltip.card.attributes.card_type_id}
                         size="sm"
                     />
-                    {$tooltip.card?.attributes.card_type_id}
+                    {card_types[$tooltip.card?.attributes.card_type_id]}
                 </span>
                 {#if $tooltip.card.attributes.influence_cost}
                     <Influence
@@ -275,7 +276,7 @@
         padding: 1rem;
         border: 2px solid var(--border);
         border-radius: 0.5rem;
-        z-index: 10000;
+        z-index: 10;
     }
 
     .tooltip[data-visible="true"] {
