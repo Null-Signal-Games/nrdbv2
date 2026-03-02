@@ -1,4 +1,5 @@
 import { NRDB_PRIVATE_API_URL } from '$lib/constants';
+import { access } from 'fs';
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 
@@ -17,7 +18,10 @@ export const load: PageServerLoad = async (event) => {
 		}
 	});
 
-	console.log(response);
+	console.log({
+		accessToken: session.accessToken,
+		response
+	});
 
 	if (response.status === 401) {
 		throw redirect(302, '/');
