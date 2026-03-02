@@ -10,6 +10,7 @@
         factions,
         formats,
         printings,
+        theme as current_theme,
     } from "$lib/store";
     import Meta from "$lib/components/Meta.svelte";
     import { db } from "$lib/db";
@@ -119,15 +120,22 @@
 
         // Handle light/dark theme
         // TODO(theme): review, as currently we utilise `light-dark` in CSS, which us purely based on user preference
-        const user_prefers_dark = window.matchMedia(
-            "(prefers-color-scheme: dark)",
-        ).matches;
-        const theme = localStorage.getItem("theme");
+        if (!localStorage.getItem("theme")) {
+            console.log("Setting theme based on user preference");
+
+            const user_prefers_dark = window.matchMedia(
+                "(prefers-color-scheme: dark)",
+            ).matches;
+
+            const value = user_prefers_dark ? "dark" : "light";
+
+            localStorage.setItem("theme", value);
+            current_theme.set(value);
+        }
+
         document.documentElement.setAttribute(
             "data-theme",
-            theme === "dark" || (!theme && user_prefers_dark)
-                ? "dark"
-                : "light",
+            $current_theme || localStorage.getItem("theme") || "light",
         );
     });
 </script>
