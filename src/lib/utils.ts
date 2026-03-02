@@ -159,6 +159,11 @@ export const getHighResImage = (card: Card, size: 'small' | 'medium' | 'large' =
 	// if the card includes one of the card cycles that are released by null signal games, use the nsg image
 	const nsgCardCycles = ['elevation', 'liberation', 'borealis', 'ashes', 'system_gateway'];
 
+	// If the card is a printing, use the printing image URL structure (id is the printing ID, not the card ID)
+	if (card && 'type' in card && card.type === 'printings') {
+		return `https://card-images.netrunnerdb.com/v2/${size}/${card.id}.jpg`;
+	}
+
 	// If the card is from a NSG cycle, or doesn't have a NRDB classic image, use the NRDB image
 	if (nsgCardCycles.some((cycle) => card.attributes.card_cycle_ids.includes(cycle))) {
 		return `https://card-images.netrunnerdb.com/v2/xlarge/${card.attributes.latest_printing_id}.webp`;
