@@ -67,9 +67,7 @@
 {#if card_data}
     <Meta title={card_data?.attributes.title} />
 
-    <Header title={card_data?.attributes.title} />
-
-    <Container>
+    <Header title={card_data?.attributes.title}>
         {#if card_previous?.id}
             <a href={localizeHref(`/card/${card_previous.id}`)}>Previous</a>
         {/if}
@@ -77,7 +75,9 @@
         {#if card_next?.id}
             <a href={localizeHref(`/card/${card_next.id}`)}>Next</a>
         {/if}
+    </Header>
 
+    <Container>
         <div class="card-details">
             <CardImage card={card_data} hasTransition={true} href={null} />
             <div>
