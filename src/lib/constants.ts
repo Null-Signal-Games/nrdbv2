@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages.js';
 import { localizeHref } from '$lib/paraglide/runtime.js';
-import { CardTypeIds } from './types';
+import type { CardTypeIds } from './types';
 
 const NRDB_API = 'https://api.netrunnerdb.com/api/v3';
 const NRDB_API_PREVIEW = 'https://api-preview.netrunnerdb.com/api/v3';
