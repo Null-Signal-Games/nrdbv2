@@ -25,7 +25,7 @@
                         <div class="cards">
                             {#each data.cards[index].data as card (card.id)}
                                 <!-- TODO: fix type error (Printing is not assignable to type `card`) -->
-                                <CardImage {card} href={false} />
+                                <CardImage {card} href={null} />
                             {/each}
                         </div>
                     {/if}
