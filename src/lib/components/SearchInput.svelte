@@ -6,6 +6,7 @@
     import { afterNavigate } from "$app/navigation";
     import { localizeHref } from "$lib/paraglide/runtime";
     import { onMount } from "svelte";
+    import Icon from "./Icon.svelte";
 
     let search_input: HTMLInputElement | null = null;
     let is_open = $state(false);
@@ -21,7 +22,12 @@
 
     onMount(() => {
         const on_key_down = (e: KeyboardEvent) => {
-            const ua = (navigator as any).userAgentData;
+            const ua = (
+                navigator as unknown as {
+                    userAgentData?: { platform?: string };
+                }
+            ).userAgentData;
+
             const platform =
                 typeof ua?.platform === "string"
                     ? ua.platform
@@ -63,6 +69,7 @@
 
 <div class="search-input-root">
     <span class="search-input-container">
+        <Icon name="subroutine" size="md" class="search-icon" />
         <input
             bind:this={search_input}
             type="text"
@@ -128,9 +135,18 @@
         z-index: 30;
     }
 
+    .search-input-container :global(.search-icon) {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 0.75rem;
+        pointer-events: none;
+    }
+
     .search-input-container input {
         width: 100%;
         padding: 0.5rem;
+        padding-left: 2.5rem;
         border: 1px solid #ccc;
         font-size: 1rem;
         line-height: 1.5;
