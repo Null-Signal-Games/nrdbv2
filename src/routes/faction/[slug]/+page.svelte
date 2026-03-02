@@ -46,7 +46,9 @@
 
 {#if faction_data && cards_data}
     <Header title={`Faction: ${faction_data.attributes.name}`}>
-        <Icon name={faction_data.id} />
+        {#snippet icon()}
+            <Icon name={faction_data.id} size="xl" />
+        {/snippet}
     </Header>
 
     <Container>
@@ -64,7 +66,10 @@
                             <!-- TODO(i18n): use/create a locale -->
                             <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
                             <!-- svelte-ignore a11y_invalid_attribute -->
-                            <a href="#">Create deck with this identity</a>
+                            <a
+                                href={`/decklist/create?identity=${group.identity.id}`}
+                                >Create deck with this identity</a
+                            >
 
                             <!-- TODO(i18n): use/create a locale -->
                             <!-- TODO(misc): add correct href url to search/find page with URL paramters to filter to this specific identity -->
