@@ -11,7 +11,7 @@
         formats,
         printings,
     } from "$lib/store";
-    import PageTitle from "$lib/components/PageTitle.svelte";
+    import Meta from "$lib/components/Meta.svelte";
     import { db } from "$lib/db";
     import Navigation from "$lib/components/Navigation.svelte";
     import Footer from "$lib/components/Footer.svelte";
@@ -138,7 +138,7 @@
 
 <Navigation />
 
-<PageTitle />
+<Meta />
 
 <main>
     {@render children?.()}
