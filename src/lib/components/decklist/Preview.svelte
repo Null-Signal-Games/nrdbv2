@@ -83,10 +83,4 @@
     .preview-card__meta {
         margin: 0;
     }
-
-    .preview-card__author {
-        color: #878787;
-        font-size: 14px;
-        text-decoration: none;
-    }
 </style>
