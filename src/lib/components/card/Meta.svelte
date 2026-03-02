@@ -10,9 +10,10 @@
         children?: Snippet;
         card: TCard | Printing;
         quantity?: number;
+        content?: Snippet;
     }
 
-    const { children, card, quantity }: Props = $props();
+    const { children, card, quantity, content }: Props = $props();
 </script>
 
 <div class="meta">
@@ -29,6 +30,7 @@
                 theme={card.attributes.faction_id as FactionIds}
             />
         {/if}
+        {@render content?.()}
     </div>
 </div>
 
