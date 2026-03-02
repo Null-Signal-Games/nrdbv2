@@ -16,10 +16,10 @@
         "start": "node build",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build",
-        "lint": "oxlint src e2e",
-        "lint:fix": "oxlint --fix src e2e",
-        "fmt": "oxfmt src e2e",
-        "fmt:check": "oxfmt --check src e2e"
+        "lint": "oxlint \"src\/**\/*\" e2e",
+        "lint:fix": "oxlint --fix \"src\/**\/*\" e2e",
+        "fmt": "oxfmt \"src\/**\/*\" e2e",
+        "fmt:check": "oxfmt --check \"src\/**\/*\" e2e"
     },
     "dependencies": {
         "@auth/sveltekit": "^1.10.0",
