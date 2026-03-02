@@ -65,7 +65,7 @@
 </script>
 
 {#if card_data}
-    <Meta subtitle={card_data?.attributes.title} />
+    <Meta title={card_data?.attributes.title} />
 
     <Header title={card_data?.attributes.title} />
 
