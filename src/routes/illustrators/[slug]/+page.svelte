@@ -3,7 +3,8 @@
     import Header from "$lib/components/Header.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
     import Container from "$lib/components/Container.svelte";
-    // import CardImage from '$lib/components/CardImage.svelte';
+    import CardImage from "$lib/components/card/CardImage.svelte";
+    import CardMeta from "$lib/components/card/Meta.svelte";
 
     let {
         data,
@@ -23,21 +24,23 @@
             {#each data.printings as printing (printing.id)}
                 <li>
                     <!-- /**
-                    * TODO(types): `printing` is not of type `Card`, slightly different attribute structure,
                     * `getHighResImage` does not account for this, and `CardImage` expects a `Card` type.
                     * Need to adjust/expand the types and utility functions to handle this properly.
                     */ -->
-                    <!-- <CardImage card={printing} /> -->
-
-                    <a
-                        href={localizeHref(
-                            `/card/${printing.attributes.card_id}`,
-                        )}
-                    >
-                        {printing.attributes.card_id}
-                    </a>
+                    <CardMeta card={printing}>
+                        <CardImage card={printing} />
+                    </CardMeta>
                 </li>
             {/each}
         </ul>
     </Container>
 {/if}
+
+<style>
+    /* Temporary styles */
+    ul {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+    }
+</style>
