@@ -39,6 +39,7 @@
                 media="(min-width:936px)"
             />
             <img
+                crossorigin="anonymous"
                 class="card {className}"
                 class:shadow={boxShadow}
                 src={getHighResImage(card)}
@@ -51,6 +52,7 @@
         </picture>
     {:else}
         <img
+            crossorigin="anonymous"
             class="card {className}"
             class:shadow={boxShadow}
             src={getHighResImage(card)}

@@ -27,6 +27,7 @@
         Printing,
     } from "$lib/types";
     import Tooltip from "$lib/components/Tooltip.svelte";
+    import { SQLocal } from 'sqlocal';
 
     interface Props {
         children?: Snippet;
@@ -46,6 +47,59 @@
     });
 
     onMount(async () => {
+        // Grab the SQLite db.
+        const dbUrl =
+            "https://card-images.netrunnerdb.com/sqlite-tmp/netrunnerdb.sqlite3.1773596450.gz";
+        const dbFilename = "netrunnerdb.sqlite3";
+
+        console.log("Initializing SQLocal with OPFS database...");
+
+        const { overwriteDatabaseFile } = new SQLocal(dbFilename);
+
+        try {
+            const root = await navigator.storage.getDirectory();
+
+            try {
+                await root.getFileHandle(dbFilename);
+                console.log(`${dbFilename} already exists in OPFS. Skipping download.`);
+            } catch (error) {
+                if (!(error instanceof DOMException) || error.name !== "NotFoundError") {
+                    throw error;
+                }
+
+                console.log("Fetching and decompressing sqlite db...");
+                const response = await fetch(dbUrl);
+
+                if (!response.ok) {
+                    throw new Error(`Network response failed: ${response.status}`);
+                }
+
+                if (!response.body) {
+                    throw new Error("Response body was empty");
+                }
+
+                if (typeof DecompressionStream === "undefined") {
+                    throw new Error("DecompressionStream is not supported in this browser");
+                }
+
+                const decompressedStream = response.body.pipeThrough(
+                    new DecompressionStream("gzip"),
+                );
+
+                await overwriteDatabaseFile(decompressedStream);
+
+                console.log(`${dbFilename} downloaded and saved to OPFS.`);
+            }
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : "Unknown error";
+            console.error(`Error preparing sqlite db: ${message}`);
+        }
+
+        const { sql } = new SQLocal(dbFilename);
+        const data = await sql`SELECT * FROM factions`;
+        console.table(data);
+
         const stores = [cards, cycles, sets, factions, formats, printings];
         let all_populated: boolean = true;
 
