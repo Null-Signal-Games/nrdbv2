@@ -1,12 +1,24 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
-import type { ApiResponse, Faction } from '$lib/types';
+import { NRDB_CACHE_COOKIE } from '$lib/constants';
 
 export const load: PageServerLoad = async ({ cookies, fetch }) => {
-	if (cookies.get('nrdb_cache') === '1') return { factions: null };
+    // Client already has the sqlite DB in OPFS, let the page/component query it locally
+    if (cookies.get(NRDB_CACHE_COOKIE) === '1') {
+        return { factions: null };
+    }
 
-	const res = await fetch(`${NRDB_API_URL}/factions?page[size]=100`);
-	const json: ApiResponse<Faction> = await res.json();
+    // Cold load = no sqlite DB yet, fall back to the API for SSR
+    const res = await fetch(`${NRDB_API_URL}/factions?page[size]=100`);
+    if (!res.ok) return { factions: null };
 
-	return { factions: json.data };
+    const json: { data: Array<{ id: string; attributes: { name: string } }> } =
+        await res.json();
+
+    return {
+        factions: json.data.map((item) => ({
+            id: item.id,
+            name: item.attributes.name,
+        })),
+    };
 };

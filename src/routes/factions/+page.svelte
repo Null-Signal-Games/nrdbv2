@@ -1,31 +1,53 @@
 <script lang="ts">
-    import type { Faction } from "$lib/types";
-    import { factions } from "$lib/store";
+    import type { PageData } from "./$types";
     import Header from "$lib/components/Header.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
-    import { store_or_server } from "$lib/utils";
     import Container from "$lib/components/Container.svelte";
+    import Loading from "$lib/components/Loading.svelte";
+    import { db_ready } from "$lib/store";
+    import { sql } from "$lib/sqlite";
 
-    interface Props {
-        data: { factions: Faction[] | null };
+    interface Factions {
+        id: string;
+        name: string;
     }
 
-    let { data }: Props = $props();
+    let { data }: { data: PageData } = $props();
 
-    let factions_list = $derived<Faction[]>(
-        store_or_server($factions, data.factions, "factions"),
-    );
+    let db_factions = $state<Factions[] | null>(null);
+    let loading = $state(data.factions === null);
+
+    $effect(() => {
+        if ($db_ready && data.factions === null) {
+            loading = true;
+            sql`SELECT id, name FROM factions`
+                .then((results: unknown[]) => {
+                    db_factions = results as Factions[];
+                })
+                .catch((err: unknown) => {
+                    console.error("[SQLITE] Failed to query factions:", err);
+                })
+                .finally(() => {
+                    loading = false;
+                });
+        }
+    });
+
+    // SSR data takes priority, sqlite fills on warm load
+    let factions = $derived((data.factions ?? db_factions ?? []) as Factions[]);
 </script>
 
-{#if factions_list.length > 0}
+{#if loading}
+    <Loading />
+{:else if factions.length > 0}
     <Header title="Factions" />
 
     <Container>
         <ul>
-            {#each factions_list as faction (faction.id)}
+            {#each factions as faction (faction.id)}
                 <li>
                     <a href={localizeHref(`/faction/${faction.id}`)}>
-                        {faction.attributes.name}
+                        {faction.name}
                     </a>
                 </li>
             {/each}

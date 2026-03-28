@@ -11,6 +11,7 @@
         formats,
         printings,
         theme as current_theme,
+        db_ready,
     } from "$lib/store";
     import Meta from "$lib/components/Meta.svelte";
     import { db } from "$lib/db";
@@ -27,7 +28,12 @@
         Printing,
     } from "$lib/types";
     import Tooltip from "$lib/components/Tooltip.svelte";
-    import { SQLocal } from 'sqlocal';
+    import { sql, overwriteDatabaseFile } from "$lib/sqlite";
+    import {
+        NRDB_SQLITE_URL,
+        NRDB_SQLITE_NAME,
+        NRDB_CACHE_COOKIE,
+    } from "$lib/constants";
 
     interface Props {
         children?: Snippet;
@@ -47,31 +53,31 @@
     });
 
     onMount(async () => {
-        // Grab the SQLite db.
-        const dbUrl =
-            "https://card-images.netrunnerdb.com/sqlite-tmp/netrunnerdb.sqlite3.1773596450.gz";
-        const dbFilename = "netrunnerdb.sqlite3";
-
-        console.log("Initializing SQLocal with OPFS database...");
-
-        const { overwriteDatabaseFile } = new SQLocal(dbFilename);
-
         try {
             const root = await navigator.storage.getDirectory();
 
             try {
-                await root.getFileHandle(dbFilename);
-                console.log(`${dbFilename} already exists in OPFS. Skipping download.`);
+                await root.getFileHandle(NRDB_SQLITE_NAME);
+                console.log(
+                    `${NRDB_SQLITE_NAME} already exists in OPFS. Skipping download.`,
+                );
             } catch (error) {
-                if (!(error instanceof DOMException) || error.name !== "NotFoundError") {
+                if (
+                    !(
+                        error instanceof DOMException &&
+                        error.name === "NotFoundError"
+                    )
+                ) {
                     throw error;
                 }
 
                 console.log("Fetching and decompressing sqlite db...");
-                const response = await fetch(dbUrl);
+                const response = await fetch(NRDB_SQLITE_URL);
 
                 if (!response.ok) {
-                    throw new Error(`Network response failed: ${response.status}`);
+                    throw new Error(
+                        `Network response failed: ${response.status}`,
+                    );
                 }
 
                 if (!response.body) {
@@ -79,7 +85,9 @@
                 }
 
                 if (typeof DecompressionStream === "undefined") {
-                    throw new Error("DecompressionStream is not supported in this browser");
+                    throw new Error(
+                        "DecompressionStream is not supported in this browser",
+                    );
                 }
 
                 const decompressedStream = response.body.pipeThrough(
@@ -88,84 +96,34 @@
 
                 await overwriteDatabaseFile(decompressedStream);
 
-                console.log(`${dbFilename} downloaded and saved to OPFS.`);
+                console.log(
+                    `[SQLITE] ${NRDB_SQLITE_NAME} downloaded and saved to OPFS.`,
+                );
+            } finally {
+                console.log("[SQLITE] Tables:");
+
+                if (dev) {
+                    const tables =
+                        await sql`SELECT name FROM sqlite_master WHERE type = 'table'`;
+                    console.dir(tables);
+                }
+
+                db_ready.set(true);
+
+                // 30 days
+                document.cookie = `${NRDB_CACHE_COOKIE}=1; max-age=2592000; path=/`;
             }
         } catch (error) {
-            const message =
-                error instanceof Error ? error.message : "Unknown error";
-            console.error(`Error preparing sqlite db: ${message}`);
+            console.error(
+                "[SQLITE] Failed to initialize local database:",
+                error,
+            );
+
+            // Clear stale cookie so next page load falls back to SSR
+            document.cookie = `${NRDB_CACHE_COOKIE}=; max-age=0; path=/`;
         }
 
-        const { sql } = new SQLocal(dbFilename);
-        const data = await sql`SELECT * FROM factions`;
-        console.table(data);
-
-        const stores = [cards, cycles, sets, factions, formats, printings];
-        let all_populated: boolean = true;
-
-        // Only skip loading if ALL stores already have data
-        const unsubs = stores.map((store) =>
-            store.subscribe((value) => {
-                if (!value || value.length === 0) all_populated = false;
-            }),
-        );
-
-        // Unsubscribe from all stores
-        unsubs.forEach((unsub) => unsub());
-
-        if (all_populated) {
-            // console.info('Using in-memory store data');
-            return;
-        }
-
-        // If no data found in Svelte store, check if cached data is fresh
-        try {
-            const cached_meta = await db.meta.get("last_updated");
-            const is_stale =
-                !cached_meta ||
-                Date.now() - Number(cached_meta.value) > CACHE_TTL_MS;
-
-            if (is_stale) {
-                console.info("Cache is stale or missing, fetching from API.");
-                await initialize_app_data();
-            } else {
-                // Load all tables from IndexedDB
-                const cached_cards: Card[] = await db.cards.toArray();
-                const cached_cycles: Cycle[] = await db.cycles.toArray();
-                const cached_sets: Set[] = await db.sets.toArray();
-                const cached_factions: Faction[] = await db.factions.toArray();
-                const cached_formats: Format[] = await db.formats.toArray();
-                const cached_printings: Printing[] =
-                    await db.printings.toArray();
-
-                // If cached data is found, use it
-                if (
-                    cached_cards.length > 0 &&
-                    cached_cycles.length > 0 &&
-                    cached_sets.length > 0 &&
-                    cached_factions.length > 0 &&
-                    cached_formats.length > 0 &&
-                    cached_printings.length > 0
-                ) {
-                    console.info("Using cached data from IndexedDB.");
-                    cards.set(cached_cards);
-                    cycles.set(cached_cycles);
-                    sets.set(cached_sets);
-                    factions.set(cached_factions);
-                    formats.set(cached_formats);
-                    printings.set(cached_printings);
-                } else {
-                    console.info("Incomplete cached data, fetching from API.");
-                    await initialize_app_data();
-                }
-            }
-
-            // Pass cookie to the server that cache is warm
-            document.cookie = `nrdb_cache=1; max-age=${Math.floor(CACHE_TTL_MS / 1000)}; path=/; SameSite=Lax`;
-        } catch (err) {
-            console.error("Failed to load app data:", err);
-        }
-
+        // Scroll tracking (always runs regardless of DB state)
         document.body.style.setProperty("--scroll", `${window.scrollY}px`);
 
         window.addEventListener("scroll", () => {
