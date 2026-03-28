@@ -1,6 +1,7 @@
 <script lang="ts">
     import Icon from "$lib/components/Icon.svelte";
     import { m } from "$lib/paraglide/messages.js";
+    import { card_types } from "$lib/i18n";
 
     interface Props {
         text: string;
@@ -49,7 +50,7 @@
                     {@const value = segment.slice(1, -1)}
                     <!-- TODO: i18n title attr -->
                     <abbr class="icon-a11y" title={value}>
-                        <Icon name={value} size="sm" fill="current" />
+                        <Icon name={value} size="sm" />
                         <!-- TODO: i18n visually hidden text -->
                         <span class="visually-hidden">{segment}</span>
                     </abbr>

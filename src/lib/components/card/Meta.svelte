@@ -20,8 +20,8 @@
     {@render children?.()}
     <div class="meta__content">
         <h3>
-            {#if quantity}&times;{quantity}
-            {/if}{card.attributes.title}
+            {#if quantity}&times;{quantity}{/if}
+            {card.attributes.title}
         </h3>
         {#if quantity}
             <Influence

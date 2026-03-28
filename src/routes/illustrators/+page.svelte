@@ -4,14 +4,16 @@
     import { localizeHref } from "$lib/paraglide/runtime";
     import CardImage from "$lib/components/card/CardImage.svelte";
     import Container from "$lib/components/Container.svelte";
+    // import { cards } from "$lib/store";
 
-    let {
-        data,
-    }: {
-        data: { illustrators: Illustrator[]; cards: ApiResponse<Printing>[] };
-    } = $props();
+    interface Props {
+        data: {
+            illustrators: Illustrator[];
+            cards: ApiResponse<Printing>[];
+        };
+    }
 
-    console.log(data.cards);
+    let { data }: Props = $props();
 </script>
 
 {#if data.illustrators}
@@ -21,14 +23,6 @@
         <div class="grid">
             {#each data.illustrators as illustrator, index (illustrator.id)}
                 <a href={localizeHref(`/illustrators/${illustrator.id}`)}>
-                    {#if false}
-                        <div class="cards">
-                            {#each data.cards[index].data as card (card.id)}
-                                <!-- TODO: fix type error (Printing is not assignable to type `card`) -->
-                                <CardImage {card} href={null} />
-                            {/each}
-                        </div>
-                    {/if}
                     <p>
                         {illustrator.attributes.name} ({illustrator.attributes
                             .num_printings} cards)

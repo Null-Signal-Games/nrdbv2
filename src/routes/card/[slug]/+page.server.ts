@@ -30,6 +30,7 @@ export const load: PageServerLoad = async ({ params, url, cookies, fetch }) => {
 					`${NRDB_API_URL}/reviews?filter[card_id]=${params.slug}&page[size]=10`
 				);
 				const json = await response.json();
+				json.data = json.data.reverse();
 				resolve(json.data);
 			} catch (error) {
 				reject(error);

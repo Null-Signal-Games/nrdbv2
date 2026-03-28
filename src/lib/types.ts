@@ -2,6 +2,8 @@ export type SidesIds = 'corp' | 'runner';
 
 export type Publishers = 'null_signal_games' | 'fantasy_flight_games';
 
+export type Formats = 'eternal' | 'ram' | 'snapshot' | 'standard' | 'startup' | 'system_gateway';
+
 export type FileFormat = 'json' | 'txt' | 'otcgn' | 'bbcode' | 'md' | 'jinteki.net';
 
 export type CardTypeIds =
@@ -230,6 +232,27 @@ export interface Format {
 		restriction_ids: string[];
 		active_card_pool_id: string;
 		active_restriction_id: string;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface Restriction {
+	id: string;
+	type: 'restrictions';
+	attributes: {
+		name: string;
+		date_start: string;
+		format_id: Format;
+		banned_subtypes: string[];
+		verdicts: {
+			banned: string[];
+			restricted: string[];
+			global_penalty: string[];
+			points: { [card_id: string]: number };
+			universal_faction_cost: { [card_id: string]: number };
+		};
 		updated_at: string;
 	};
 	relationships: Relationships;

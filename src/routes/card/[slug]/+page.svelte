@@ -19,7 +19,11 @@
     import { card_types, factions } from "$lib/i18n";
     import Influence from "$lib/components/Influence.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
-    import { find_or_server, filter_or_server } from "$lib/utils";
+    import {
+        find_or_server,
+        filter_or_server,
+        getHighResImage,
+    } from "$lib/utils";
     import FormatText from "$lib/components/FormatText.svelte";
     import Container from "$lib/components/Container.svelte";
 
@@ -66,9 +70,31 @@
 </script>
 
 {#if card_data}
-    <Meta title={card_data?.attributes.title} />
+    <Meta title={card_data?.attributes.title}>
+        <!-- Preload previous and next card images for smoother navigation -->
+
+        {#if card_previous?.id}
+            <link
+                rel="preload"
+                src={getHighResImage(card_previous)}
+                as="image"
+            />
+        {/if}
+
+        {#if card_next?.id}
+            <link rel="preload" src={getHighResImage(card_next)} as="image" />
+        {/if}
+    </Meta>
 
     <Header title={card_data?.attributes.title}>
+        <p>
+            <a
+                href={localizeHref(
+                    `/sets/${card_data.attributes.card_set_ids[0]}`,
+                )}>{card_data.attributes.card_set_names}</a
+            >
+        </p>
+
         {#if card_previous?.id}
             <a href={localizeHref(`/card/${card_previous.id}`)}>Previous</a>
         {/if}
@@ -194,8 +220,48 @@
                         Decklists with this card
                     </a>
                 </p>
+
+                {#if card_data.attributes.card_type_id.includes("_identity")}
+                    <p>
+                        <a
+                            href={localizeHref(
+                                `/decklist/create?identity=${card_data.id}`,
+                            )}
+                        >
+                            Create deck with this identity
+                        </a>
+                    </p>
+                {/if}
             </div>
-            <div>Cycle, set, legality, printings</div>
+            <div>
+                <div>
+                    <p>Cycle</p>
+                    {#each card_data.attributes.card_cycle_ids as cycle_id}
+                        <a
+                            href={localizeHref(`/cycles/${cycle_id}`)}
+                            class="underline"
+                        >
+                            {card_data.attributes.card_cycle_names}
+                        </a>
+                    {/each}
+                </div>
+                <hr />
+                <div>
+                    <p>sets</p>
+                    {#each card_data.attributes.card_set_ids as set_id}
+                        <a
+                            href={localizeHref(`/sets/${set_id}`)}
+                            class="underline"
+                        >
+                            {card_data.attributes.card_set_names}
+                        </a>
+                    {/each}
+                </div>
+                <hr />
+                <div>
+                    <p>legality</p>
+                </div>
+            </div>
         </div>
 
         <a
@@ -205,10 +271,10 @@
             data-sveltekit-preload-data>View on NetrunnerDB</a
         >
 
-        <!-- PRINTINGS -->
+        <!-- PRINTINGS/ALTERNATIVE-ARTS -->
         {#if printing_data.length > 1}
             <!-- TODO: i18n value for header -->
-            <h2>Printings</h2>
+            <h2>Alternative Arts</h2>
             <div>
                 <h2>Printings/alt arts</h2>
                 <div

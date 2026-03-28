@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Container from "$lib/components/Container.svelte";
     import Header from "$lib/components/Header.svelte";
+    import Container from "$lib/components/Container.svelte";
     import { m } from "$lib/paraglide/messages.js";
     import { localizeHref } from "$lib/paraglide/runtime.js";
 

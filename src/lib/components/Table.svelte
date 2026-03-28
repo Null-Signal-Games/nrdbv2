@@ -35,10 +35,10 @@
     </thead>
     <tbody>
         {#each cards as card (card.id)}
-            <tr>
+            <tr data-id={card.id}>
                 {#if decklist}
                     <td>
-                        {decklist.attributes.card_slots[card.id] ?? "0"}
+                        &times;{decklist.attributes.card_slots[card.id] ?? "0"}
                     </td>
                 {/if}
                 <td>
@@ -82,10 +82,15 @@
                     </a>
                 </td>
                 <td>
-                    <span class="table-cell">
+                    <a
+                        href={localizeHref(
+                            `/decklists/search?=t:${card.attributes.card_type_id}`,
+                        )}
+                        class="table-cell"
+                    >
                         <Icon name={card.attributes.card_type_id} size="sm" />
                         {card_types[card.attributes.card_type_id]}
-                    </span>
+                    </a>
                 </td>
                 <td>
                     {#if card.attributes.display_subtypes}

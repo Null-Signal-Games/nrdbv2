@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages.js';
 import { localizeHref } from '$lib/paraglide/runtime.js';
-import type { CardTypeIds } from './types';
+import type { CardTypeIds, FactionIds, Formats } from './types';
 
 const NRDB_API = 'https://api.netrunnerdb.com/api/v3';
 const NRDB_API_PREVIEW = 'https://api-preview.netrunnerdb.com/api/v3';
@@ -38,6 +38,10 @@ export const NAVIGATION = [
 		url: localizeHref('/factions')
 	},
 	{
+		title: m.bans(),
+		url: localizeHref('/bans')
+	},
+	{
 		title: m.formats(),
 		url: localizeHref('/formats')
 	},
@@ -67,4 +71,28 @@ export const CARD_TYPES: CardTypeIds[] = [
 	'resource',
 	'runner_identity',
 	'upgrade'
+];
+
+export const FORMATS: Formats[] = [
+	'eternal',
+	'ram',
+	'snapshot',
+	'standard',
+	'startup',
+	'system_gateway'
+];
+
+export const FACTIONS: FactionIds[] = [
+	'anarch',
+	'criminal',
+	'shaper',
+	'adam',
+	'apex',
+	'sunny_lebeau',
+	'haas_bioroid',
+	'jinteki',
+	'nbn',
+	'weyland_consortium',
+	'neutral_corp',
+	'neutral_runner'
 ];

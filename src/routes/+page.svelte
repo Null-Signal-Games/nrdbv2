@@ -25,7 +25,7 @@
     <Factions />
 
     <div class="home">
-        <div>
+        <div data-id="deck-of-the-week">
             {#await data.decklist_of_the_week}
                 <p>Loading deck of the week...</p>
             {:then deck_of_the_week_data}
@@ -39,10 +39,10 @@
                     cards={deck_of_the_week_data.cards}
                 />
             {:catch error}
-                <p>error loading deck of the day: {error.message}</p>
+                <p>error loading deck of the week: {error.message}</p>
             {/await}
         </div>
-        <div>
+        <div data-id="latest-decks">
             Latest decks
             <ul>
                 {#await data.decklists}

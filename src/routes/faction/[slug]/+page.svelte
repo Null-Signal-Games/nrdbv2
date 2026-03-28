@@ -10,6 +10,7 @@
     import { find_or_server, filter_or_server } from "$lib/utils";
     import Ghost from "$lib/components/Ghost.svelte";
     import Container from "$lib/components/Container.svelte";
+    import { localizeHref } from "$lib/paraglide/runtime";
 
     interface Props {
         data: {
@@ -51,8 +52,11 @@
         {/snippet}
 
         <a
-            href="/decklist/create?side={faction_data.attributes
-                .side_id}&faction={faction_data.id}"
+            href={localizeHref(
+                `/decklist/create?side=${
+                    faction_data.attributes.side_id
+                }&faction=${faction_data.id}`,
+            )}
             class="button"
         >
             <!-- TODO(i18n): use/create a locale -->
@@ -76,8 +80,9 @@
                             <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
                             <!-- svelte-ignore a11y_invalid_attribute -->
                             <a
-                                href={`/decklist/create?identity=${group.identity.id}`}
-                                >Create deck with this identity</a
+                                href={localizeHref(
+                                    `/decklist/create?identity=${group.identity.id}`,
+                                )}>Create deck with this identity</a
                             >
 
                             <!-- TODO(i18n): use/create a locale -->

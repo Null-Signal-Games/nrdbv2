@@ -102,8 +102,9 @@
         if (side && is_side_id(side)) selected_side = side;
 
         const faction = params.get("faction");
-        if (faction && is_faction_id(faction))
+        if (faction) {
             selected_faction = faction as FactionIds;
+        }
 
         const identity = params.get("identity");
         if (identity) selected_identity = identity as Card["id"];

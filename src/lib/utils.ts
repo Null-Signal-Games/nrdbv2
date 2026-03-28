@@ -155,7 +155,10 @@ export const reset_indexeddb_data = async () => {
 	await initialize_app_data();
 };
 
-export const getHighResImage = (card: Card, size: 'small' | 'medium' | 'large' = 'large') => {
+export const getHighResImage = (
+	card: Card,
+	size: 'small' | 'medium' | 'large' = 'large'
+): string => {
 	// if the card includes one of the card cycles that are released by null signal games, use the nsg image
 	const nsgCardCycles = ['elevation', 'liberation', 'borealis', 'ashes', 'system_gateway'];
 

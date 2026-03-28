@@ -11,7 +11,7 @@
 </script>
 
 <div class="comment">
-    <pre>{JSON.stringify(comment.body, null, 2)}</pre>
+    {comment.body}
     <div>
         <small>
             By <a href={localizeHref(`/profile/${comment.user}`)}
