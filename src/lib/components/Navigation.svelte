@@ -8,7 +8,7 @@
     } from "$lib/paraglide/runtime.js";
     import SearchInput from "$lib/components/SearchInput.svelte";
     import { theme as current_theme } from "$lib/store";
-    import { SignIn, SignOut } from "@auth/sveltekit/components";
+    import { signIn } from "@auth/sveltekit/client";
     import { page } from "$app/state";
     import { APP_NAME } from "$lib/constants";
     import { NAVIGATION } from "$lib/constants";
@@ -82,18 +82,16 @@
                         <strong>{page.data.session.user?.name ?? "User"}</strong
                         >
                     </span>
-                    <SignOut>
-                        <div slot="submitButton" class="buttonPrimary">
+                    <form method="POST" action="/signout">
+                        <button type="submit">
                             {m.logout()}
-                        </div>
-                    </SignOut>
+                        </button>
+                    </form>
                 {:else}
                     <!-- <span class="notSignedInText">You are not signed in</span>	 -->
-                    <SignIn provider="nsg-keycloak">
-                        <div slot="submitButton">
-                            {m.login()}/{m.register()}
-                        </div>
-                    </SignIn>
+                    <button onclick={() => signIn("nsg-keycloak")}>
+                        {m.login()}/{m.register()}
+                    </button>
                 {/if}
             </div>
         </div>
