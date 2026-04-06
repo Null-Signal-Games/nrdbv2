@@ -1,184 +1,183 @@
 @layer theme, base;
 
 @layer theme {
-    :root {
-        color-scheme: light dark;
+	:root {
+		color-scheme: light dark;
 
-        &[data-theme='light'] {
-            color-scheme: light;
-        }
+		&[data-theme='light'] {
+			color-scheme: light;
+		}
 
-        &[data-theme='dark'] {
-            color-scheme: dark;
-        }
+		&[data-theme='dark'] {
+			color-scheme: dark;
+		}
 
-        --container: 1280px;
+		--container: 1280px;
 
-        --background: light-dark(#f4f4f6, #101010);
-        --foreground: light-dark(#ffffff, #141414);
-        --text: light-dark(#000000, #ffffff);
-        --border: light-dark(#e0e0e0, #222222);
+		--background: light-dark(#f4f4f6, #101010);
+		--foreground: light-dark(#ffffff, #141414);
+		--text: light-dark(#000000, #ffffff);
+		--border: light-dark(#e0e0e0, #222222);
 
-        /* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
-        --adam: light-dark(#a89c33, #a89c33);
-        --anarch: light-dark(#e26b35, #e26b35);
-        --apex: light-dark(#000, #fff);
-        --criminal: light-dark(#194c9b, #194c9b);
-        --neutral_corp: light-dark(#5e5e5e, #5e5e5e);
-        --neutral_runner: light-dark(#919191, #919191);
-        --sunny_lebeau: light-dark(#939598, #939598);
-        --haas_bioroid: light-dark(#794d94, #794d94);
-        --jinteki: light-dark(#ba3339, #ba3339);
-        --nbn: light-dark(darkorange, #ffde00);
-        --shaper: light-dark(#4cb148, #4cb148);
-        --weyland_consortium: light-dark(#516751, #516751);
+		/* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
+		--adam: light-dark(#a89c33, #a89c33);
+		--anarch: light-dark(#e26b35, #e26b35);
+		--apex: light-dark(#000, #fff);
+		--criminal: light-dark(#194c9b, #194c9b);
+		--neutral_corp: light-dark(#5e5e5e, #5e5e5e);
+		--neutral_runner: light-dark(#919191, #919191);
+		--sunny_lebeau: light-dark(#939598, #939598);
+		--haas_bioroid: light-dark(#794d94, #794d94);
+		--jinteki: light-dark(#ba3339, #ba3339);
+		--nbn: light-dark(darkorange, #ffde00);
+		--shaper: light-dark(#4cb148, #4cb148);
+		--weyland_consortium: light-dark(#516751, #516751);
 
-        /* States, namely for badges (and likely others */
-        --verified: #698146;
-    }
+		/* States, namely for badges (and likely others */
+		--verified: #698146;
+	}
 
-    body {
-        font-family: sans-serif;
-        background-color: var(--background);
-        color: var(--text);
-        margin: unset;
-    }
+	body {
+		font-family: sans-serif;
+		background-color: var(--background);
+		color: var(--text);
+		margin: unset;
+	}
 }
 
 @layer base {
-    /* [data-faction-theme] {
+	/* [data-faction-theme] {
         color: attr(data-faction-theme type(<color>));
     } */
 
-    @media (prefers-reduced-motion) {
+	@media (prefers-reduced-motion) {
+		::view-transition-group(*),
+		::view-transition-old(*),
+		::view-transition-new(*) {
+			animation: none !important;
+		}
+	}
 
-        ::view-transition-group(*),
-        ::view-transition-old(*),
-        ::view-transition-new(*) {
-            animation: none !important;
-        }
-    }
+	@media (prefers-contrast: more) {
+		a {
+			text-decoration: underline;
+		}
 
-    @media (prefers-contrast: more) {
-        a {
-            text-decoration: underline;
-        }
+		.table-cell--not-applicable::after {
+			content: 'N/A';
+			opacity: 1;
+		}
+	}
 
-        .table-cell--not-applicable::after {
-            content: 'N/A';
-            opacity: 1;
-        }
-    }
+	.container {
+		max-width: var(--container, 1280px);
+		margin-inline: auto;
+		padding-inline: 2.5vw;
+	}
 
-    .container {
-        max-width: var(--container, 1280px);
-        margin-inline: auto;
-        padding-inline: 2.5vw;
-    }
+	:where(h1, h2, h3, h4, h5, h6) {
+		margin: unset;
+	}
 
-    :where(h1, h2, h3, h4, h5, h6) {
-        margin: unset;
-    }
+	a {
+		color: inherit;
+	}
 
-    a {
-        color: inherit;
-    }
+	[data-fill='theme'] {
+		color: var(--theme, currentColor);
+		fill: var(--theme, currentColor);
+	}
 
-    [data-fill='theme'] {
-        color: var(--theme, currentColor);
-        fill: var(--theme, currentColor);
-    }
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+	table th {
+		text-align: left;
+	}
 
-    table th {
-        text-align: left;
-    }
+	table tr:nth-child(2n) {
+		background: var(--foreground);
 
-    table tr:nth-child(2n) {
-        background: var(--foreground);
+		& td {
+			border-top: 1px solid var(--border);
+		}
+	}
 
-        & td {
-            border-top: 1px solid var(--border);
-        }
-    }
+	table th,
+	table td {
+		padding: 0.5rem 1rem;
+	}
 
-    table th,
-    table td {
-        padding: 0.5rem 1rem;
-    }
+	table td {
+		height: 2rem;
+	}
 
-    table td {
-        height: 2rem;
-    }
+	table a {
+		text-decoration: none;
+	}
 
-    table a {
-        text-decoration: none;
-    }
+	.table-cell {
+		display: inline-flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+	}
 
-    .table-cell {
-        display: inline-flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 0.5rem;
-    }
+	.table-cell--not-applicable::after {
+		content: '—';
+		opacity: 0.25;
+	}
 
-    .table-cell--not-applicable::after {
-        content: '—';
-        opacity: 0.25;
-    }
+	/* Temporary styles */
+	pre {
+		max-width: 600px;
+	}
 
-    /* Temporary styles */
-    pre {
-        max-width: 600px;
-    }
+	@media print {
+		* {
+			print-color-adjust: exact;
+		}
 
-    @media print {
-        * {
-            print-color-adjust: exact;
-        }
+		body :not(body > div > main, .printer):not(.printer > *) {
+			display: none;
+		}
 
-        body :not(body > div > main, .printer):not(.printer > *) {
-            display: none;
-        }
+		.printer {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 10.5mm;
+		}
+	}
 
-        .printer {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10.5mm;
-        }
-    }
+	@media not print {
+		.printer {
+			display: none;
+			visibility: hidden;
+		}
+	}
 
-    @media not print {
-        .printer {
-            display: none;
-            visibility: hidden;
-        }
-    }
+	.printer > div {
+		text-align: center;
+		color: #fff;
+		background-size: cover;
+		border-radius: 2.5mm;
+		justify-content: center;
+		align-items: center;
+		width: 63mm;
+		height: 88mm;
+		font-size: 2rem;
+		display: flex;
+	}
 
-    .printer>div {
-        text-align: center;
-        color: #fff;
-        background-size: cover;
-        border-radius: 2.5mm;
-        justify-content: center;
-        align-items: center;
-        width: 63mm;
-        height: 88mm;
-        font-size: 2rem;
-        display: flex;
-    }
+	.group-header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
 
-    .group-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .root:has(header[data-id="page-header"] + article)>article {
-        margin-block: 3rem;
-    }
+	.root:has(header[data-id='page-header'] + article) > article {
+		margin-block: 3rem;
+	}
 }

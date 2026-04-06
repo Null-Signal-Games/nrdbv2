@@ -243,13 +243,13 @@
 
                 {#if card_data.attributes.card_type_id.includes("_identity")}
                     <p>
-                        <a
+                        <Button
                             href={localizeHref(
                                 `/decklist/create?identity=${card_data.id}`,
                             )}
                         >
                             Create deck with this identity
-                        </a>
+                        </Button>
                     </p>
                 {/if}
             </div>
