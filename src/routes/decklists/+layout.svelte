@@ -59,7 +59,7 @@
 
 <style>
     /* Temporary styles */
-    .wrapper {
+    :global(.wrapper) {
         display: grid;
         gap: 2rem;
         grid-template-columns: 1fr 3fr;

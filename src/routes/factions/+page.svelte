@@ -56,6 +56,7 @@
                                 >
                                     <img
                                         src={`/assets/factions/${faction.id}.png`}
+                                        alt={faction.attributes.name}
                                     />
                                     <Icon name={faction.id} size="xl" />
                                     {faction.attributes.name}

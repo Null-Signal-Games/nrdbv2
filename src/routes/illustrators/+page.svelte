@@ -47,9 +47,4 @@
         border: 1px solid var(--border);
         background: var(--foreground);
     }
-
-    .cards {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-    }
 </style>

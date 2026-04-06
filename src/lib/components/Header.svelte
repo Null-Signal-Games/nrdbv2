@@ -7,23 +7,31 @@
         title: string;
         subtitle?: string;
         children?: Snippet;
+        actions?: Snippet;
     }
 
-    let { icon, title, subtitle, children }: Props = $props();
+    let { icon, title, subtitle, children, actions }: Props = $props();
 </script>
 
-<header class="page-header">
+<header data-id="page-header">
     <Container>
-        <div
-            style="display: flex; align-items: center; justify-items: center; flex-direction: row; gap: 1rem;"
-        >
-            {@render icon?.()}
-            <h1>{title}</h1>
+        <div class="upper">
+            <div class="content">
+                <div>
+                    {@render icon?.()}
+                    <h1>{title}</h1>
+                </div>
+                {#if subtitle}
+                    <p>{subtitle}</p>
+                {/if}
+            </div>
+            <div>
+                {@render actions?.()}
+            </div>
         </div>
-        {#if subtitle}
-            <p>{subtitle}</p>
-        {/if}
-        {@render children?.()}
+        <div>
+            {@render children?.()}
+        </div>
     </Container>
 </header>
 
@@ -31,5 +39,23 @@
     header {
         border-bottom: 1px solid var(--border);
         padding-block: 2rem;
+    }
+
+    .upper {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .content {
+        display: flex;
+        align-items: center;
+        justify-items: center;
+        flex-direction: row;
+        gap: 1rem;
+    }
+
+    .actions {
     }
 </style>

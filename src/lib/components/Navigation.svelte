@@ -12,11 +12,13 @@
     import { page } from "$app/state";
     import { APP_NAME } from "$lib/constants";
     import { NAVIGATION } from "$lib/constants";
+    import Button from "$lib/components/ui/Button.svelte";
 
     // TODO(theme): review, as currently we utilise `light-dark` in CSS, which us purely based on user preference
     const set_theme = (theme: "light" | "dark") => {
-        document.documentElement.setAttribute("data-theme", theme);
+        $current_theme = theme;
         localStorage.setItem("theme", theme);
+        document.documentElement.setAttribute("data-theme", theme);
     };
 </script>
 
@@ -62,9 +64,9 @@
                     )}
             >
                 {#each ["light", "dark"] as theme, index (index)}
-                    <option value={theme} selected={theme === $current_theme}
-                        >{theme}</option
-                    >
+                    <option value={theme} selected={theme === $current_theme}>
+                        {theme}
+                    </option>
                 {/each}
             </select>
 
@@ -83,15 +85,15 @@
                         >
                     </span>
                     <form method="POST" action="/signout">
-                        <button type="submit">
+                        <Button type="submit">
                             {m.logout()}
-                        </button>
+                        </Button>
                     </form>
                 {:else}
                     <!-- <span class="notSignedInText">You are not signed in</span>	 -->
-                    <button onclick={() => signIn("nsg-keycloak")}>
+                    <Button onclick={() => signIn("nsg-keycloak")}>
                         {m.login()}/{m.register()}
-                    </button>
+                    </Button>
                 {/if}
             </div>
         </div>

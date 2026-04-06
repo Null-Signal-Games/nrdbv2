@@ -51,17 +51,19 @@
             <Icon name={faction_data.id} size="xl" />
         {/snippet}
 
-        <a
-            href={localizeHref(
-                `/decklist/create?side=${
-                    faction_data.attributes.side_id
-                }&faction=${faction_data.id}`,
-            )}
-            class="button"
-        >
-            <!-- TODO(i18n): use/create a locale -->
-            Create decklist with this faction
-        </a>
+        {#snippet actions()}
+            <a
+                href={localizeHref(
+                    `/decklist/create?side=${
+                        faction_data.attributes.side_id
+                    }&faction=${faction_data.id}`,
+                )}
+                class="button"
+            >
+                <!-- TODO(i18n): use/create a locale -->
+                Create decklist with this faction
+            </a>
+        {/snippet}
     </Header>
 
     <Container>

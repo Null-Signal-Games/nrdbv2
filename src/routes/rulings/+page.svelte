@@ -3,6 +3,7 @@
     import Header from "$lib/components/Header.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
     import Container from "$lib/components/Container.svelte";
+    import RulingItem from "$lib/components/Ruling.svelte";
 
     let { data }: { data: { rulings: Ruling[] } } = $props();
 </script>
@@ -13,11 +14,12 @@
     <Container>
         <ul>
             {#each data.rulings as ruling (ruling.id)}
-                <li>
+                <RulingItem data={ruling} />
+                <!-- <li>
                     <a href={localizeHref(`/rulings/${ruling.id}`)}>
                         {ruling.attributes.question}
                     </a>
-                </li>
+                </li> -->
             {/each}
         </ul>
     </Container>

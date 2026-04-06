@@ -130,13 +130,15 @@
             const value = user_prefers_dark ? "dark" : "light";
 
             localStorage.setItem("theme", value);
-            current_theme.set(value);
+            $current_theme = value;
+        } else {
+            document.documentElement.setAttribute(
+                "data-theme",
+                localStorage.getItem("theme") || "light",
+            );
+            $current_theme =
+                (localStorage.getItem("theme") as "light" | "dark") || "light";
         }
-
-        document.documentElement.setAttribute(
-            "data-theme",
-            $current_theme || localStorage.getItem("theme") || "light",
-        );
     });
 </script>
 
@@ -148,7 +150,7 @@
 
 <Meta />
 
-<main>
+<main class="root">
     {@render children?.()}
 </main>
 

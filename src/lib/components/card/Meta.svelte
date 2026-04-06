@@ -11,18 +11,21 @@
         card: TCard | Printing;
         quantity?: number;
         content?: Snippet;
+        title?: boolean;
     }
 
-    const { children, card, quantity, content }: Props = $props();
+    const { children, card, quantity, content, title }: Props = $props();
 </script>
 
 <div class="meta">
     {@render children?.()}
     <div class="meta__content">
-        <h3>
-            {#if quantity}&times;{quantity}{/if}
-            {card.attributes.title}
-        </h3>
+        {#if title}
+            <h3>
+                {#if quantity}&times;{quantity}{/if}
+                {card.attributes.title}
+            </h3>
+        {/if}
         {#if quantity}
             <Influence
                 count={quantity}

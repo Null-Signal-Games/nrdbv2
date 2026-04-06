@@ -12,49 +12,58 @@
     let { review }: Props = $props();
 </script>
 
-<div class="review">
+<div data-id="review" class="review">
+    <!-- TODO: add interaction logic (liking review), ideally use optimistic updates for UX -->
+    <button class="icon-label">
+        <Icon name="heart" />
+        7
+    </button>
     <div>
-        <div class="icon-label">
-            <Icon name="heart" />
-            7
+        <div>
+            <p>{review.attributes.body}</p>
+            <p>
+                By <a
+                    href={localizeHref(
+                        `/profile/${review.attributes.username}`,
+                    )}>{review.attributes.username}</a
+                >
+                on
+                <time datetime={format_date(review.attributes.created_at)}
+                    >{format_date(review.attributes.created_at)}</time
+                >
+                (updated: {format_date(review.attributes.updated_at)})
+            </p>
         </div>
-        <p>
-            By <a href={localizeHref(`/profile/${review.attributes.username}`)}
-                >{review.attributes.username}</a
-            >
-            on
-            <time datetime={format_date(review.attributes.created_at)}
-                >{format_date(review.attributes.created_at)}</time
-            >
-            (updated: {format_date(review.attributes.updated_at)})
-        </p>
-    </div>
-    <div>
-        {review.attributes.body}
-    </div>
-    {#if review.attributes.comments.length > 0}
-        <div class="comments">
-            <p>Comments:</p>
-            <div>
+        {#if review.attributes.comments.length > 0}
+            <ul class="comments">
                 {#each review.attributes.comments as comment, index (index)}
                     <Comment {comment} />
                 {/each}
-            </div>
-        </div>
-    {/if}
+            </ul>
+        {/if}
+    </div>
 </div>
 
 <style>
     /* Temporary styles */
     .review {
+        display: grid;
+        gap: 1rem;
+        align-items: start;
+        /* auto should potentially be a fixed width or the like icon and quality need to be fixed sizing */
+        grid-template-columns: auto 1fr;
         border: 1px solid white;
         padding: 1rem;
     }
 
     .comments {
-        border-top: 1px solid red;
+        list-style: none;
+        margin: unset;
+        padding: unset;
+        /* border-left: 2px solid var(--border);
+        padding-left: 1rem; */
         padding-top: 1rem;
         display: grid;
-        gap: 0.25rem;
+        gap: 0.5rem;
     }
 </style>

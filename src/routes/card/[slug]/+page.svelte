@@ -26,6 +26,10 @@
     } from "$lib/utils";
     import FormatText from "$lib/components/FormatText.svelte";
     import Container from "$lib/components/Container.svelte";
+    import Button from "$lib/components/ui/Button.svelte";
+    import { next, previous } from "$lib/paraglide/messages";
+    import Ghost from "$lib/components/Ghost.svelte";
+    import RulingItem from "$lib/components/Ruling.svelte";
 
     interface Props {
         data: {
@@ -87,21 +91,27 @@
     </Meta>
 
     <Header title={card_data?.attributes.title}>
-        <p>
+        {#snippet actions()}
+            {#if card_previous?.id}
+                <Button href={localizeHref(`/card/${card_previous.id}`)}>
+                    {previous()}
+                </Button>
+            {/if}
+
+            {#if card_next?.id}
+                <Button href={localizeHref(`/card/${card_next.id}`)}>
+                    {next()}
+                </Button>
+            {/if}
+        {/snippet}
+
+        <!-- <p>
             <a
                 href={localizeHref(
                     `/sets/${card_data.attributes.card_set_ids[0]}`,
                 )}>{card_data.attributes.card_set_names}</a
             >
-        </p>
-
-        {#if card_previous?.id}
-            <a href={localizeHref(`/card/${card_previous.id}`)}>Previous</a>
-        {/if}
-
-        {#if card_next?.id}
-            <a href={localizeHref(`/card/${card_next.id}`)}>Next</a>
-        {/if}
+        </p> -->
     </Header>
 
     <Container>
@@ -211,14 +221,24 @@
                 </p>
 
                 <p>
-                    <a
+                    <Button
                         href={localizeHref(
                             `/decklists/search?cards[]=${card_data.id}`,
                         )}
                         class="underline"
                     >
+                        <Icon name="subroutine" size="sm" />
+                        <!-- TODO(i18n) -->
                         Decklists with this card
-                    </a>
+                    </Button>
+                    <Button
+                        href={`${NRDB_API_URL}/cards/${card_data.id}`}
+                        target="_blank"
+                    >
+                        <Icon name="subroutine" size="sm" />
+                        <!-- TODO(i18n) -->
+                        View on NetrunnerDB
+                    </Button>
                 </p>
 
                 {#if card_data.attributes.card_type_id.includes("_identity")}
@@ -264,81 +284,88 @@
             </div>
         </div>
 
-        <a
-            href={`${NRDB_API_URL}/cards/${card_data.id}`}
-            target="_blank"
-            data-sveltekit-noscroll
-            data-sveltekit-preload-data>View on NetrunnerDB</a
-        >
+        <div style="display: grid; gap: 1rem;">
+            <!-- PRINTINGS/ALTERNATIVE-ARTS -->
+            {#if printing_data.length > 1}
+                <div class="box">
+                    <!-- TODO(i18n) -->
+                    <h2>Prints &amp; Alternative Arts</h2>
+                    <div>
+                        <div
+                            style="display: grid; grid-template-columns: repeat(5, minmax(auto, 1fr)); gap: 1rem;"
+                        >
+                            {#each printing_data as printing (printing.id)}
+                                <CardMeta card={printing} title={false}>
+                                    <CardImage card={printing} href={null} />
+                                    {#snippet content()}
+                                        Illusrated by <a
+                                            href={localizeHref(
+                                                `/illustrators/${printing.attributes.illustrator_ids[0]}`,
+                                            )}
+                                            >{printing.attributes
+                                                .display_illustrators}</a
+                                        >
+                                    {/snippet}
+                                </CardMeta>
+                            {/each}
+                        </div>
+                    </div>
+                </div>
+            {/if}
 
-        <!-- PRINTINGS/ALTERNATIVE-ARTS -->
-        {#if printing_data.length > 1}
-            <!-- TODO: i18n value for header -->
-            <h2>Alternative Arts</h2>
-            <div>
-                <h2>Printings/alt arts</h2>
-                <div
-                    style="display: grid; grid-template-columns: repeat(5, minmax(auto, 1fr)); gap: 1rem;"
-                >
-                    {#each printing_data as printing (printing.id)}
-                        <CardMeta card={printing}>
-                            <CardImage card={printing} />
-                            {#snippet content()}
-                                Illusrated by <a
-                                    href={localizeHref(
-                                        `/illustrators/${printing.attributes.illustrator_ids[0]}`,
-                                    )}
-                                    >{printing.attributes
-                                        .display_illustrators}</a
-                                >
-                            {/snippet}
-                        </CardMeta>
+            <!-- RULINGS -->
+            {#await data.rulings}
+                <Ghost />
+            {:then rulings}
+                <!-- <pre>{JSON.stringify(rulings, null, 2)}</pre> -->
+                <div class="box rulings">
+                    <!-- TODO: i18n value for header -->
+                    <h2>Rulings</h2>
+                    {#if rulings.length > 0}
+                        <ul>
+                            {#each rulings as ruling (ruling.id)}
+                                <RulingItem data={ruling} />
+                            {/each}
+                        </ul>
+                    {:else}
+                        <p>No rulings found for this card.</p>
+                    {/if}
+                </div>
+            {:catch error}
+                <p>error loading rulings: {error.message}</p>
+            {/await}
+
+            <!-- REVIEWS -->
+            {#await data.reviews}
+                Loading reviews...
+            {:then reviews}
+                <div class="box reviews">
+                    <h2>Reviews</h2>
+                    {#each reviews as review (review.id)}
+                        <Review {review} />
                     {/each}
                 </div>
-            </div>
-        {/if}
+            {:catch error}
+                <p>error loading comments: {error.message}</p>
+            {/await}
 
-        <!-- RULINGS -->
-        {#await data.rulings}
-            Loading rulings...
-        {:then rulings}
-            <pre>{JSON.stringify(rulings, null, 2)}</pre>
-            <div class="rulings">
-                <!-- TODO: i18n value for header -->
-                <h2>Rulings</h2>
-                {#if rulings.length > 0}
-                    {#each rulings as ruling (ruling.id)}
-                        <pre>{JSON.stringify(ruling, null, 2)}</pre>
-                    {/each}
-                {:else}
-                    <p>No rulings found for this card.</p>
-                {/if}
-            </div>
-        {:catch error}
-            <p>error loading rulings: {error.message}</p>
-        {/await}
+            <!-- <pre>{JSON.stringify(card_data, null, 2)}</pre>
 
-        <!-- REVIEWS -->
-        {#await data.reviews}
-            Loading reviews...
-        {:then reviews}
-            <div class="reviews">
-                <h2>Reviews</h2>
-                {#each reviews as review (review.id)}
-                    <Review {review} />
-                {/each}
-            </div>
-        {:catch error}
-            <p>error loading comments: {error.message}</p>
-        {/await}
-
-        <pre>{JSON.stringify(card_data, null, 2)}</pre>
-
-        prev:
-        <pre>{JSON.stringify(card_previous, null, 2)}</pre>
-        next:
-        <pre>{JSON.stringify(card_next, null, 2)}</pre>
+            prev:
+            <pre>{JSON.stringify(card_previous, null, 2)}</pre>
+            next:
+            <pre>{JSON.stringify(card_next, null, 2)}</pre> -->
+        </div>
     </Container>
+
+    <div class="background-image">
+        <img
+            src={getHighResImage(card_data)}
+            alt={card_data.attributes.title}
+            aria-hidden="true"
+            role="presentation"
+        />
+    </div>
 {/if}
 
 <style>
@@ -352,5 +379,36 @@
     .reviews {
         display: grid;
         gap: 1rem;
+    }
+
+    .background-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100vw;
+        height: 75vh;
+        z-index: -1;
+        filter: grayscale(1) blur(0.5rem);
+        opacity: 5%;
+        mask-image: linear-gradient(to top, transparent 0%, black 100%);
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: 50% 20%;
+        }
+
+        @media (prefers-contrast: more) {
+            visibility: hidden;
+            display: none;
+        }
+    }
+
+    .box {
+        padding: 2rem;
+        border-radius: 0.5rem;
+        background-color: var(--foreground);
     }
 </style>
