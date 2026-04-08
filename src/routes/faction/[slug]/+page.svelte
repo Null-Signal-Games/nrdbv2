@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { PageData } from "./$types";
-    // import { page } from "$app/state";
     import Header from "$lib/components/Header.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
     import Icon from "$lib/components/Icon.svelte";
@@ -8,13 +7,10 @@
     import Ghost from "$lib/components/Ghost.svelte";
     import CardImage from "$lib/components/card/CardImage.svelte";
     import DecklistItem from "$lib/components/decklist/Item.svelte";
-    import type { Card } from "$lib/types";
+    import { tooltip } from "$lib/actions";
+    import Button from "$lib/components/ui/Button.svelte";
 
     let { data }: { data: PageData } = $props();
-
-    const get_identity = (id: string): Card => {
-        return data.identities.find((i) => i.id === id);
-    };
 </script>
 
 <!-- `Property 'name' does not exist on type 'Faction'.` - disregard for now, sqlite data does not match API structure yet -->
@@ -23,7 +19,7 @@
         <Icon name={data.faction.id} size="xl" />
     {/snippet}
 
-    <a
+    <Button
         href={localizeHref(
             `/decklist/create?side=${data.faction.side_id}&faction=${data.faction.id}`,
         )}
@@ -31,50 +27,52 @@
     >
         <!-- TODO(i18n): use/create a locale -->
         Create decklist with this faction
-    </a>
+    </Button>
 </Header>
 
 <Container>
-    <!-- Streamed in decklists for the current faction (per identity) -->
-    {#await data.decklists}
-        {#each Array(5) as _}
-            <Ghost />
-        {/each}
-    {:then decklists}
-        <div class="group">
-            {#each decklists as group (group.identity)}
-                <article>
-                    <header>
-                        <h2>{get_identity(group.identity).title}</h2>
-                        <!-- TODO(i18n): use/create a locale -->
-                        <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
-                        <!-- svelte-ignore a11y_invalid_attribute -->
-                        <a href={`/decklist/create?identity=${group.identity}`}
-                            >Create deck with this identity</a
-                        >
+    <!-- Streamed in decklists for the current faction (per identity).
+         Render identities immediately from sqlite; await decklists per-identity so
+         only the decks area shows placeholders while the streamed promise resolves. -->
+    <div class="group">
+        {#each data.identities as identity (identity.id)}
+            <article>
+                <header>
+                    <h2>{identity.title}</h2>
+                    <!-- TODO(i18n): use/create a locale -->
+                    <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
+                    <!-- svelte-ignore a11y_invalid_attribute -->
+                    <Button href={`/decklist/create?identity=${identity.id}`}
+                        >Create deck with this identity</Button
+                    >
 
-                        <!-- TODO(i18n): use/create a locale -->
-                        <!-- TODO(misc): add correct href url to search/find page with URL paramters to filter to this specific identity -->
-                        <!-- svelte-ignore a11y_invalid_attribute -->
-                        <a href="#">More decks</a>
-                    </header>
-                    <main>
-                        <div use:tooltip={get_identity(group.identity)}>
-                            <!-- Broken while sqlite data does not match API structure -->
-                            <CardImage card={get_identity(group.identity)} />
-                        </div>
-                        <ul>
-                            {#each group.decklists as decklist (decklist.id)}
+                    <!-- TODO(i18n): use/create a locale -->
+                    <!-- TODO(misc): add correct href url to search/find page with URL paramters to filter to this specific identity -->
+                    <!-- svelte-ignore a11y_invalid_attribute -->
+                    <Button href="#">More decks</Button>
+                </header>
+                <main>
+                    <div use:tooltip={identity}>
+                        <!-- Broken while sqlite data does not match API structure -->
+                        <CardImage card={identity} />
+                    </div>
+                    <ul>
+                        {#await data.decklists}
+                            {#each Array(3) as _}
+                                <li><Ghost /></li>
+                            {/each}
+                        {:then decklists}
+                            {#each decklists.find((g) => g.identity === identity.id)?.decklists || [] as decklist (decklist.id)}
                                 <DecklistItem {decklist} />
                             {/each}
-                        </ul>
-                    </main>
-                </article>
-            {/each}
-        </div>
-    {:catch error}
-        <p>error loading decklists: {error.message}</p>
-    {/await}
+                        {:catch error}
+                            <li>error loading decklists: {error.message}</li>
+                        {/await}
+                    </ul>
+                </main>
+            </article>
+        {/each}
+    </div>
 
     <h2>Cards from {data.faction.name}</h2>
     <ul>

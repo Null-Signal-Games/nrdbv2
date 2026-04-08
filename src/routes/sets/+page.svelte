@@ -1,123 +1,101 @@
 <script lang="ts">
+    import type { PageData } from "./$types";
     import type { Cycle, Set, Publishers } from "$lib/types";
-    import { sets, cycles } from "$lib/store";
     import Header from "$lib/components/Header.svelte";
     import Icon from "$lib/components/Icon.svelte";
     import { m } from "$lib/paraglide/messages.js";
-    import { format_date, store_or_server } from "$lib/utils";
+    import { format_date } from "$lib/utils";
     import { publishers } from "$lib/i18n";
     import { localizeHref } from "$lib/paraglide/runtime";
     import Container from "$lib/components/Container.svelte";
 
     interface Props {
-        data: { sets: Set[] | null; cycles: Cycle[] | null };
+        data: PageData;
     }
 
     let { data }: Props = $props();
-
-    let data_cycles = $derived<Cycle[]>(
-        store_or_server($cycles, data.cycles, "cycles")
-            .slice()
-            .sort((a, b) =>
-                a.attributes.date_release > b.attributes.date_release ? -1 : 1,
-            ),
-    );
-    let data_sets = $derived<Set[]>(
-        store_or_server($sets, data.sets, "sets")
-            .slice()
-            .sort((a, b) =>
-                a.attributes.date_release > b.attributes.date_release ? -1 : 1,
-            ),
-    );
 </script>
 
-{#if data_cycles && data_sets}
-    <Header title="Sets" />
+<pre>{JSON.stringify(data, null, 2)}</pre>
 
-    <Container>
-        <!-- TODO: replace with <Table /> once the component is more generic/extensible -->
-        <table class="results mt-5">
-            <thead>
-                <tr>
-                    <th>{m.name()}</th>
-                    <!-- <th>{m.cards()}</th> -->
-                    <th>{m.release_date()}</th>
-                    <th>{m.publisher()}</th>
-                    <th>{m.standard()}</th>
-                    <th>{m.startup()}</th>
-                    <th>{m.eternal()}</th>
+<Header title="Sets" />
+
+<Container>
+    <!-- TODO: replace with <Table /> once the component is more generic/extensible -->
+    <table class="results mt-5">
+        <thead>
+            <tr>
+                <th>{m.name()}</th>
+                <!-- <th>{m.cards()}</th> -->
+                <th>{m.release_date()}</th>
+                <th>{m.publisher()}</th>
+                <th>{m.standard()}</th>
+                <th>{m.startup()}</th>
+                <th>{m.eternal()}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each data.cycles as cycle (cycle.id)}
+                <tr data-id={cycle.id}>
+                    <td>
+                        <a href={localizeHref(`/cycles/${cycle.id}`)}
+                            >{cycle.name}</a
+                        >
+                    </td>
+                    <!-- <td>{cycle.size}</td> -->
+                    <td>
+                        <time datetime={cycle.date_release}>
+                            {format_date(cycle.date_release)}
+                        </time>
+                    </td>
+                    <td>
+                        <label class="icon-label">
+                            <Icon name={cycle.released_by} size="sm" />
+                            {publishers[cycle.released_by as Publishers]}
+                        </label>
+                    </td>
+                    <td>Standard</td>
+                    <td>Startup</td>
+                    <td>Eternal</td>
                 </tr>
-            </thead>
-            <tbody>
-                {#each data_cycles as cycle (cycle.id)}
-                    <tr data-id={cycle.id}>
-                        <td>
-                            <a href={localizeHref(`/cycles/${cycle.id}`)}
-                                >{cycle.attributes.name}</a
-                            >
-                        </td>
-                        <!-- <td>{cycle.attributes.size}</td> -->
-                        <td>
-                            <time datetime={cycle.attributes.date_release}>
-                                {format_date(cycle.attributes.date_release)}
-                            </time>
-                        </td>
-                        <td>
-                            <label class="icon-label">
-                                <Icon
-                                    name={cycle.attributes.released_by}
-                                    size="sm"
-                                />
-                                {publishers[
-                                    cycle.attributes.released_by as Publishers
-                                ]}
-                            </label>
-                        </td>
-                        <td>Standard</td>
-                        <td>Startup</td>
-                        <td>Eternal</td>
-                    </tr>
-                    {#if cycle.attributes.card_set_ids.length > 1}
-                        {#each cycle.attributes.card_set_ids as set_id (set_id)}
-                            {#each data_sets.filter((set: Set) => set.id === set_id) as set (set)}
-                                <tr>
-                                    <td>
-                                        <span class="icon-label">
-                                            <Icon name="subroutine" size="sm" />
-                                            <a
-                                                href={localizeHref(
-                                                    `/sets/${set.id}`,
-                                                )}>{set.attributes.name}</a
-                                            >
-                                        </span>
-                                    </td>
-                                    <!-- <td>{set.attributes.size}</td> -->
-                                    <td>{set.attributes.date_release}</td>
-                                    <td>
-                                        <span class="icon-label">
-                                            <Icon
-                                                name={set.attributes
-                                                    .released_by}
-                                                size="sm"
-                                            />
-                                            {publishers[
-                                                set.attributes
-                                                    .released_by as Publishers
-                                            ]}
-                                        </span>
-                                    </td>
-                                    <td>Standard</td>
-                                    <td>Startup</td>
-                                    <td>Eternal</td>
-                                </tr>
-                            {/each}
+                {#if data.cycle.card_set_ids.length > 1}
+                    {#each data.cycle.card_set_ids as set_id (set_id)}
+                        {#each data.sets.filter((set: Set) => set.id === set_id) as set (set)}
+                            <tr>
+                                <td>
+                                    <span class="icon-label">
+                                        <Icon name="subroutine" size="sm" />
+                                        <a
+                                            href={localizeHref(
+                                                `/sets/${set.id}`,
+                                            )}>{set.name}</a
+                                        >
+                                    </span>
+                                </td>
+                                <!-- <td>{set.size}</td> -->
+                                <td>{set.date_release}</td>
+                                <td>
+                                    <span class="icon-label">
+                                        <Icon
+                                            name={set.released_by}
+                                            size="sm"
+                                        />
+                                        {publishers[
+                                            set.released_by as Publishers
+                                        ]}
+                                    </span>
+                                </td>
+                                <td>Standard</td>
+                                <td>Startup</td>
+                                <td>Eternal</td>
+                            </tr>
                         {/each}
-                    {/if}
-                {/each}
-            </tbody>
-        </table>
+                    {/each}
+                {/if}
+            {/each}
+        </tbody>
+    </table>
 
-        <!-- <pre>{JSON.stringify(data_cycles, null, 2)}</pre>
-        <pre>{JSON.stringify(data_sets, null, 2)}</pre> -->
-    </Container>
-{/if}
+    <!-- <pre>{JSON.stringify(data.cycles, null, 2)}</pre>
+        <pre>{JSON.stringify(data.sets, null, 2)}</pre> -->
+</Container>

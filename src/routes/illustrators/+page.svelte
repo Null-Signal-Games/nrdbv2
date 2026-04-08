@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type { PageData } from "./$types";
+
     import type { ApiResponse, Illustrator, Printing } from "$lib/types";
     import Header from "$lib/components/Header.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
@@ -7,31 +9,25 @@
     // import { cards } from "$lib/store";
 
     interface Props {
-        data: {
-            illustrators: Illustrator[];
-            cards: ApiResponse<Printing>[];
-        };
+        data: PageData;
     }
 
     let { data }: Props = $props();
 </script>
 
-{#if data.illustrators}
-    <Header title="Illustrators" />
+<Header title="Illustrators" />
 
-    <Container>
-        <div class="grid">
-            {#each data.illustrators as illustrator, index (illustrator.id)}
-                <a href={localizeHref(`/illustrators/${illustrator.id}`)}>
-                    <p>
-                        {illustrator.attributes.name} ({illustrator.attributes
-                            .num_printings} cards)
-                    </p>
-                </a>
-            {/each}
-        </div>
-    </Container>
-{/if}
+<Container>
+    <div class="grid">
+        {#each data.illustrators as illustrator, index (illustrator.id)}
+            <a href={localizeHref(`/illustrators/${illustrator.id}`)}>
+                <p>
+                    {illustrator.name} ({illustrator.num_printings} cards)
+                </p>
+            </a>
+        {/each}
+    </div>
+</Container>
 
 <style>
     /* Temporary styles */

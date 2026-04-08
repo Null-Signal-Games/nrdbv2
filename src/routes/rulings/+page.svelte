@@ -1,19 +1,25 @@
 <script lang="ts">
     import type { Ruling } from "$lib/types";
     import Header from "$lib/components/Header.svelte";
-    import { localizeHref } from "$lib/paraglide/runtime";
+    // import { localizeHref } from "$lib/paraglide/runtime";
     import Container from "$lib/components/Container.svelte";
     import RulingItem from "$lib/components/Ruling.svelte";
+    import Ghost from "$lib/components/Ghost.svelte";
 
     let { data }: { data: { rulings: Ruling[] } } = $props();
 </script>
 
-{#if data.rulings}
-    <Header title="Rulings" />
+<Header title="Rulings" />
 
-    <Container>
+<Container>
+    {#await data.rulings}
+        {#each Array(5) as _}
+            <Ghost />
+        {/each}
+    {:then rulings}
         <ul>
-            {#each data.rulings as ruling (ruling.id)}
+            {#each rulings as ruling (ruling.id)}
+                ruling.id: {ruling.id}
                 <RulingItem data={ruling} />
                 <!-- <li>
                     <a href={localizeHref(`/rulings/${ruling.id}`)}>
@@ -22,8 +28,10 @@
                 </li> -->
             {/each}
         </ul>
-    </Container>
-{/if}
+    {:catch error}
+        <p>error loading rulings: {error.message}</p>
+    {/await}
+</Container>
 
 <style>
     /* Temporary styles */

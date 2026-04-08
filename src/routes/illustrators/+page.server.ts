@@ -1,14 +1,20 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
-import type { Illustrator, ApiResponse } from '$lib/types';
+import type { ApiResponse, Illustrator } from '$lib/types';
+import { cache_guard } from '$lib/server/guard';
 
-// https://api.netrunnerdb.com/api/v3/public/printings?filter[illustrator_id]=adam_s_doyle
+export const load: PageServerLoad = async ({ cookies, fetch }) => {
+	const cold_data = await cache_guard(cookies, async () => {
+		const [illustrators] = await Promise.all([
+			fetch(`${NRDB_API_URL}/illustrators?page[size]=500`)
+				.then((response) => response.json())
+				.then((response) => response.data as ApiResponse<Illustrator>[])
+		]);
 
-export const load: PageServerLoad = async () => {
-	const response = await fetch(`${NRDB_API_URL}/illustrators?page[size]=500`);
-	const data: ApiResponse<Illustrator> = await response.json();
+		return { illustrators };
+	});
 
 	return {
-		illustrators: data.data
+		...(cold_data ?? {})
 	};
 };
