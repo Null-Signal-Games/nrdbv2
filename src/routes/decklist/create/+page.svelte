@@ -7,6 +7,7 @@
     import { onMount } from "svelte";
     import DecklistBuilder from "$lib/components/decklist/Builder.svelte";
     import Icon from "$lib/components/Icon.svelte";
+    import Button from "$lib/components/ui/Button.svelte";
 
     interface Props {
         data: {
@@ -142,47 +143,47 @@
 <Container id="decklist">
     {#if !selected_side}
         <div data-step="side" class="decklist-create-options">
-            <button onclick={() => select_side("corp")} data-id="create-corp"
-                >Corp</button
+            <Button onclick={() => select_side("corp")} data-id="create-corp"
+                >Corp</Button
             >
-            <button
+            <Button
                 onclick={() => select_side("runner")}
-                data-id="create-runner">Runner</button
+                data-id="create-runner">Runner</Button
             >
         </div>
     {:else if selected_side && !selected_faction}
         <div data-step="faction" class="decklist-create-options">
-            <button onclick={back_to_side}>back</button>
+            <Button onclick={back_to_side}>back</Button>
             <ul>
                 {#each selected_side_factions as faction (faction.id)}
                     <li>
-                        <button
+                        <Button
                             onclick={() =>
                                 select_faction(faction.id as FactionIds)}
                             data-id={`select-faction-${faction.id}`}
                         >
                             {faction.attributes.name}
-                        </button>
+                        </Button>
                     </li>
                 {/each}
             </ul>
         </div>
     {:else if selected_side && selected_faction && !selected_identity}
         <div data-step="identity" class="decklist-create-options">
-            <button onclick={back_to_faction}>back</button>
+            <Button onclick={back_to_faction}>back</Button>
             <ul>
                 {#each identities_list as identity (identity.id)}
                     <li>
-                        <button onclick={() => select_identity(identity.id)}>
+                        <Button onclick={() => select_identity(identity.id)}>
                             {identity.attributes.title}
-                        </button>
+                        </Button>
                     </li>
                 {/each}
             </ul>
         </div>
     {:else}
         <div data-step="builder" class="decklist-create-options">
-            <button onclick={back_to_identity}>back</button>
+            <Button onclick={back_to_identity}>back</Button>
             <DecklistBuilder
                 side={selected_side as SidesIds}
                 faction={selected_faction as FactionIds}

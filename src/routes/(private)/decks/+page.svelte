@@ -3,8 +3,9 @@
     import Container from "$lib/components/Container.svelte";
     import { m } from "$lib/paraglide/messages.js";
     import { localizeHref } from "$lib/paraglide/runtime.js";
-
+    import { page } from "$app/state";
     import type { Decklist } from "$lib/types";
+    import Button from "$lib/components/ui/Button.svelte";
 
     interface Props {
         data: {
@@ -28,5 +29,16 @@
     >
     <button>Import deck</button>
 
-    <p>{JSON.stringify(data.decks)}</p>
+    {#if page.data.decks.length > 0}
+        <ul>
+            {#each page.data.decks as deck}
+                <li>{deck.name}</li>
+            {/each}
+        </ul>
+    {:else}
+        <p>You have no decks yet.</p>
+        <Button href={localizeHref(`/decklist/create`)}>Create a deck</Button>
+    {/if}
+
+    <p>{JSON.stringify(page)}</p>
 </Container>
