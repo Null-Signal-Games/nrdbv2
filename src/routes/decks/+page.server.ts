@@ -5,9 +5,10 @@ import { redirect } from '@sveltejs/kit';
 export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
 
-	if (!session || !session.accessToken) {
-		throw redirect(302, '/');
-	}
+	// TODO(auth): handle unauthorized users more gracefully, on page message or something
+	// if (!session || !session.accessToken) {
+	//     throw redirect(302, '/');
+	// }
 
 	const url = `${NRDB_PRIVATE_API_URL}/decks`;
 

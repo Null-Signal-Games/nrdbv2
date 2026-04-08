@@ -8,15 +8,17 @@
     } from "$lib/paraglide/runtime.js";
     import SearchInput from "$lib/components/SearchInput.svelte";
     import { theme as current_theme } from "$lib/store";
-    import { SignIn, SignOut } from "@auth/sveltekit/components";
+    import { signIn } from "@auth/sveltekit/client";
     import { page } from "$app/state";
     import { APP_NAME } from "$lib/constants";
     import { NAVIGATION } from "$lib/constants";
+    import Button from "$lib/components/ui/Button.svelte";
 
     // TODO(theme): review, as currently we utilise `light-dark` in CSS, which us purely based on user preference
     const set_theme = (theme: "light" | "dark") => {
-        document.documentElement.setAttribute("data-theme", theme);
+        $current_theme = theme;
         localStorage.setItem("theme", theme);
+        document.documentElement.setAttribute("data-theme", theme);
     };
 </script>
 
@@ -62,9 +64,9 @@
                     )}
             >
                 {#each ["light", "dark"] as theme, index (index)}
-                    <option value={theme} selected={theme === $current_theme}
-                        >{theme}</option
-                    >
+                    <option value={theme} selected={theme === $current_theme}>
+                        {theme}
+                    </option>
                 {/each}
             </select>
 
@@ -82,18 +84,16 @@
                         <strong>{page.data.session.user?.name ?? "User"}</strong
                         >
                     </span>
-                    <SignOut>
-                        <div slot="submitButton" class="buttonPrimary">
+                    <form method="POST" action="/signout">
+                        <Button type="submit">
                             {m.logout()}
-                        </div>
-                    </SignOut>
+                        </Button>
+                    </form>
                 {:else}
                     <!-- <span class="notSignedInText">You are not signed in</span>	 -->
-                    <SignIn provider="nsg-keycloak">
-                        <div slot="submitButton">
-                            {m.login()}/{m.register()}
-                        </div>
-                    </SignIn>
+                    <Button onclick={() => signIn("nsg-keycloak")}>
+                        {m.login()}/{m.register()}
+                    </Button>
                 {/if}
             </div>
         </div>

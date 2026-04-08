@@ -50,7 +50,7 @@
             </thead>
             <tbody>
                 {#each data_cycles as cycle (cycle.id)}
-                    <tr>
+                    <tr data-id={cycle.id}>
                         <td>
                             <a href={localizeHref(`/cycles/${cycle.id}`)}
                                 >{cycle.attributes.name}</a

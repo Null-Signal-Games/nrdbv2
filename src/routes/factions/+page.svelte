@@ -54,3 +54,23 @@
         </ul>
     </Container>
 {/if}
+
+<style>
+    /* Temporary styles */
+    ul {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        gap: 1rem;
+
+        & ul {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(4, auto);
+        }
+
+        & img {
+            width: 100%;
+        }
+    }
+</style>

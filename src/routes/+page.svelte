@@ -6,15 +6,16 @@
     import { localizeHref } from "$lib/paraglide/runtime";
     import DecklistPreview from "$lib/components/decklist/Preview.svelte";
     import Container from "$lib/components/Container.svelte";
+    import Ghost from "$lib/components/Ghost.svelte";
 
     interface Props {
         data: {
-            decklist_of_the_week: {
+            decklist_of_the_week: Promise<{
                 identity: Card;
                 decklist: Decklist;
                 cards: Card[];
-            };
-            decklists: Decklist[];
+            }>;
+            decklists: Promise<Decklist[]>;
         };
     }
 
@@ -25,9 +26,9 @@
     <Factions />
 
     <div class="home">
-        <div>
+        <div data-id="deck-of-the-week">
             {#await data.decklist_of_the_week}
-                <p>Loading deck of the week...</p>
+                <Ghost aspect="3/2" />
             {:then deck_of_the_week_data}
                 <h2>Deck of the Week</h2>
                 <DecklistSummary
@@ -39,10 +40,10 @@
                     cards={deck_of_the_week_data.cards}
                 />
             {:catch error}
-                <p>error loading deck of the day: {error.message}</p>
+                <p>error loading deck of the week: {error.message}</p>
             {/await}
         </div>
-        <div>
+        <div data-id="latest-decks">
             Latest decks
             <ul>
                 {#await data.decklists}

@@ -117,7 +117,7 @@
             return title_match && faction_match && type_match;
         });
 
-        results = matches.slice(0, 20);
+        results = matches; // .slice(0, 20);
     };
 
     $effect(() => {
@@ -177,57 +177,64 @@
 
 <div class="builder">
     <div class="builder__summary">
-        <h2>Decklist builder</h2>
-        {#if identity_card}
-            <p>
-                Decklist for <strong>{identity_card.attributes.title}</strong>
-            </p>
-            <div style="width: 50%;">
-                <CardImage card={identity_card} />
-            </div>
-        {/if}
+        <div class="builder__summary__sticky">
+            <h2>Decklist builder</h2>
+            {#if identity_card}
+                <p>
+                    Decklist for <strong
+                        >{identity_card.attributes.title}</strong
+                    >
+                </p>
+                <div style="width: 50%;">
+                    <CardImage card={identity_card} />
+                </div>
+            {/if}
 
-        <div class="builder__columns">
-            {#each filtered_types as type (type)}
-                <section class="builder__group">
-                    <h3>
-                        <Icon name={type} size="sm" />
-                        {card_types[type]}
-                    </h3>
-                    {#if Object.keys(deck.cards[type] ?? {}).length > 0}
-                        <ul>
-                            {#each Object.entries(deck.cards[type] ?? {}) as [card_id, quantity] (card_id)}
-                                {@const selected_card = filtered_cards.find(
-                                    (card) => card.id === card_id,
-                                )}
-                                {#if selected_card}
-                                    <li>
-                                        <a
-                                            href={localizeHref(
-                                                `/card/${card_id}`,
-                                            )}
-                                            use:tooltip={selected_card}
-                                        >
-                                            {quantity}x {selected_card
-                                                .attributes.title}
-                                        </a>
-                                        {#if selected_card.attributes.influence_cost > 0}
-                                            <Influence
-                                                count={selected_card.attributes
-                                                    .influence_cost}
-                                                theme={selected_card.attributes
-                                                    .faction_id as FactionIds}
-                                            />
-                                        {/if}
-                                    </li>
-                                {/if}
-                            {/each}
-                        </ul>
-                    {:else}
-                        <p class="builder__empty">No cards selected</p>
-                    {/if}
-                </section>
-            {/each}
+            <!-- TODO: refactor/replace this structure with the same structure in $lib/components/decklist/Breakdown.svelte -->
+            <div class="builder__columns">
+                {#each filtered_types as type (type)}
+                    <section class="builder__group">
+                        <h3>
+                            <Icon name={type} size="sm" />
+                            {card_types[type]}
+                        </h3>
+                        {#if Object.keys(deck.cards[type] ?? {}).length > 0}
+                            <ul>
+                                {#each Object.entries(deck.cards[type] ?? {}) as [card_id, quantity] (card_id)}
+                                    {@const selected_card = filtered_cards.find(
+                                        (card) => card.id === card_id,
+                                    )}
+                                    {#if selected_card}
+                                        <li>
+                                            <a
+                                                href={localizeHref(
+                                                    `/card/${card_id}`,
+                                                )}
+                                                use:tooltip={selected_card}
+                                            >
+                                                {quantity}x {selected_card
+                                                    .attributes.title}
+                                            </a>
+                                            {#if selected_card.attributes.influence_cost > 0}
+                                                <Influence
+                                                    count={selected_card
+                                                        .attributes
+                                                        .influence_cost}
+                                                    theme={selected_card
+                                                        .attributes
+                                                        .faction_id as FactionIds}
+                                                />
+                                            {/if}
+                                        </li>
+                                    {/if}
+                                {/each}
+                            </ul>
+                        {:else}
+                            <p class="builder__empty">No cards selected</p>
+                        {/if}
+                    </section>
+                {/each}
+            </div>
         </div>
     </div>
 
@@ -429,6 +436,11 @@
         display: grid;
         align-content: start;
         gap: 1rem;
+    }
+
+    .builder__summary__sticky {
+        position: sticky;
+        top: 1rem;
     }
 
     .builder__columns {

@@ -10,8 +10,8 @@
     let { comment }: Props = $props();
 </script>
 
-<div class="comment">
-    <pre>{JSON.stringify(comment.body, null, 2)}</pre>
+<li data-id="comment" class="comment">
+    <p>{comment.body}</p>
     <div>
         <small>
             By <a href={localizeHref(`/profile/${comment.user}`)}
@@ -23,12 +23,14 @@
             (updated: {format_date(comment.updated_at)})
         </small>
     </div>
-</div>
+</li>
 
 <style>
     /* Temporary styles */
     .comment {
-        border-bottom: 1px solid blue;
+        border-left: 2px solid var(--border);
+        border-bottom: 2px solid var(--border);
+        padding-left: 1rem;
         padding-bottom: 1rem;
     }
 </style>
