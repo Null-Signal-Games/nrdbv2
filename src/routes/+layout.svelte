@@ -2,7 +2,6 @@
     import "../app.css";
     import { onMount, type Snippet } from "svelte";
     import { onNavigate } from "$app/navigation";
-    import { initialize_app_data, CACHE_TTL_MS } from "$lib/utils";
     import {
         cards,
         cycles,
@@ -14,7 +13,6 @@
         db_ready,
     } from "$lib/store";
     import Meta from "$lib/components/Meta.svelte";
-    import { db } from "$lib/db";
     import Navigation from "$lib/components/Navigation.svelte";
     import Footer from "$lib/components/Footer.svelte";
     import { dev } from "$app/environment";
@@ -103,9 +101,10 @@
                 console.log("[SQLITE] Tables:");
 
                 if (dev) {
-                    const tables =
-                        await sql`SELECT name FROM sqlite_master WHERE type = 'table'`;
-                    console.dir(tables);
+                    console.dir(
+                        await sql`SELECT name FROM sqlite_master WHERE type = 'table'`,
+                    );
+                    console.dir(await sql`SELECT * FROM unified_cards LIMIT 5`);
                 }
 
                 db_ready.set(true);
