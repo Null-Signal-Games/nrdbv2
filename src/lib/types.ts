@@ -19,6 +19,9 @@ export type CardTypeIds =
 	| 'runner_identity'
 	| 'upgrade';
 
+// TODO: get all available subtypes
+export type CardSubTypeIds = 'fracter' | 'icebreaker';
+
 export type FactionIds =
 	| 'anarch'
 	| 'criminal'
@@ -428,3 +431,6 @@ export interface CardGroup {
 	type: CardTypeIds;
 	data: (Card & { quantity: number })[];
 }
+
+export type SQLite<T, K extends keyof T> = Omit<T, K> &
+	(T[K] extends Record<string, unknown> ? { [P in keyof T[K] & string]: T[K][P] } : never);
