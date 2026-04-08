@@ -1,10 +1,9 @@
 <script lang="ts">
-    import { reset_indexeddb_data, reset_opfs_data } from "$lib/utils";
+    import { reset_opfs_data } from "$lib/utils";
     import { page } from "$app/state";
 </script>
 
 <div class="debug">
-    <button onclick={reset_indexeddb_data}>Clear IndexedDB</button>
     <button onclick={reset_opfs_data}>Clear OPFS</button>
     <details>
         <summary>Session Data</summary>
