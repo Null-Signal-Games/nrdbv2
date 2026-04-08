@@ -1,6 +1,11 @@
 <script lang="ts">
     import { type Snippet } from "svelte";
-    import type { FactionIds, Card as TCard, Printing } from "$lib/types";
+    import type {
+        FactionIds,
+        Card as TCard,
+        Printing,
+        SQLite,
+    } from "$lib/types";
     import CardImage from "./CardImage.svelte";
     import { cards } from "$lib/store";
     import { localizeHref } from "$lib/paraglide/runtime";
@@ -8,7 +13,7 @@
 
     interface Props {
         children?: Snippet;
-        card: TCard | Printing;
+        card: SQLite<TCard | Printing, "attributes">;
         quantity?: number;
         content?: Snippet;
         title?: boolean;
@@ -23,14 +28,14 @@
         {#if title}
             <h3>
                 {#if quantity}&times;{quantity}{/if}
-                {card.attributes.title}
+                {card.title}
             </h3>
         {/if}
         {#if quantity}
             <Influence
                 count={quantity}
                 total={true}
-                theme={card.attributes.faction_id as FactionIds}
+                theme={card.faction_id as FactionIds}
             />
         {/if}
         {@render content?.()}

@@ -1,10 +1,10 @@
 <script lang="ts">
     import { localizeHref } from "$lib/paraglide/runtime";
-    import type { Card, Printing } from "$lib/types";
+    import type { Card, Printing, SQLite } from "$lib/types";
     import { getHighResImage } from "$lib/utils";
 
     interface Props {
-        card: Card | Printing;
+        card: SQLite<Card | Printing, "attributes">;
         href?: string | null;
         loading?: "lazy" | "eager";
         class?: string;
@@ -16,7 +16,7 @@
     const {
         card,
         // TODO: review/implement proper href routing for printings, currently does nothing (maybe use an achor of #printings instead?)
-        href = `/card/${card && "type" in card && card.type === "printings" ? `${card.attributes.card_id}?printing=${card.id}` : card.id}`,
+        href = `/card/${card && "type" in card && card.type === "printings" ? `${card.card_id}?printing=${card.id}` : card.id}`,
         loading = "lazy",
         class: className = "",
         boxShadow = true,
@@ -25,7 +25,7 @@
     }: Props = $props();
 </script>
 
-{#snippet image(card: Card | Printing)}
+{#snippet image(card: Props["card"])}
     {#if responsive}
         <picture>
             <source
@@ -43,7 +43,7 @@
                 class="card {className}"
                 class:shadow={boxShadow}
                 src={getHighResImage(card)}
-                alt={card.attributes.title}
+                alt={card.title}
                 {loading}
                 style:view-transition-name={hasTransition
                     ? `card-${card.id}`
@@ -56,14 +56,14 @@
             class="card {className}"
             class:shadow={boxShadow}
             src={getHighResImage(card)}
-            alt={card.attributes.title}
+            alt={card.title}
             {loading}
             style:view-transition-name={hasTransition ? `card-${card.id}` : ""}
         />
     {/if}
 {/snippet}
 
-{#if card?.attributes?.printing_ids?.[0]}
+{#if card?.printing_ids?.[0]}
     {#if href}
         <a class="card-link" href={localizeHref(href)}>
             {@render image(card)}
