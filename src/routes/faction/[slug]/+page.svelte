@@ -23,11 +23,6 @@
     }
 
     let { data }: Props = $props();
-
-    type DecklistGroup = {
-        identity: Card["id"];
-        decklists: Decklist[];
-    };
 </script>
 
 <!-- `Property 'name' does not exist on type 'Faction'.` - disregard for now, sqlite data does not match API structure yet -->
@@ -107,6 +102,11 @@
             <li>
                 <!-- Broken while sqlite data does not match API structure -->
                 <CardImage {card} />
+                <summary>
+                    <details>
+                        <pre>{JSON.stringify(card.attributes, null, 2)}</pre>
+                    </details>
+                </summary>
             </li>
         {/each}
     </ul>

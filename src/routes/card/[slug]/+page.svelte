@@ -160,61 +160,59 @@
                     {/if}
                 </tbody>
             </table>
-            {#if false}
-                <div>
-                    <FormatText text={data.card.attributes.text} />
-                    <br />
-                    <hr />
-                    <br />
-                    {#if data.printings[0].attributes.flavor}
-                        <p>Flavor: {data.printings[0].attributes.flavor}</p>
-                    {/if}
-                </div>
-
-                <p>
-                    <a
-                        href={localizeHref(
-                            `/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`,
-                        )}
-                        class="underline"
-                    >
-                        Illustrated by {data.printings[0].attributes
-                            .display_illustrators}
-                    </a>
-                </p>
-
-                <p>
-                    <Button
-                        href={localizeHref(
-                            `/decklists/search?cards[]=${data.card.id}`,
-                        )}
-                        class="underline"
-                    >
-                        <Icon name="subroutine" size="sm" />
-                        <!-- TODO(i18n) -->
-                        Decklists with this card
-                    </Button>
-                    <Button
-                        href={`${NRDB_API_URL}/cards/${data.card.id}`}
-                        target="_blank"
-                    >
-                        <Icon name="subroutine" size="sm" />
-                        <!-- TODO(i18n) -->
-                        View on NetrunnerDB
-                    </Button>
-                </p>
-
-                {#if data.card.attributes.card_type_id.includes("_identity")}
-                    <p>
-                        <Button
-                            href={localizeHref(
-                                `/decklist/create?identity=${data.card.id}`,
-                            )}
-                        >
-                            Create deck with this identity
-                        </Button>
-                    </p>
+            <div>
+                <FormatText text={data.card.attributes.text} />
+                <br />
+                <hr />
+                <br />
+                {#if data.printings[0].attributes.flavor}
+                    <p>Flavor: {data.printings[0].attributes.flavor}</p>
                 {/if}
+            </div>
+
+            <p>
+                <a
+                    href={localizeHref(
+                        `/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`,
+                    )}
+                    class="underline"
+                >
+                    Illustrated by {data.printings[0].attributes
+                        .display_illustrators}
+                </a>
+            </p>
+
+            <p>
+                <Button
+                    href={localizeHref(
+                        `/decklists/search?cards[]=${data.card.id}`,
+                    )}
+                    class="underline"
+                >
+                    <Icon name="subroutine" size="sm" />
+                    <!-- TODO(i18n) -->
+                    Decklists with this card
+                </Button>
+                <Button
+                    href={`${NRDB_API_URL}/cards/${data.card.id}`}
+                    target="_blank"
+                >
+                    <Icon name="subroutine" size="sm" />
+                    <!-- TODO(i18n) -->
+                    View on NetrunnerDB
+                </Button>
+            </p>
+
+            {#if data.card.attributes.card_type_id.includes("_identity")}
+                <p>
+                    <Button
+                        href={localizeHref(
+                            `/decklist/create?identity=${data.card.id}`,
+                        )}
+                    >
+                        Create deck with this identity
+                    </Button>
+                </p>
             {/if}
         </div>
 
@@ -259,6 +257,7 @@
                         {#each data.printings as printing (printing.id)}
                             <CardMeta card={printing} title={false}>
                                 <CardImage card={printing} href={null} />
+                                <!-- <pre>{JSON.stringify(printing, null, 2)}</pre> -->
                                 {#snippet content()}
                                     Illusrated by <a
                                         href={localizeHref(
