@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
+    import type { PageServerData, PageData } from "./$types";
     import { NRDB_API_URL } from "$lib/constants";
     import Meta from "$lib/components/Meta.svelte";
     import CardMeta from "$lib/components/card/Meta.svelte";
@@ -21,14 +21,14 @@
     import HeaderImage from "$lib/components/HeaderImage.svelte";
 
     interface Props {
-        data: PageData;
+        data: PageServerData & PageData;
     }
 
     let { data }: Props = $props();
 </script>
 
 <Meta title={data.card.attributes.title}>
-    {#if data.card_prev?.id}
+    {#if data?.card_prev}
         <link
             rel="preload"
             href={getHighResImage(data.card_prev)}
@@ -37,7 +37,7 @@
         />
     {/if}
 
-    {#if data.card_next?.id}
+    {#if data?.card_next}
         <link
             rel="preload"
             href={getHighResImage(data.card_next)}
@@ -51,13 +51,13 @@
 
 <Header title={data.card.attributes.title}>
     {#snippet actions()}
-        {#if data.card_prev.id}
+        {#if data?.card_prev}
             <Button href={localizeHref(`/card/${data.card_prev.id}`)}>
                 {previous()}
             </Button>
         {/if}
 
-        {#if data.card_next.id}
+        {#if data?.card_next}
             <Button href={localizeHref(`/card/${data.card_next.id}`)}>
                 {next()}
             </Button>
@@ -165,22 +165,24 @@
                 <br />
                 <hr />
                 <br />
-                {#if data.printings[0].attributes.flavor}
+                {#if data.printings.length && data.printings[0]?.attributes?.flavor}
                     <p>Flavor: {data.printings[0].attributes.flavor}</p>
                 {/if}
             </div>
 
-            <p>
-                <a
-                    href={localizeHref(
-                        `/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`,
-                    )}
-                    class="underline"
-                >
-                    Illustrated by {data.printings[0].attributes
-                        .display_illustrators}
-                </a>
-            </p>
+            {#if data.printings.length > 0 && data.printings[0].attributes.illustrator_ids.length > 0}
+                <p>
+                    <a
+                        href={localizeHref(
+                            `/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`,
+                        )}
+                        class="underline"
+                    >
+                        Illustrated by {data.printings[0].attributes
+                            .display_illustrators}
+                    </a>
+                </p>
+            {/if}
 
             <p>
                 <Button
