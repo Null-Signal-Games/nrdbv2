@@ -1,10 +1,12 @@
 <script lang="ts">
     import { localizeHref } from "$lib/paraglide/runtime";
-    import type { Card, Printing, SQLite } from "$lib/types";
+    import type { Card, Printing } from "$lib/types";
     import { getHighResImage } from "$lib/utils";
 
+    type CardLike = Card | Printing;
+
     interface Props {
-        card: SQLite<Card | Printing, "attributes">;
+        card: CardLike;
         href?: string | null;
         loading?: "lazy" | "eager";
         class?: string;
@@ -16,13 +18,35 @@
     const {
         card,
         // TODO: review/implement proper href routing for printings, currently does nothing (maybe use an achor of #printings instead?)
-        href = `/card/${card && "type" in card && card.type === "printings" ? `${card.card_id}?printing=${card.id}` : card.id}`,
+        href: providedHref = null,
         loading = "lazy",
         class: className = "",
         boxShadow = true,
         hasTransition = false,
         responsive = false,
     }: Props = $props();
+
+    const get_title = (value: Props["card"]): string => {
+        return value.attributes.title ?? "Card image";
+    };
+
+    const get_printing_ids = (value: Props["card"]): string[] => {
+        return value.attributes.printing_ids ?? [];
+    };
+
+    const get_printing_card_id = (value: Props["card"]): string => {
+        return "card_id" in value.attributes
+            ? value.attributes.card_id
+            : value.id;
+    };
+
+    const is_printing = (value: Props["card"]): value is Printing => {
+        return "type" in value && value.type === "printings";
+    };
+
+    const href =
+        providedHref ??
+        `/card/${card && is_printing(card) ? `${get_printing_card_id(card)}?printing=${card.id}` : card.id}`;
 </script>
 
 {#snippet image(card: Props["card"])}
@@ -43,7 +67,7 @@
                 class="card {className}"
                 class:shadow={boxShadow}
                 src={getHighResImage(card)}
-                alt={card.title}
+                alt={get_title(card)}
                 {loading}
                 style:view-transition-name={hasTransition
                     ? `card-${card.id}`
@@ -56,14 +80,14 @@
             class="card {className}"
             class:shadow={boxShadow}
             src={getHighResImage(card)}
-            alt={card.title}
+            alt={get_title(card)}
             {loading}
             style:view-transition-name={hasTransition ? `card-${card.id}` : ""}
         />
     {/if}
 {/snippet}
 
-{#if card?.printing_ids?.[0]}
+{#if get_printing_ids(card).length > 0 || is_printing(card)}
     {#if href}
         <a class="card-link" href={localizeHref(href)}>
             {@render image(card)}

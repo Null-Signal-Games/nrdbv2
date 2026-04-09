@@ -9,19 +9,36 @@
     import DecklistItem from "$lib/components/decklist/Item.svelte";
     import { tooltip } from "$lib/actions";
     import Button from "$lib/components/ui/Button.svelte";
+    import type { Card, Decklist } from "$lib/types";
 
-    let { data }: { data: PageData } = $props();
+    interface Props {
+        data: PageData & {
+            decklists: Promise<
+                {
+                    identity: Card["id"];
+                    decklists: Decklist[];
+                }[]
+            >;
+        };
+    }
+
+    let { data }: Props = $props();
+
+    type DecklistGroup = {
+        identity: Card["id"];
+        decklists: Decklist[];
+    };
 </script>
 
 <!-- `Property 'name' does not exist on type 'Faction'.` - disregard for now, sqlite data does not match API structure yet -->
-<Header title={`Faction: ${data.faction.name}`}>
+<Header title={`Faction: ${data.faction.attributes.name}`}>
     {#snippet icon()}
         <Icon name={data.faction.id} size="xl" />
     {/snippet}
 
     <Button
         href={localizeHref(
-            `/decklist/create?side=${data.faction.side_id}&faction=${data.faction.id}`,
+            `/decklist/create?side=${data.faction.attributes.side_id}&faction=${data.faction.id}`,
         )}
         class="button"
     >
@@ -38,7 +55,7 @@
         {#each data.identities as identity (identity.id)}
             <article>
                 <header>
-                    <h2>{identity.title}</h2>
+                    <h2>{identity.attributes.title}</h2>
                     <!-- TODO(i18n): use/create a locale -->
                     <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
                     <!-- svelte-ignore a11y_invalid_attribute -->
@@ -57,16 +74,26 @@
                         <CardImage card={identity} />
                     </div>
                     <ul>
+                        <!-- <pre>{JSON.stringify(data.decklists, null, 2)}</pre> -->
+                        <!-- {data.decklists.find((g) => g.identity === identity.id)?.decklists.length ?? 0} decklists -->
+
+                        <!-- {@const decklists = data.decklists.find((g) => g.identity === identity.id)?.decklists ?? []} -->
                         {#await data.decklists}
                             {#each Array(3) as _}
                                 <li><Ghost /></li>
                             {/each}
-                        {:then decklists}
-                            {#each decklists.find((g) => g.identity === identity.id)?.decklists || [] as decklist (decklist.id)}
-                                <DecklistItem {decklist} />
+                        {:then grouped_decklists}
+                            {#each grouped_decklists.find((g) => g.identity === identity.id)?.decklists ?? [] as decklist}
+                                <DecklistItem decklist={decklist as Decklist} />
+                                <details>
+                                    <summary>JSON</summary>
+                                    <p>{JSON.stringify(decklist, null, 2)}</p>
+                                </details>
                             {/each}
                         {:catch error}
-                            <li>error loading decklists: {error.message}</li>
+                            <li>
+                                error loading decklists: {error.message}
+                            </li>
                         {/await}
                     </ul>
                 </main>
@@ -74,7 +101,7 @@
         {/each}
     </div>
 
-    <h2>Cards from {data.faction.name}</h2>
+    <h2>Cards from {data.faction.attributes.name}</h2>
     <ul>
         {#each data.cards as card (card.id)}
             <li>

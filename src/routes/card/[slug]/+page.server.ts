@@ -1,6 +1,6 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
-import type { Card, Printing, SQLite } from '$lib/types';
+import type { Card, Printing } from '$lib/types';
 import { cache_guard } from '$lib/server/guard';
 
 export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
@@ -8,10 +8,10 @@ export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
 		const [card, printings] = await Promise.all([
 			fetch(`${NRDB_API_URL}/cards/${params.slug}`)
 				.then((response) => response.json())
-				.then((response) => response.data as SQLite<Card, 'attributes'>),
+				.then((response) => response.data as Card),
 			fetch(`${NRDB_API_URL}/printings?filter[card_id]=${params.slug}&page[size]=100`)
 				.then((response) => response.json())
-				.then((response) => response.data as SQLite<Printing, 'attributes'>)
+				.then((response) => response.data as Printing[])
 		]);
 
 		return { card, printings };

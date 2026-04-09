@@ -47,11 +47,5 @@
         color: var(--text);
         text-decoration: none;
         border-radius: 0.25rem;
-
-        &:hover {
-        }
-
-        &:focus-visible {
-        }
     }
 </style>

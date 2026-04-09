@@ -19,7 +19,6 @@
     {:then rulings}
         <ul>
             {#each rulings as ruling (ruling.id)}
-                ruling.id: {ruling.id}
                 <RulingItem data={ruling} />
                 <!-- <li>
                     <a href={localizeHref(`/rulings/${ruling.id}`)}>

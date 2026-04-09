@@ -1,8 +1,8 @@
-<script lang="ts">
-    import type { Decklist, Card as TCard } from "$lib/types";
+<!-- <script lang="ts">
+    import type { Decklist } from "$lib/types";
     import CardImage from "$lib/components/card/CardImage.svelte";
-    import { cards } from "$lib/store";
     import { localizeHref } from "$lib/paraglide/runtime";
+    import { sql } from "$lib/sqlite";
 
     interface Props {
         decklist: Decklist;
@@ -11,9 +11,7 @@
     const { decklist }: Props = $props();
 
     const identityCard = $derived(
-        $cards.find(
-            (card: TCard) => card.id === decklist.attributes.identity_card_id,
-        ),
+        sql`SELECT * FROM unified_cards WHERE id = ${decklist.attributes.identity_card_id} LIMIT 1`[0],
     );
 </script>
 
@@ -45,4 +43,4 @@
     .decklist-preview-identity-card {
         max-width: 100px;
     }
-</style>
+</style> -->

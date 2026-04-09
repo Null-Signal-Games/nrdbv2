@@ -11,7 +11,7 @@
     let { data }: Props = $props();
 </script>
 
-<Header title={`Cycle: ${data.cycle.name}`} />
+<Header title={`Cycle: ${data.cycle.attributes.name}`} />
 
 <Container>
     <Table cards={data.cards} />

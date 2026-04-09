@@ -35,15 +35,18 @@
                 <tr>
                     <td>
                         <a href={localizeHref(`/cycles/${cycle.id}`)}
-                            >{cycle.name}</a
+                            >{cycle.attributes.name}</a
                         >
                     </td>
                     <!-- <td>{cycle.size}</td> -->
-                    <td>{format_date(cycle.date_release)}</td>
+                    <td>{format_date(cycle.attributes.date_release)}</td>
                     <td>
                         <label class="icon-label">
-                            <Icon name={cycle.released_by} size="sm" />
-                            {cycle.released_by}
+                            <Icon
+                                name={cycle.attributes.released_by}
+                                size="sm"
+                            />
+                            {cycle.attributes.released_by}
                         </label>
                     </td>
                     <td>Standard</td>

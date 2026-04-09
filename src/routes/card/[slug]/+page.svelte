@@ -18,6 +18,7 @@
     import { next, previous } from "$lib/paraglide/messages";
     import Ghost from "$lib/components/Ghost.svelte";
     import RulingItem from "$lib/components/Ruling.svelte";
+    import HeaderImage from "$lib/components/HeaderImage.svelte";
 
     interface Props {
         data: PageData;
@@ -26,7 +27,7 @@
     let { data }: Props = $props();
 </script>
 
-<Meta title={data.card.title}>
+<Meta title={data.card.attributes.title}>
     {#if data.card_prev?.id}
         <link
             rel="preload"
@@ -48,7 +49,7 @@
 
 <!-- <pre>{JSON.stringify(data.card, null, 2)}</pre> -->
 
-<Header title={data.card.title}>
+<Header title={data.card.attributes.title}>
     {#snippet actions()}
         {#if data.card_prev.id}
             <Button href={localizeHref(`/card/${data.card_prev.id}`)}>
@@ -82,19 +83,24 @@
                         <td>Type</td>
                         <td>
                             <span class="icon-label">
-                                <Icon name={data.card.card_type_id} size="sm" />
+                                <Icon
+                                    name={data.card.attributes.card_type_id}
+                                    size="sm"
+                                />
                                 {card_types[
-                                    data.card.card_type_id as CardTypeIds
+                                    data.card.attributes
+                                        .card_type_id as CardTypeIds
                                 ]}
                             </span>
                         </td>
                     </tr>
-                    {#if data.card.card_subtype_ids.length > 0}
+                    {#if data.card.attributes.card_subtype_ids.length > 0}
                         <tr>
                             <td>Subtypes</td>
                             <td>
                                 {card_sub_types[
-                                    data.card.card_subtype_ids as CardSubTypeIds
+                                    data.card.attributes
+                                        .card_subtype_ids as CardSubTypeIds
                                 ]}
                             </td>
                         </tr>
@@ -104,24 +110,32 @@
                         <td>
                             <a
                                 href={localizeHref(
-                                    `/faction/${data.card.faction_id}`,
+                                    `/faction/${data.card.attributes.faction_id}`,
                                 )}
                                 class="icon-label"
                             >
-                                <span data-faction-theme={data.card.faction_id}>
+                                <span
+                                    data-faction-theme={data.card.attributes
+                                        .faction_id}
+                                >
                                     <Icon
-                                        name={data.card.faction_id}
+                                        name={data.card.attributes.faction_id}
                                         size="sm"
                                     />
                                 </span>
-                                {factions[data.card.faction_id as FactionIds]}
+                                {factions[
+                                    data.card.attributes
+                                        .faction_id as FactionIds
+                                ]}
                             </a>
                         </td>
                     </tr>
                     <tr>
                         <td>Influence</td>
                         <td>
-                            <Influence count={data.card.influence_cost} />
+                            <Influence
+                                count={data.card.attributes.influence_cost}
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -129,17 +143,17 @@
                         <td>
                             <span class="icon-label">
                                 <Icon name="credit" size="sm" />
-                                {data.card.cost}
+                                {data.card.attributes.cost}
                             </span>
                         </td>
                     </tr>
-                    {#if data.card.trash_cost}
+                    {#if data.card.attributes.trash_cost}
                         <tr>
                             <td>Trash</td>
                             <td>
                                 <span class="icon-label">
                                     <Icon name="trash" size="sm" />
-                                    {data.card.trash_cost}
+                                    {data.card.attributes.trash_cost}
                                 </span>
                             </td>
                         </tr>
@@ -148,23 +162,24 @@
             </table>
             {#if false}
                 <div>
-                    <FormatText text={data.card.text} />
+                    <FormatText text={data.card.attributes.text} />
                     <br />
                     <hr />
                     <br />
-                    {#if data.printings[0].flavor}
-                        <p>Flavor: {data.printings[0].flavor}</p>
+                    {#if data.printings[0].attributes.flavor}
+                        <p>Flavor: {data.printings[0].attributes.flavor}</p>
                     {/if}
                 </div>
 
                 <p>
                     <a
                         href={localizeHref(
-                            `/illustrators/${data.printings[0].illustrator_ids[0]}`,
+                            `/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`,
                         )}
                         class="underline"
                     >
-                        Illustrated by {data.printings[0].display_illustrators}
+                        Illustrated by {data.printings[0].attributes
+                            .display_illustrators}
                     </a>
                 </p>
 
@@ -189,7 +204,7 @@
                     </Button>
                 </p>
 
-                {#if data.card.card_type_id.includes("_identity")}
+                {#if data.card.attributes.card_type_id.includes("_identity")}
                     <p>
                         <Button
                             href={localizeHref(
@@ -206,21 +221,21 @@
         <div>
             <div>
                 <p>Cycle</p>
-                {#each data.card.card_cycle_ids as cycle_id, index}
+                {#each data.card.attributes.card_cycle_ids as cycle_id, index}
                     <a
                         href={localizeHref(`/cycles/${cycle_id}`)}
                         class="underline"
                     >
-                        {data.card.card_cycle_names[index]}
+                        {data.card.attributes.card_cycle_names[index]}
                     </a>
                 {/each}
             </div>
             <hr />
             <div>
                 <p>sets</p>
-                {#each data.card.card_set_ids as set_id, index}
+                {#each data.card.attributes.card_set_ids as set_id, index}
                     <a href={localizeHref(`/sets/${set_id}`)} class="underline">
-                        {data.card.card_set_names[index]}
+                        {data.card.attributes.card_set_names[index]}
                     </a>
                 {/each}
             </div>
@@ -247,8 +262,10 @@
                                 {#snippet content()}
                                     Illusrated by <a
                                         href={localizeHref(
-                                            `/illustrators/${printing.illustrator_ids[0]}`,
-                                        )}>{printing.display_illustrators}</a
+                                            `/illustrators/${printing.attributes.illustrator_ids[0]}`,
+                                        )}
+                                        >{printing.attributes
+                                            .display_illustrators}</a
                                     >
                                 {/snippet}
                             </CardMeta>
@@ -303,14 +320,7 @@
     </div>
 </Container>
 
-<div class="background-image">
-    <img
-        src={getHighResImage(data.card)}
-        alt={data.card.title}
-        aria-hidden="true"
-        role="presentation"
-    />
-</div>
+<HeaderImage card={data.card} />
 
 <pre>{JSON.stringify(data.card, null, 2)}</pre>
 
@@ -325,31 +335,6 @@
     .reviews {
         display: grid;
         gap: 1rem;
-    }
-
-    .background-image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        width: 100vw;
-        height: 75vh;
-        z-index: -1;
-        filter: grayscale(1) blur(0.5rem);
-        opacity: 5%;
-        mask-image: linear-gradient(to top, transparent 0%, black 100%);
-
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: 50% 20%;
-        }
-
-        @media (prefers-contrast: more) {
-            visibility: hidden;
-            display: none;
-        }
     }
 
     .box {

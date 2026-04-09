@@ -1,21 +1,20 @@
 import { sql } from '$lib/sqlite';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { Cycle } from '$lib/types';
+import type { Format } from '$lib/types';
 import { normalize_sqlite } from '$lib/utils';
 
 export const ssr = false;
 
 export const load: PageLoad = async ({ data }) => {
-	const cycles: Array<{ id: string } & Cycle['attributes']> =
-		await sql`SELECT * FROM card_cycles`;
+	const formats: Array<{ id: string } & Format['attributes']> = await sql`SELECT * FROM formats`;
 
-	if (!cycles.length) {
-		throw error(404, `Cycles not found`);
+	if (!formats.length) {
+		throw error(404, `formats not found`);
 	}
 
 	return {
-		cycles: normalize_sqlite(cycles) as Cycle[],
+		formats: normalize_sqlite(formats) as Format[],
 		...data
 	};
 };

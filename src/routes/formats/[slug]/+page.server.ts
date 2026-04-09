@@ -1,12 +1,20 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
 import type { Format } from '$lib/types';
+import { cache_guard } from '$lib/server/guard';
 
 export const load: PageServerLoad = async ({ cookies, fetch, params }) => {
-	if (cookies.get('nrdb_cache') === '1') return { format: null };
+	const cold_data = await cache_guard(cookies, async () => {
+		const [format] = await Promise.all([
+			fetch(`${NRDB_API_URL}/formats/${params.slug}`)
+				.then((response) => response.json())
+				.then((response) => response.data as Format)
+		]);
 
-	const res = await fetch(`${NRDB_API_URL}/formats/${params.slug}`);
-	const json = await res.json();
+		return { format };
+	});
 
-	return { format: json.data as Format };
+	return {
+		...(cold_data ?? {})
+	};
 };

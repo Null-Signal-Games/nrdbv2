@@ -1,6 +1,6 @@
 <script lang="ts">
     import { m } from "$lib/paraglide/messages.js";
-    import type { Decklist, Card, SQLite } from "$lib/types";
+    import type { Decklist, Card } from "$lib/types";
     import Icon from "./Icon.svelte";
     import { tooltip } from "$lib/actions";
     import { factions, card_types } from "$lib/i18n";
@@ -11,7 +11,7 @@
     // TODO: refactor this component to be more generic and extensible (e.g. allow custom columns, not specific to cards/decklists)
     interface Props {
         decklist?: Decklist;
-        cards: SQLite<Card, "attributes">[];
+        cards: Card[];
     }
 
     const { decklist, cards }: Props = $props();
@@ -38,7 +38,7 @@
             <tr data-id={card.id}>
                 {#if decklist}
                     <td>
-                        &times;{decklist.card_slots[card.id] ?? "0"}
+                        &times;{decklist.attributes.card_slots[card.id] ?? "0"}
                     </td>
                 {/if}
                 <td>
@@ -46,16 +46,16 @@
                         href={localizeHref(`/card/${card.id}`)}
                         use:tooltip={card}
                     >
-                        {card.title}
+                        {card.attributes.title}
                     </a>
                 </td>
                 <td>
-                    {#if card.influence_cost}
+                    {#if card.attributes.influence_cost}
                         <span class="table-cell">
                             <Influence
                                 text={true}
-                                count={card.influence_cost}
-                                theme={card.faction_id as FactionIds}
+                                count={card.attributes.influence_cost}
+                                theme={card.attributes.faction_id as FactionIds}
                                 total={true}
                             />
                         </span>
@@ -68,51 +68,53 @@
                 </td>
                 <td>
                     <a
-                        href={localizeHref(`/faction/${card.faction_id}`)}
+                        href={localizeHref(
+                            `/faction/${card.attributes.faction_id}`,
+                        )}
                         class="table-cell"
                     >
                         <Icon
-                            name={card.faction_id}
+                            name={card.attributes.faction_id}
                             size="sm"
-                            theme={card.faction_id as FactionIds}
+                            theme={card.attributes.faction_id as FactionIds}
                         />
-                        {factions[card.faction_id as FactionIds]}
+                        {factions[card.attributes.faction_id as FactionIds]}
                     </a>
                 </td>
                 <td>
                     <a
                         href={localizeHref(
-                            `/decklists/search?=t:${card.card_type_id}`,
+                            `/decklists/search?=t:${card.attributes.card_type_id}`,
                         )}
                         class="table-cell"
                     >
-                        <Icon name={card.card_type_id} size="sm" />
-                        {card_types[card.card_type_id]}
+                        <Icon name={card.attributes.card_type_id} size="sm" />
+                        {card_types[card.attributes.card_type_id]}
                     </a>
                 </td>
                 <td>
-                    {#if card.display_subtypes}
+                    {#if card.attributes.display_subtypes}
                         <span class="table-cell">
-                            {card.display_subtypes}
+                            {card.attributes.display_subtypes}
                         </span>
                     {:else}
                         <span class="table-cell--not-applicable"></span>
                     {/if}
                 </td>
                 <td>
-                    {#if card.cost}
+                    {#if card.attributes.cost}
                         <span class="table-cell">
                             <Icon name="credit" size="sm" />
-                            {card.cost}
+                            {card.attributes.cost}
                         </span>
                     {:else}
                         <span class="table-cell--not-applicable"></span>
                     {/if}
                 </td>
                 <td>
-                    {#if card.trash_cost}
+                    {#if card.attributes.trash_cost}
                         <span class="table-cell">
-                            {card.trash_cost}
+                            {card.attributes.trash_cost}
                             <Icon name="trash" size="sm" />
                         </span>
                     {:else}
@@ -120,9 +122,9 @@
                     {/if}
                 </td>
                 <td>
-                    {#if card.strength}
+                    {#if card.attributes.strength}
                         <span class="table-cell">
-                            {card.strength}
+                            {card.attributes.strength}
                             <Icon name="strength" size="sm" />
                         </span>
                     {:else}

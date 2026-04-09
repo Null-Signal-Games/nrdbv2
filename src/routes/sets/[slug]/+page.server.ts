@@ -1,17 +1,23 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
-import type { ApiResponse, Set, Card } from '$lib/types';
+import type { Set, Card } from '$lib/types';
+import { cache_guard } from '$lib/server/guard';
 
 export const load: PageServerLoad = async ({ cookies, fetch, params }) => {
-	if (cookies.get('nrdb_cache') === '1') return { set: null, cards: null };
+    const cold_data = await cache_guard(cookies, async () => {
+        const [set, cards] = await Promise.all([
+            fetch(`${NRDB_API_URL}/card_sets/${params.slug}`)
+                .then((response) => response.json())
+                .then((response) => response.data as Set),
+            fetch(`${NRDB_API_URL}/cards?filter[card_set_id]=${params.slug}&page[size]=1000`)
+                .then((response) => response.json())
+                .then((response) => response.data as Card[])
+        ]);
 
-	const [set_res, cards_res] = await Promise.all([
-		fetch(`${NRDB_API_URL}/card_sets/${params.slug}`),
-		fetch(`${NRDB_API_URL}/cards?filter[card_set_id]=${params.slug}&page[size]=1000`)
-	]);
+        return { set, cards };
+    });
 
-	const set_json = await set_res.json();
-	const cards_json: ApiResponse<Card> = await cards_res.json();
-
-	return { set: set_json.data as Set, cards: cards_json.data };
+    return {
+        ...(cold_data ?? {})
+    };
 };

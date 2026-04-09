@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
     import Header from "$lib/components/Header.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
     import Container from "$lib/components/Container.svelte";
@@ -12,29 +11,29 @@
         name: string;
     }
 
-    let { data }: { data: PageData } = $props();
-
-    let db_factions = $state<Factions[] | null>(null);
-    let loading = $state(data.factions === null);
+    let factions = $state<Factions[]>([]);
+    let loading = $state(true);
 
     $effect(() => {
-        if ($db_ready && data.factions === null) {
+        if (!$db_ready) {
             loading = true;
-            sql`SELECT id, name FROM factions`
-                .then((results: unknown[]) => {
-                    db_factions = results as Factions[];
-                })
-                .catch((err: unknown) => {
-                    console.error("[SQLITE] Failed to query factions:", err);
-                })
-                .finally(() => {
-                    loading = false;
-                });
+            return;
         }
-    });
 
-    // SSR data takes priority, sqlite fills on warm load
-    let factions = $derived((data.factions ?? db_factions ?? []) as Factions[]);
+        loading = true;
+
+        sql`SELECT id, name FROM factions`
+            .then((results: unknown[]) => {
+                factions = results as Factions[];
+            })
+            .catch((err: unknown) => {
+                console.error("[SQLITE] Failed to query factions:", err);
+                factions = [];
+            })
+            .finally(() => {
+                loading = false;
+            });
+    });
 </script>
 
 {#if loading}
@@ -62,15 +61,5 @@
         padding: 0;
         display: grid;
         gap: 1rem;
-
-        & ul {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(4, auto);
-        }
-
-        & img {
-            width: 100%;
-        }
     }
 </style>

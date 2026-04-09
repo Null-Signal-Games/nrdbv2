@@ -1,8 +1,8 @@
-import type { Card } from './types';
+import type { Card, Printing } from './types';
 import { tooltip as _tooltip, tooltip_hover } from './store';
 import { get } from 'svelte/store';
 
-export const tooltip = (node: HTMLElement, card: Card) => {
+export const tooltip = (node: HTMLElement, card: Card | Printing) => {
 	let leave_timeout: ReturnType<typeof setTimeout> | null = null;
 
 	const enter = () => {

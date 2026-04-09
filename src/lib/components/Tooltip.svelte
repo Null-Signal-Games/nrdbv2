@@ -211,25 +211,29 @@
             <div>
                 <p>
                     <a href={localizeHref(`/card/${$tooltip.card?.id}`)}
-                        >{$tooltip.card?.title}</a
+                        >{$tooltip.card?.attributes.title}</a
                     >
                 </p>
                 <span>
-                    <Icon name={$tooltip.card.card_type_id} size="sm" />
-                    {card_types[$tooltip.card?.card_type_id]}
+                    <Icon
+                        name={$tooltip.card.attributes.card_type_id}
+                        size="sm"
+                    />
+                    {card_types[$tooltip.card.attributes.card_type_id]}
                 </span>
-                {#if $tooltip.card.influence_cost}
+                {#if $tooltip.card.attributes.influence_cost}
                     <Influence
                         text={true}
-                        count={$tooltip.card.influence_cost}
-                        theme={$tooltip.card.faction_id as FactionIds}
+                        count={$tooltip.card.attributes.influence_cost}
+                        theme={$tooltip.card.attributes
+                            .faction_id as FactionIds}
                         total={true}
                     />
                 {/if}
             </div>
-            {#if $tooltip.card?.text}
-                <div data-faction-theme={$tooltip.card.faction_id}>
-                    <FormatText text={$tooltip.card.text} />
+            {#if $tooltip.card.attributes.text}
+                <div data-faction-theme={$tooltip.card.attributes.faction_id}>
+                    <FormatText text={$tooltip.card.attributes.text} />
                 </div>
             {/if}
         </div>

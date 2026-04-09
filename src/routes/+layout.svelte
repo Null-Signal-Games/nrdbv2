@@ -2,29 +2,12 @@
     import "../app.css";
     import { onMount, type Snippet } from "svelte";
     import { onNavigate } from "$app/navigation";
-    import {
-        cards,
-        cycles,
-        sets,
-        factions,
-        formats,
-        printings,
-        theme as current_theme,
-        db_ready,
-    } from "$lib/store";
+    import { theme as current_theme, db_ready } from "$lib/store";
     import Meta from "$lib/components/Meta.svelte";
     import Navigation from "$lib/components/Navigation.svelte";
     import Footer from "$lib/components/Footer.svelte";
     import { dev } from "$app/environment";
     import Debug from "$lib/components/Debug.svelte";
-    import type {
-        Card,
-        Cycle,
-        Set,
-        Faction,
-        Format,
-        Printing,
-    } from "$lib/types";
     import Tooltip from "$lib/components/Tooltip.svelte";
     import { sql, overwriteDatabaseFile } from "$lib/sqlite";
     import {
@@ -57,9 +40,13 @@
             try {
                 await root.getFileHandle(NRDB_SQLITE_NAME);
                 console.log(
-                    `${NRDB_SQLITE_NAME} already exists in OPFS. Skipping download.`,
+                    `[SQLITE] ${NRDB_SQLITE_NAME} already exists in OPFS. Skipping download.`,
                 );
             } catch (error) {
+                console.log(
+                    `[SQLITE] ${NRDB_SQLITE_NAME} not found in OPFS. Fetching from network...`,
+                );
+
                 if (
                     !(
                         error instanceof DOMException &&
@@ -69,7 +56,7 @@
                     throw error;
                 }
 
-                console.log("Fetching and decompressing sqlite db...");
+                console.log("[SQLITE] Fetching and decompressing sqlite db...");
                 const response = await fetch(NRDB_SQLITE_URL);
 
                 if (!response.ok) {
@@ -132,7 +119,7 @@
         // Handle light/dark theme
         // TODO(theme): review, as currently we utilise `light-dark` in CSS, which us purely based on user preference
         if (!localStorage.getItem("theme")) {
-            console.log("Setting theme based on user preference");
+            console.log("[THEME] Setting theme based on user preference");
 
             const user_prefers_dark = window.matchMedia(
                 "(prefers-color-scheme: dark)",

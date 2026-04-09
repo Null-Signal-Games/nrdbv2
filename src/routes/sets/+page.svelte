@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { PageData } from "./$types";
-    import type { Cycle, Set, Publishers } from "$lib/types";
+    import type { Set, Publishers } from "$lib/types";
     import Header from "$lib/components/Header.svelte";
     import Icon from "$lib/components/Icon.svelte";
     import { m } from "$lib/paraglide/messages.js";
@@ -15,8 +15,6 @@
 
     let { data }: Props = $props();
 </script>
-
-<pre>{JSON.stringify(data, null, 2)}</pre>
 
 <Header title="Sets" />
 
@@ -39,27 +37,32 @@
                 <tr data-id={cycle.id}>
                     <td>
                         <a href={localizeHref(`/cycles/${cycle.id}`)}
-                            >{cycle.name}</a
+                            >{cycle.attributes.name}</a
                         >
                     </td>
                     <!-- <td>{cycle.size}</td> -->
                     <td>
-                        <time datetime={cycle.date_release}>
-                            {format_date(cycle.date_release)}
+                        <time datetime={cycle.attributes.date_release}>
+                            {format_date(cycle.attributes.date_release)}
                         </time>
                     </td>
                     <td>
                         <label class="icon-label">
-                            <Icon name={cycle.released_by} size="sm" />
-                            {publishers[cycle.released_by as Publishers]}
+                            <Icon
+                                name={cycle.attributes.released_by}
+                                size="sm"
+                            />
+                            {publishers[
+                                cycle.attributes.released_by as Publishers
+                            ]}
                         </label>
                     </td>
                     <td>Standard</td>
                     <td>Startup</td>
                     <td>Eternal</td>
                 </tr>
-                {#if data.cycle.card_set_ids.length > 1}
-                    {#each data.cycle.card_set_ids as set_id (set_id)}
+                {#if cycle.attributes.card_set_ids && cycle.attributes.card_set_ids.length > 1}
+                    {#each cycle.attributes.card_set_ids as set_id (set_id)}
                         {#each data.sets.filter((set: Set) => set.id === set_id) as set (set)}
                             <tr>
                                 <td>
@@ -68,20 +71,21 @@
                                         <a
                                             href={localizeHref(
                                                 `/sets/${set.id}`,
-                                            )}>{set.name}</a
+                                            )}>{set.attributes.name}</a
                                         >
                                     </span>
                                 </td>
                                 <!-- <td>{set.size}</td> -->
-                                <td>{set.date_release}</td>
+                                <td>{set.attributes.date_release}</td>
                                 <td>
                                     <span class="icon-label">
                                         <Icon
-                                            name={set.released_by}
+                                            name={set.attributes.released_by}
                                             size="sm"
                                         />
                                         {publishers[
-                                            set.released_by as Publishers
+                                            set.attributes
+                                                .released_by as Publishers
                                         ]}
                                     </span>
                                 </td>
@@ -95,7 +99,4 @@
             {/each}
         </tbody>
     </table>
-
-    <!-- <pre>{JSON.stringify(data.cycles, null, 2)}</pre>
-        <pre>{JSON.stringify(data.sets, null, 2)}</pre> -->
 </Container>
