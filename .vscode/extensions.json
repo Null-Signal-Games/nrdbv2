@@ -1,7 +1,7 @@
 {
-    "recommendations": [
-        "inlang.vs-code-extension",
-        "oxc.oxc-vscode",
-        "sveltejs.eslint-plugin-svelte"
-    ]
+	"recommendations": [
+		"inlang.vs-code-extension",
+		"oxc.oxc-vscode",
+		"sveltejs.eslint-plugin-svelte"
+	]
 }
