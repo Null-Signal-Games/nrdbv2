@@ -1,12 +1,12 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
+    import type { PageServerData, PageData } from "./$types";
     import Header from "$lib/components/Header.svelte";
     import Container from "$lib/components/Container.svelte";
     import CardImage from "$lib/components/card/CardImage.svelte";
     import CardMeta from "$lib/components/card/Meta.svelte";
 
     interface Props {
-        data: PageData;
+        data: PageServerData & PageData;
     }
 
     let { data }: Props = $props();

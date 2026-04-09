@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
+    import type { PageServerData, PageData } from "./$types";
     import type { Decklist, Review } from "$lib/types";
     import Container from "$lib/components/Container.svelte";
     import DecklistPreview from "$lib/components/decklist/Preview.svelte";
@@ -12,11 +12,12 @@
     import Button from "$lib/components/ui/Button.svelte";
 
     interface Props {
-        data: PageData & {
-            // TODO: review this, as only included to bypass type errors on streamed data by explicitly typing them as promises, but not sure if this is the best way to handle it
-            decks: Promise<Decklist[]>;
-            reviews: Promise<Review[]>;
-        };
+        data: PageServerData &
+            PageData & {
+                // TODO: review this, as only included to bypass type errors on streamed data by explicitly typing them as promises, but not sure if this is the best way to handle it
+                decks: Promise<Decklist[]>;
+                reviews: Promise<Review[]>;
+            };
     }
 
     let { data }: Props = $props();

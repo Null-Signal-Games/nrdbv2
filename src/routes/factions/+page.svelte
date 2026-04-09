@@ -1,12 +1,12 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
+    import type { PageServerData, PageData } from "./$types";
     import Header from "$lib/components/Header.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
     import Container from "$lib/components/Container.svelte";
     import Ghost from "$lib/components/Ghost.svelte";
 
     interface Props {
-        data: PageData;
+        data: PageServerData & PageData;
     }
 
     let { data }: Props = $props();
