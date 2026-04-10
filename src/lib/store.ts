@@ -1,19 +1,12 @@
 import { writable } from 'svelte/store';
-import type { Card, Cycle, Set, Faction, Format, Printing } from './types';
+import type { Card, Printing } from './types';
 
-export const cards = writable<Card[]>([]);
-export const cycles = writable<Cycle[]>([]);
-export const sets = writable<Set[]>([]);
-export const factions = writable<Faction[]>([]);
-export const formats = writable<Format[]>([]);
-export const printings = writable<Printing[]>([]);
-
-export const searchQuery = writable<string>('');
+export const search_query = writable<string>('');
 
 export const tooltip = writable<{
 	element: HTMLElement | null;
 	visible: boolean;
-	card: Card | null;
+	card: Card | Printing | null;
 	position: {
 		x: number;
 		y: number;
@@ -38,3 +31,6 @@ export const tooltip_hover = writable<{
 });
 
 export const theme = writable<'light' | 'dark' | null>(null);
+
+// True once the SQLite DB has been confirmed present (or downloaded) in OPFS
+export const db_ready = writable<boolean>(false);

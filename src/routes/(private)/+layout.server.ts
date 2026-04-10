@@ -4,7 +4,6 @@ import type { ApiResponse, Decklist } from '$lib/types';
 
 export const load: LayoutServerLoad = async (event) => {
 	const session = await event.locals.auth();
-	console.log('session', session);
 
 	if (!session?.accessToken) {
 		return {

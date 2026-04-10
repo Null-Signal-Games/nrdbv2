@@ -55,7 +55,4 @@
         flex-direction: row;
         gap: 1rem;
     }
-
-    .actions {
-    }
 </style>

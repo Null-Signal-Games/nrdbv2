@@ -99,7 +99,7 @@ describe('getHighResImage', () => {
 
 describe('export_format', async () => {
 	const decklist = await create_mock_deck();
-	const data_formatted = (format: FileFormat) => export_format(decklist, format);
+	const data_formatted = (format: FileFormat) => export_format(decklist, format, []);
 
 	it('should export decklist in JSON format', () => {
 		const result = JSON.stringify(data_formatted('json'), null, 2);

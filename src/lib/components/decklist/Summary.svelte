@@ -3,6 +3,7 @@
     import CardImage from "$lib/components/card/CardImage.svelte";
     import Icon from "$lib/components/Icon.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
+    import { sql } from "$lib/sqlite";
 
     interface Props {
         identity: Card;

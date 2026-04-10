@@ -1,17 +1,25 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
+import type { Printing, Illustrator } from '$lib/types';
+import { cache_guard } from '$lib/server/guard';
 
-export const load: PageServerLoad = async ({ params }) => {
-	const illustrator = await fetch(`${NRDB_API_URL}/illustrators/${params.slug}`);
-	const printings = await fetch(
-		`${NRDB_API_URL}/printings?filter[illustrator_id]=${params.slug}&page[size]=999`
-	);
+export const load: PageServerLoad = async ({ cookies, params, fetch }) => {
+	const cold_data = await cache_guard(cookies, async () => {
+		const [printings] = await Promise.all([
+			fetch(`${NRDB_API_URL}/printings?filter[illustrator_id]=${params.slug}&page[size]=999`)
+				.then((response) => response.json())
+				.then((response) => response.data as Printing[])
+		]);
 
-	const illustrator_data = await illustrator.json();
-	const printings_data = await printings.json();
+		return { printings };
+	});
+
+	const illustrator = await fetch(`${NRDB_API_URL}/illustrators/${params.slug}`)
+		.then((response) => response.json())
+		.then((response) => response.data as Illustrator);
 
 	return {
-		illustrator: illustrator_data.data,
-		printings: printings_data.data
+		illustrator,
+		...(cold_data ?? {})
 	};
 };

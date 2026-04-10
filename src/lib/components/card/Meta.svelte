@@ -2,7 +2,6 @@
     import { type Snippet } from "svelte";
     import type { FactionIds, Card as TCard, Printing } from "$lib/types";
     import CardImage from "./CardImage.svelte";
-    import { cards } from "$lib/store";
     import { localizeHref } from "$lib/paraglide/runtime";
     import Influence from "../Influence.svelte";
 

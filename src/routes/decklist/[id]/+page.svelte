@@ -52,6 +52,7 @@
         const data_formatted = export_format(
             data.decklist,
             format as FileFormat,
+            data.cards,
         );
         download_file(
             JSON.stringify(data_formatted, null, 2),
@@ -151,7 +152,11 @@
                         <ul class="cards">
                             {#each group.data as card (card.id)}
                                 <li use:tooltip={card}>
-                                    <CardMeta {card} quantity={card.quantity}>
+                                    <CardMeta
+                                        {card}
+                                        quantity={data.decklist.attributes
+                                            .card_slots[card.id]}
+                                    >
                                         <CardImage hasTransition {card} />
                                     </CardMeta>
                                 </li>

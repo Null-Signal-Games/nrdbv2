@@ -1,126 +1,116 @@
 <script lang="ts">
-    import { page } from "$app/state";
-    import CardImage from "$lib/components/card/CardImage.svelte";
+    import type { PageServerData, PageData } from "./$types";
     import Header from "$lib/components/Header.svelte";
-    import type { Decklist, Faction, Card } from "$lib/types";
-    import { factions, cards } from "$lib/store";
+    import { localizeHref } from "$lib/paraglide/runtime";
     import Icon from "$lib/components/Icon.svelte";
+    import Container from "$lib/components/Container.svelte";
+    import Ghost from "$lib/components/Ghost.svelte";
+    import CardImage from "$lib/components/card/CardImage.svelte";
     import DecklistItem from "$lib/components/decklist/Item.svelte";
     import { tooltip } from "$lib/actions";
-    import { find_or_server, filter_or_server } from "$lib/utils";
-    import Ghost from "$lib/components/Ghost.svelte";
-    import Container from "$lib/components/Container.svelte";
-    import { localizeHref } from "$lib/paraglide/runtime";
     import Button from "$lib/components/ui/Button.svelte";
+    import type { Card, Decklist } from "$lib/types";
 
     interface Props {
-        data: {
-            faction: Faction | null;
-            faction_cards: Card[] | null;
-            // identities: Card[];
-            decklists: {
-                identity: Card;
-                decklists: Decklist[];
-            }[];
+        data: PageData & {
+            decklists: Promise<
+                {
+                    identity: Card["id"];
+                    decklists: Decklist[];
+                }[]
+            >;
         };
     }
 
     let { data }: Props = $props();
-
-    let faction_data = $derived<Faction | undefined>(
-        find_or_server(
-            $factions,
-            (f) => f.id === page.params.slug,
-            data.faction,
-            `faction:${page.params.slug}`,
-        ),
-    );
-
-    let cards_data = $derived<Card[]>(
-        filter_or_server(
-            $cards,
-            (card) => card.attributes.faction_id === page.params.slug,
-            data.faction_cards,
-            `faction-cards:${page.params.slug}`,
-        ),
-    );
 </script>
 
-{#if faction_data && cards_data}
-    <Header title={`Faction: ${faction_data.attributes.name}`}>
-        {#snippet icon()}
-            <Icon name={faction_data.id} size="xl" />
-        {/snippet}
+<!-- `Property 'name' does not exist on type 'Faction'.` - disregard for now, sqlite data does not match API structure yet -->
+<Header title={`Faction: ${data.faction.attributes.name}`}>
+    {#snippet icon()}
+        <Icon name={data.faction.id} size="xl" />
+    {/snippet}
 
-        {#snippet actions()}
-            <Button
-                href={localizeHref(
-                    `/decklist/create?side=${
-                        faction_data.attributes.side_id
-                    }&faction=${faction_data.id}`,
-                )}
-                class="button"
-            >
-                <!-- TODO(i18n): use/create a locale -->
-                Create decklist with this faction
-            </Button>
-        {/snippet}
-    </Header>
+    <Button
+        href={localizeHref(
+            `/decklist/create?side=${data.faction.attributes.side_id}&faction=${data.faction.id}`,
+        )}
+        class="button"
+    >
+        <!-- TODO(i18n): use/create a locale -->
+        Create decklist with this faction
+    </Button>
+</Header>
 
-    <Container>
-        <!-- Streamed in decklists for the current faction (per identity) -->
-        {#await data.decklists}
-            {#each Array(5) as _}
-                <Ghost />
-            {/each}
-        {:then decklists}
-            <div class="group">
-                {#each decklists as group (group.identity)}
-                    <article>
-                        <header>
-                            <h2>{group.identity.attributes.title}</h2>
-                            <!-- TODO(i18n): use/create a locale -->
-                            <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
-                            <!-- svelte-ignore a11y_invalid_attribute -->
-                            <Button
-                                href={localizeHref(
-                                    `/decklist/create?identity=${group.identity.id}`,
-                                )}>Create deck with this identity</Button
-                            >
+<Container>
+    <!-- Streamed in decklists for the current faction (per identity).
+         Render identities immediately from sqlite; await decklists per-identity so
+         only the decks area shows placeholders while the streamed promise resolves. -->
+    <div class="group">
+        {#each data.identities as identity (identity.id)}
+            <article>
+                <header>
+                    <h2>{identity.attributes.title}</h2>
+                    <!-- TODO(i18n): use/create a locale -->
+                    <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
+                    <!-- svelte-ignore a11y_invalid_attribute -->
+                    <Button href={`/decklist/create?identity=${identity.id}`}
+                        >Create deck with this identity</Button
+                    >
 
-                            <!-- TODO(i18n): use/create a locale -->
-                            <!-- TODO(misc): add correct href url to search/find page with URL paramters to filter to this specific identity -->
-                            <!-- svelte-ignore a11y_invalid_attribute -->
-                            <Button href="#">More decks</Button>
-                        </header>
-                        <main>
-                            <div use:tooltip={group.identity}>
-                                <CardImage card={group.identity} />
-                            </div>
-                            <ul>
-                                {#each group.decklists as decklist (decklist.id)}
-                                    <DecklistItem {decklist} />
-                                {/each}
-                            </ul>
-                        </main>
-                    </article>
-                {/each}
-            </div>
-        {:catch error}
-            <p>error loading decklists: {error.message}</p>
-        {/await}
+                    <!-- TODO(i18n): use/create a locale -->
+                    <!-- TODO(misc): add correct href url to search/find page with URL paramters to filter to this specific identity -->
+                    <!-- svelte-ignore a11y_invalid_attribute -->
+                    <Button href="#">More decks</Button>
+                </header>
+                <main>
+                    <div use:tooltip={identity}>
+                        <!-- Broken while sqlite data does not match API structure -->
+                        <CardImage card={identity} />
+                    </div>
+                    <ul>
+                        <!-- <pre>{JSON.stringify(data.decklists, null, 2)}</pre> -->
+                        <!-- {data.decklists.find((g) => g.identity === identity.id)?.decklists.length ?? 0} decklists -->
 
-        <!-- All cards from the current faction (IndexedDB data) -->
-        <h2>Cards from {faction_data.attributes.name}</h2>
-        <ul>
-            {#each cards_data as card (card.id)}
-                <li>
-                    <CardImage {card} />
-                </li>
-            {/each}
-        </ul>
-    </Container>
-{/if}
+                        <!-- {@const decklists = data.decklists.find((g) => g.identity === identity.id)?.decklists ?? []} -->
+                        {#await data.decklists}
+                            {#each Array(3) as _}
+                                <li><Ghost /></li>
+                            {/each}
+                        {:then grouped_decklists}
+                            {#each grouped_decklists.find((g) => g.identity === identity.id)?.decklists ?? [] as decklist}
+                                <DecklistItem decklist={decklist as Decklist} />
+                                <details>
+                                    <summary>JSON</summary>
+                                    <p>{JSON.stringify(decklist, null, 2)}</p>
+                                </details>
+                            {/each}
+                        {:catch error}
+                            <li>
+                                error loading decklists: {error.message}
+                            </li>
+                        {/await}
+                    </ul>
+                </main>
+            </article>
+        {/each}
+    </div>
+
+    <h2>Cards from {data.faction.attributes.name}</h2>
+    <ul>
+        {#each data.cards as card (card.id)}
+            <li>
+                <!-- Broken while sqlite data does not match API structure -->
+                <CardImage {card} />
+                <summary>
+                    <details>
+                        <pre>{JSON.stringify(card.attributes, null, 2)}</pre>
+                    </details>
+                </summary>
+            </li>
+        {/each}
+    </ul>
+</Container>
 
 <style>
     /* Temporary styles */
