@@ -13,6 +13,7 @@
     import { tooltip } from "$lib/actions";
     import { localizeHref } from "$lib/paraglide/runtime";
     import CardImage from "../card/CardImage.svelte";
+    import Button from "../ui/Button.svelte";
 
     interface Props {
         side: SidesIds;
@@ -236,9 +237,9 @@
     <div class="builder__search">
         <div class="builder__tabs" role="tablist" aria-label="Decklist tabs">
             {#each ["Build", "Notes", "Check", "History", "Collection", "Settings"] as tab (tab)}
-                <button
+                <Button
                     role="tab"
-                    class:active={active_tab === tab}
+                    color={active_tab === tab ? "primary" : "ghost"}
                     aria-selected={active_tab === tab}
                     onclick={() =>
                         (active_tab = tab as
@@ -250,7 +251,7 @@
                             | "Settings")}
                 >
                     {tab}
-                </button>
+                </Button>
             {/each}
         </div>
 
@@ -271,10 +272,12 @@
                     <h3>Filter by faction</h3>
                     <div class="builder__chips">
                         {#each factions_list as faction_option (faction_option.id)}
-                            <button
-                                class:active={filters.factions.includes(
+                            <Button
+                                color={filters.factions.includes(
                                     faction_option.id as FactionIds,
-                                )}
+                                )
+                                    ? "primary"
+                                    : "ghost"}
                                 onclick={() =>
                                     toggle_faction(
                                         faction_option.id as FactionIds,
@@ -282,7 +285,7 @@
                             >
                                 <Icon name={faction_option.id} size="sm" />
                                 {i18n_factions[faction_option.id as FactionIds]}
-                            </button>
+                            </Button>
                         {/each}
                     </div>
                 </section>
@@ -291,13 +294,15 @@
                     <h3>Filter by type</h3>
                     <div class="builder__chips">
                         {#each filtered_types as type (type)}
-                            <button
-                                class:active={filters.types.includes(type)}
+                            <Button
+                                color={filters.types.includes(type)
+                                    ? "primary"
+                                    : "ghost"}
                                 onclick={() => toggle_type(type)}
                             >
                                 <Icon name={type} size="sm" />
                                 {card_types[type]}
-                            </button>
+                            </Button>
                         {/each}
                     </div>
                 </section>
@@ -319,8 +324,10 @@
                         <tr>
                             <td>
                                 <span class="builder__quantity">
-                                    <button onclick={() => decrement(result)}
-                                        >-</button
+                                    <Button
+                                        size="sm"
+                                        onclick={() => decrement(result)}
+                                        >-</Button
                                     >
                                     <input
                                         type="number"
@@ -338,8 +345,10 @@
                                                 ) || 0,
                                             )}
                                     />
-                                    <button onclick={() => increment(result)}
-                                        >+</button
+                                    <Button
+                                        size="sm"
+                                        onclick={() => increment(result)}
+                                        >+</Button
                                     >
                                 </span>
                             </td>
