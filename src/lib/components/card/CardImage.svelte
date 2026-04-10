@@ -3,10 +3,9 @@
     import type { Card, Printing } from "$lib/types";
     import { getHighResImage } from "$lib/utils";
 
-    type CardLike = Card | Printing;
-
     interface Props {
-        card: CardLike;
+        card: Card | Printing;
+        type: "card" | Printing["type"];
         href?: string | null;
         loading?: "lazy" | "eager";
         class?: string;
@@ -17,8 +16,9 @@
 
     const {
         card,
+        type = card?.type ?? "card",
         // TODO: review/implement proper href routing for printings, currently does nothing (maybe use an achor of #printings instead?)
-        href: providedHref = null,
+        href = `/card/${card && "type" in card && card.type === "printings" ? `${card.attributes.card_id}?printing=${card.id}` : card.id}`,
         loading = "lazy",
         class: className = "",
         boxShadow = true,
@@ -43,10 +43,6 @@
     const is_printing = (value: Props["card"]): value is Printing => {
         return "type" in value && value.type === "printings";
     };
-
-    const href =
-        providedHref ??
-        `/card/${card && is_printing(card) ? `${get_printing_card_id(card)}?printing=${card.id}` : card.id}`;
 </script>
 
 {#snippet image(card: Props["card"])}

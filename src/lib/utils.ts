@@ -1,4 +1,4 @@
-import type { Card, Decklist, FileFormat, CardGroup } from '$lib/types';
+import type { Card, Decklist, FileFormat, CardGroup, Printing } from '$lib/types';
 
 import { NRDB_IMAGE_URL, NRDB_SQLITE_NAME } from '$lib/constants';
 
@@ -34,76 +34,64 @@ const parse_sqlite_value = (value: unknown) => {
 };
 
 export const normalize_sqlite_single = <T extends Record<string, unknown>>(
-	row: T
+	row: T,
+	_type: 'cards' | 'printings'
 ): {
 	id: string;
 	type?: string;
-	attributes: Omit<T, 'id' | 'type'>;
+	attributes: T;
 } => {
 	const normalized_row = Object.fromEntries(
 		Object.entries(row).map(([key, value]) => [key, parse_sqlite_value(value)])
 	) as T & { id?: string; type?: string };
 
-	const { id, type, ...attributes } = normalized_row;
+	const { id, type } = normalized_row;
 
 	return {
 		id: id as string,
-		...(typeof type === 'string' ? { type } : {}),
-		attributes: attributes as Omit<T, 'id' | 'type'>
+		...(typeof type === 'string' ? { type } : { type: _type }),
+		attributes: normalized_row as T
 	};
 };
 
-export const normalize_sqlite = <T extends Record<string, unknown>>(rows: T[]) => {
-	return rows.map((row) => normalize_sqlite_single(row));
-};
+export const normalize_sqlite = <T extends Record<string, unknown>>(
+	rows: T[],
+	type: 'cards' | 'printing' = 'cards'
+) => {
+	// Infer type from data
+	if (rows.length > 0 && rows.every((row) => 'is_latest_printing' in row)) {
+		type = 'printing';
+	}
 
-type ImageCard = {
-	id: string;
-	type?: string;
-	card_id?: string;
-	attributes?: {
-		printing_ids?: string[];
-		latest_printing_id?: string;
-		latest_printing_images?: {
-			nrdb_classic: {
-				tiny: string;
-				small: string;
-				medium: string;
-				large: string;
-			};
-		};
-		card_cycle_ids?: string[];
-		title?: string;
-	};
-	printing_ids?: string[];
-	latest_printing_id?: string;
-	latest_printing_images?: {
-		nrdb_classic: {
-			tiny: string;
-			small: string;
-			medium: string;
-			large: string;
-		};
-	};
-	card_cycle_ids?: string[];
+	return rows.map((row) => normalize_sqlite_single(row, type));
 };
 
 export const getHighResImage = (
-	card: ImageCard,
+	card: Card | Printing,
 	size: 'small' | 'medium' | 'large' = 'large'
 ): string => {
-	const attributes = ('attributes' in card && card.attributes ? card.attributes : card) as {
-		printing_ids?: string[];
-		latest_printing_id?: string;
-		latest_printing_images?: ImageCard['latest_printing_images'];
-		card_cycle_ids?: string[];
-	};
+	/*
+    // if the card includes one of the card cycles that are released by null signal games, use the nsg image
+    const nsgCardCycles = ['elevation', 'liberation', 'borealis', 'ashes', 'system_gateway'];
 
-	if ('type' in card && card.type === 'printings') {
-		return `${NRDB_IMAGE_URL}/${size}/${card.id}.jpg`;
-	}
+    // If the card is a printing, use the printing image URL structure (id is the printing ID, not the card ID)
+    if (card && 'type' in card && card.type === 'printings') {
+        return `${NRDB_IMAGE_URL}/${size}/${card.id}.jpg`;
+    }
 
-	return `${NRDB_IMAGE_URL}/xlarge/${attributes.printing_ids?.[0] ?? card.id}.webp`;
+    // If the card is from a NSG cycle, or doesn't have a NRDB classic image, use the NRDB image
+    if (nsgCardCycles.some((cycle) => card.attributes.card_cycle_ids.includes(cycle))) {
+        return `${NRDB_IMAGE_URL}/xlarge/${card.attributes.latest_printing_id}.webp`;
+    }
+
+    if (!card.attributes.latest_printing_images?.nrdb_classic) {
+        return `${NRDB_IMAGE_URL}/large/${card.attributes.latest_printing_id}.jpg`;
+    }
+
+    return card.attributes.latest_printing_images.nrdb_classic[size];
+    */
+
+	return `${NRDB_IMAGE_URL}/${size}/${card.attributes.printing_ids[0]}.jpg`;
 };
 
 export const group_cards_by_type = (cards: Card[]): CardGroup[] => {
