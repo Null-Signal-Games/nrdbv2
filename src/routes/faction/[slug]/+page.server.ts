@@ -1,71 +1,60 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
-import type { SidesIds, FactionIds, ApiResponse, Card, Decklist, Faction } from '$lib/types';
+import type { SidesIds, Faction, FactionIds, Card, Decklist } from '$lib/types';
+import { cache_guard } from '$lib/server/guard';
 
 export const load: PageServerLoad = async ({ fetch, params, cookies }) => {
-	const has_cache = cookies.get('nrdb_cache') === '1';
+	const cold_data = await cache_guard(cookies, async () => {
+		const [faction, cards] = await Promise.all([
+			fetch(`${NRDB_API_URL}/factions/${params.slug}`)
+				.then((response) => response.json())
+				.then((response) => response.data as Faction[]),
+			fetch(`${NRDB_API_URL}/cards?filter[faction_id]=${params.slug}&page[size]=1000`)
+				.then((response) => response.json())
+				.then((response) => response.data as Card[])
+		]);
 
-	const [faction, faction_cards] = has_cache
-		? [null, null]
-		: await Promise.all([
-				fetch(`${NRDB_API_URL}/factions/${params.slug}`)
-					.then((r) => r.json())
-					.then((r) => r.data as Faction),
-				fetch(`${NRDB_API_URL}/cards?filter[faction_id]=${params.slug}&page[size]=1000`)
-					.then((r) => r.json())
-					.then((r) => r.data as Card[])
-			]);
+		return { faction, cards };
+	});
 
-	let card_type_id: `${SidesIds}_identity` = 'corp_identity';
-
-	// NRDB API uses "corp_identity" and "runner_identity" for card_type_id, not just "identity", so we need to determine which one to use based on the faction
+	// Below to constants (factions, card_type_id) should be a util func
 	const factions: { [key in SidesIds]: FactionIds[] } = {
 		corp: ['haas_bioroid', 'jinteki', 'nbn', 'weyland_consortium', 'neutral_corp'],
 		runner: ['anarch', 'criminal', 'shaper', 'adam', 'apex', 'sunny_lebeau', 'neutral_runner']
 	};
 
-	card_type_id = factions.corp.includes(params.slug as FactionIds)
+	const card_type_id = factions.corp.includes(params.slug as FactionIds)
 		? 'corp_identity'
 		: 'runner_identity';
 
 	return {
-		faction,
-		faction_cards,
+		...(cold_data ?? {}),
 		// https://svelte.dev/docs/kit/load#Streaming-with-promises
-
-		// identities: new Promise(async (resolve, reject) => {
-		//     try {
-		//         const identities_response = await fetch(
-		//             `${NRDB_API_URL}/cards?filter[faction_id]=${params.slug}&filter[card_type_id]=${card_type_id}&page[size]=50`
-		//         );
-		//         const identities_json: ApiResponse<Card[]> = await identities_response.json();
-		//         const identities = identities_json.data;
-		//         resolve(identities);
-		//     } catch (error) {
-		//         reject(error);
-		//     }
-		// }),
-
 		// eslint-disable-next-line no-async-promise-executor
 		decklists: new Promise(async (resolve, reject) => {
 			try {
-				const identities_response = await fetch(
+				const identities = await fetch(
 					`${NRDB_API_URL}/cards?filter[faction_id]=${params.slug}&filter[card_type_id]=${card_type_id}&page[size]=50`
-				);
-				const identities_json: ApiResponse<Card[]> = await identities_response.json();
-				const identities = identities_json.data;
-				const decklist_array: { id: string; decklists: Decklist[] }[] = [];
+				)
+					.then((response) => response.json())
+					.then((response) => response.data as Card[]);
+
+				const decklist_array: {
+					identity: Card['id'];
+					decklists: Decklist[];
+				}[] = [];
 
 				await Promise.all(
 					identities.map(async (identity: Card) => {
-						const decklists_response = await fetch(
+						const decklists = await fetch(
 							`${NRDB_API_URL}/decklists?filter[identity_card_id]=${identity.id}&page[size]=5`
-						);
-						const decklists_json: ApiResponse<Decklist[]> =
-							await decklists_response.json();
+						)
+							.then((response) => response.json())
+							.then((response) => response.data as Decklist[]);
+
 						decklist_array.push({
-							identity: identity,
-							decklists: decklists_json.data.length > 0 ? decklists_json.data : []
+							identity: identity.id,
+							decklists: decklists
 						});
 					})
 				);
@@ -74,18 +63,5 @@ export const load: PageServerLoad = async ({ fetch, params, cookies }) => {
 				reject(error);
 			}
 		})
-
-		// Returns any/all decklists for this faction, limited to 5 for now
-
-		// decklists: new Promise(async (resolve, reject) => {
-		//     try {
-		//         console.log(`${NRDB_API_URL}/decklists?filter[faction_id]=${params.slug}&page[size]=5`);
-		//         const response = await fetch(`${NRDB_API_URL}/decklists?filter[faction_id]=${params.slug}&page[size]=5`);
-		//         const json: ApiResponse<Decklist> = await response.json();
-		//         resolve(json.data);
-		//     } catch (error) {
-		//         reject(error);
-		//     }
-		// }),
 	};
 };

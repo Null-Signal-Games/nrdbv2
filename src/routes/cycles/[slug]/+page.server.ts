@@ -1,17 +1,23 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
-import type { ApiResponse, Cycle, Card } from '$lib/types';
+import type { Cycle, Card } from '$lib/types';
+import { cache_guard } from '$lib/server/guard';
 
 export const load: PageServerLoad = async ({ cookies, fetch, params }) => {
-	if (cookies.get('nrdb_cache') === '1') return { cycle: null, cards: null };
+	const cold_data = await cache_guard(cookies, async () => {
+		const [cycle, cards] = await Promise.all([
+			fetch(`${NRDB_API_URL}/card_cycles/${params.slug}`)
+				.then((response) => response.json())
+				.then((response) => response.data as Cycle),
+			fetch(`${NRDB_API_URL}/cards?filter[card_cycle_id]=${params.slug}&page[size]=1000`)
+				.then((response) => response.json())
+				.then((response) => response.data as Card[])
+		]);
 
-	const [cycle_res, cards_res] = await Promise.all([
-		fetch(`${NRDB_API_URL}/card_cycles/${params.slug}`),
-		fetch(`${NRDB_API_URL}/cards?filter[card_cycle_id]=${params.slug}&page[size]=1000`)
-	]);
+		return { cycle, cards };
+	});
 
-	const cycle_json = await cycle_res.json();
-	const cards_json: ApiResponse<Card> = await cards_res.json();
-
-	return { cycle: cycle_json.data as Cycle, cards: cards_json.data };
+	return {
+		...(cold_data ?? {})
+	};
 };

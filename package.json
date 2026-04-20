@@ -24,8 +24,7 @@
 	"dependencies": {
 		"@auth/sveltekit": "^1.10.0",
 		"@nsg/common-components": "workspace:../common-components/dist",
-		"dexie": "^4.2.0",
-		"fuse.js": "^7.1.0"
+		"sqlocal": "^0.17.0"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^4.1.0",

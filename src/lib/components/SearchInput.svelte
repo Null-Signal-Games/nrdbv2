@@ -1,19 +1,76 @@
 <script lang="ts">
-    import { cards, searchQuery } from "$lib/store";
-    import { filterAndRankCards } from "$lib/search";
+    import { search_query, db_ready } from "$lib/store";
     import CardImage from "$lib/components/card/CardImage.svelte";
     import DecklistSuggestions from "$lib/components/DecklistSuggestions.svelte";
     import { afterNavigate } from "$app/navigation";
     import { localizeHref } from "$lib/paraglide/runtime";
     import { onMount } from "svelte";
     import Icon from "./Icon.svelte";
+    import { sql } from "$lib/sqlite";
+    import type { Card } from "$lib/types";
+    import { normalize_sqlite } from "$lib/utils";
+
+    const empty_relationships = {
+        side: { links: { related: "" } },
+        cards: { links: { related: "" } },
+        decklists: { links: { related: "" } },
+        printings: { links: { related: "" } },
+    };
+
+    const to_card = (card: Pick<Card, "id" | "attributes">): Card => ({
+        id: card.id,
+        attributes: card.attributes,
+        relationships: empty_relationships,
+        links: { self: "" },
+    });
 
     let search_input: HTMLInputElement | null = null;
     let is_open = $state(false);
     let dropdown_element = $state<HTMLDivElement | null>(null);
-    const filtered_cards = $derived(
-        filterAndRankCards($cards, $searchQuery).slice(0, 5),
-    );
+    let filtered_cards = $state<Card[]>([]);
+    let search_request_id = 0;
+
+    const to_search_key = (value: string) => {
+        return value
+            .trim()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/\p{Diacritic}/gu, "")
+            .replace(/[^a-z0-9]/g, "");
+    };
+
+    $effect(() => {
+        const search_key = to_search_key($search_query);
+
+        if (!is_open || !$db_ready || !search_key) {
+            filtered_cards = [];
+            return;
+        }
+
+        const request_id = ++search_request_id;
+
+        (async () => {
+            try {
+                const cards =
+                    await sql`SELECT * FROM unified_cards WHERE stripped_title LIKE ${`%${search_key}%`} ORDER BY CASE WHEN stripped_title LIKE ${`${search_key}%`} THEN 0 ELSE 1 END, title ASC LIMIT 5`;
+
+                if (request_id !== search_request_id) {
+                    return;
+                }
+
+                filtered_cards = normalize_sqlite(
+                    cards as Array<Card["attributes"] & { id: string }>,
+                ).map(to_card);
+            } catch (error) {
+                if (request_id !== search_request_id) {
+                    return;
+                }
+
+                console.error("Failed to load search results:", error);
+                filtered_cards = [];
+            }
+        })();
+    });
 
     // Close the dropdown on navigation, to prevent it from sticking around when navigating via search results
     afterNavigate(() => {
@@ -74,7 +131,7 @@
             bind:this={search_input}
             type="text"
             placeholder="Search"
-            bind:value={$searchQuery}
+            bind:value={$search_query}
             onfocus={() => (is_open = true)}
             onblur={(e) => {
                 const next = (e as FocusEvent).relatedTarget as Node | null;
@@ -88,7 +145,7 @@
             }}
         />
     </span>
-    {#if is_open && $searchQuery.length > 0}
+    {#if is_open && $search_query.length > 0}
         <div class="search-dropdown" bind:this={dropdown_element}>
             <h2>Cards</h2>
             <div class="card-grid">

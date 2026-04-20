@@ -5,6 +5,7 @@
 
     interface Props {
         card: Card | Printing;
+        type: "card" | Printing["type"];
         href?: string | null;
         loading?: "lazy" | "eager";
         class?: string;
@@ -15,6 +16,7 @@
 
     const {
         card,
+        type = card?.type ?? "card",
         // TODO: review/implement proper href routing for printings, currently does nothing (maybe use an achor of #printings instead?)
         href = `/card/${card && "type" in card && card.type === "printings" ? `${card.attributes.card_id}?printing=${card.id}` : card.id}`,
         loading = "lazy",
@@ -23,9 +25,27 @@
         hasTransition = false,
         responsive = false,
     }: Props = $props();
+
+    const get_title = (value: Props["card"]): string => {
+        return value.attributes.title ?? "Card image";
+    };
+
+    const get_printing_ids = (value: Props["card"]): string[] => {
+        return value.attributes.printing_ids ?? [];
+    };
+
+    const get_printing_card_id = (value: Props["card"]): string => {
+        return "card_id" in value.attributes
+            ? value.attributes.card_id
+            : value.id;
+    };
+
+    const is_printing = (value: Props["card"]): value is Printing => {
+        return "type" in value && value.type === "printings";
+    };
 </script>
 
-{#snippet image(card: Card | Printing)}
+{#snippet image(card: Props["card"])}
     {#if responsive}
         <picture>
             <source
@@ -39,10 +59,11 @@
                 media="(min-width:936px)"
             />
             <img
+                crossorigin="anonymous"
                 class="card {className}"
                 class:shadow={boxShadow}
                 src={getHighResImage(card)}
-                alt={card.attributes.title}
+                alt={get_title(card)}
                 {loading}
                 style:view-transition-name={hasTransition
                     ? `card-${card.id}`
@@ -51,17 +72,18 @@
         </picture>
     {:else}
         <img
+            crossorigin="anonymous"
             class="card {className}"
             class:shadow={boxShadow}
             src={getHighResImage(card)}
-            alt={card.attributes.title}
+            alt={get_title(card)}
             {loading}
             style:view-transition-name={hasTransition ? `card-${card.id}` : ""}
         />
     {/if}
 {/snippet}
 
-{#if card?.attributes?.printing_ids?.[0]}
+{#if get_printing_ids(card).length > 0 || is_printing(card)}
     {#if href}
         <a class="card-link" href={localizeHref(href)}>
             {@render image(card)}

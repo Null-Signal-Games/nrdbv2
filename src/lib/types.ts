@@ -19,6 +19,9 @@ export type CardTypeIds =
 	| 'runner_identity'
 	| 'upgrade';
 
+// TODO: get all available subtypes
+export type CardSubTypeIds = 'fracter' | 'icebreaker';
+
 export type FactionIds =
 	| 'anarch'
 	| 'criminal'
@@ -103,7 +106,7 @@ export interface Card {
 		text: string;
 		trash_cost: null;
 		is_unique: false;
-		card_subtype_ids: string[];
+		card_subtype_ids: CardSubTypeIds;
 		display_subtypes: null;
 		attribution: null;
 		updated_at: string;
@@ -313,7 +316,7 @@ export interface Printing {
 		text: string;
 		trash_cost: number | null;
 		is_unique: boolean;
-		card_subtype_ids: string[];
+		card_subtype_ids: CardSubTypeIds;
 		card_subtype_names: string[];
 		display_subtypes: string | null;
 		attribution: string | null;
@@ -426,5 +429,5 @@ export interface Comment {
 
 export interface CardGroup {
 	type: CardTypeIds;
-	data: (Card & { quantity: number })[];
+	data: Card[];
 }

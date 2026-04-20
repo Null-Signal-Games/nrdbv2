@@ -1,19 +1,17 @@
 <script lang="ts">
+    import type { PageServerData, PageData } from "../$types";
     import Container from "$lib/components/Container.svelte";
     import Header from "$lib/components/Header.svelte";
     import type { SidesIds, Faction, FactionIds, Card } from "$lib/types";
-    import { factions, cards } from "$lib/store";
-    import { store_or_server, filter_or_server } from "$lib/utils";
     import { onMount } from "svelte";
     import DecklistBuilder from "$lib/components/decklist/Builder.svelte";
     import Icon from "$lib/components/Icon.svelte";
     import Button from "$lib/components/ui/Button.svelte";
+    import CardImage from "$lib/components/card/CardImage.svelte";
+    import Meta from "$lib/components/card/Meta.svelte";
 
     interface Props {
-        data: {
-            factions: Faction[] | null;
-            faction_cards: Card[] | null;
-        };
+        data: PageServerData & PageData;
     }
 
     let { data }: Props = $props();
@@ -26,34 +24,26 @@
         value === "corp" || value === "runner";
 
     const is_faction_id = (value: string): value is FactionIds =>
-        factions_list.some((faction: Faction) => faction.id === value);
+        data.factions.some((faction: Faction) => faction.id === value);
 
-    let factions_list = $derived<Faction[]>(
-        store_or_server($factions, data.factions, "factions"),
-    );
     let selected_side_factions = $derived<Faction[]>(
-        factions_list.filter(
+        data.factions.filter(
             (faction: Faction) => faction.attributes.side_id === selected_side,
         ),
     );
 
     let identities_list = $derived<Card[]>(
-        filter_or_server(
-            $cards,
-            (card) => card.attributes.faction_id === selected_faction,
-            data.faction_cards,
-            `faction-cards:${selected_faction}`,
+        data.cards.filter(
+            (card: Card) =>
+                card.attributes.faction_id === selected_faction &&
+                card.attributes.card_type_id === `${selected_side}_identity`,
         ),
-    );
-
-    let all_cards_list = $derived<Card[]>(
-        store_or_server($cards, data.faction_cards, "cards"),
     );
 
     $effect(() => {
         if (!selected_identity) return;
 
-        const identity = all_cards_list.find(
+        const identity = data.cards.find(
             (card: Card) => card.id === selected_identity,
         );
 
@@ -70,30 +60,57 @@
         selected_side = side;
         selected_faction = null;
         selected_identity = null;
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("side", side);
+        window.history.pushState({}, "", url);
     };
 
     const select_faction = (faction: FactionIds) => {
         selected_faction = faction;
         selected_identity = null;
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("faction", faction);
+        window.history.pushState({}, "", url);
     };
 
     const select_identity = (identity: Card["id"]) => {
         selected_identity = identity;
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("identity", identity);
+        window.history.pushState({}, "", url);
     };
 
     const back_to_side = () => {
         selected_side = null;
         selected_faction = null;
         selected_identity = null;
+
+        const url = new URL(window.location.href);
+        url.searchParams.delete("side");
+        url.searchParams.delete("faction");
+        url.searchParams.delete("identity");
+        window.history.pushState({}, "", url);
     };
 
     const back_to_faction = () => {
         selected_faction = null;
         selected_identity = null;
+
+        const url = new URL(window.location.href);
+        url.searchParams.delete("faction");
+        url.searchParams.delete("identity");
+        window.history.pushState({}, "", url);
     };
 
     const back_to_identity = () => {
         selected_identity = null;
+
+        const url = new URL(window.location.href);
+        url.searchParams.delete("identity");
+        window.history.pushState({}, "", url);
     };
 
     onMount(() => {
@@ -103,9 +120,7 @@
         if (side && is_side_id(side)) selected_side = side;
 
         const faction = params.get("faction");
-        if (faction) {
-            selected_faction = faction as FactionIds;
-        }
+        if (faction) selected_faction = faction as FactionIds;
 
         const identity = params.get("identity");
         if (identity) selected_identity = identity as Card["id"];
@@ -126,7 +141,7 @@
 
         {#if selected_faction}
             <span
-                >{factions_list.find((f) => f.id === selected_faction)
+                >{data.factions.find((f) => f.id === selected_faction)
                     ?.attributes.name} -
             </span>
         {/if}
@@ -140,7 +155,7 @@
     </p>
 </Header>
 
-<Container id="decklist">
+<Container>
     {#if !selected_side}
         <div data-step="side" class="decklist-create-options">
             <Button onclick={() => select_side("corp")} data-id="create-corp"
@@ -171,12 +186,19 @@
     {:else if selected_side && selected_faction && !selected_identity}
         <div data-step="identity" class="decklist-create-options">
             <Button onclick={back_to_faction}>back</Button>
-            <ul>
+            <ul
+                style="display: grid; gap: 1rem; grid-template-columns: repeat(5, 1fr);"
+            >
                 {#each identities_list as identity (identity.id)}
                     <li>
-                        <Button onclick={() => select_identity(identity.id)}>
-                            {identity.attributes.title}
-                        </Button>
+                        <Meta card={identity}>
+                            <Button
+                                onclick={() => select_identity(identity.id)}
+                            >
+                                <CardImage card={identity} href={null} />
+                                {identity.attributes.title}
+                            </Button>
+                        </Meta>
                     </li>
                 {/each}
             </ul>
@@ -188,6 +210,8 @@
                 side={selected_side as SidesIds}
                 faction={selected_faction as FactionIds}
                 identity={selected_identity as Card["id"]}
+                factions={data.factions}
+                cards={data.cards}
             />
         </div>
     {/if}

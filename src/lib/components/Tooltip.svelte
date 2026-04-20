@@ -219,7 +219,7 @@
                         name={$tooltip.card.attributes.card_type_id}
                         size="sm"
                     />
-                    {card_types[$tooltip.card?.attributes.card_type_id]}
+                    {card_types[$tooltip.card.attributes.card_type_id]}
                 </span>
                 {#if $tooltip.card.attributes.influence_cost}
                     <Influence
@@ -231,7 +231,7 @@
                     />
                 {/if}
             </div>
-            {#if $tooltip.card.attributes?.text}
+            {#if $tooltip.card.attributes.text}
                 <div data-faction-theme={$tooltip.card.attributes.faction_id}>
                     <FormatText text={$tooltip.card.attributes.text} />
                 </div>
