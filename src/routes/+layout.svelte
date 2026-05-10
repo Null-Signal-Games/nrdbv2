@@ -10,8 +10,9 @@
     import Debug from "$lib/components/Debug.svelte";
     import Tooltip from "$lib/components/Tooltip.svelte";
     import { sql, overwriteDatabaseFile } from "$lib/sqlite";
+    import { fetch_published_databases } from "$lib/utils";
     import {
-        NRDB_SQLITE_URL,
+        CURRENT_SQLITE_URL_FILENAME,
         NRDB_SQLITE_NAME,
         NRDB_CACHE_COOKIE,
     } from "$lib/constants";
@@ -35,7 +36,14 @@
 
     onMount(async () => {
         try {
-            const root = await navigator.storage.getDirectory();
+            const [root, sqlite_url] = await Promise.all([
+                navigator.storage.getDirectory(),
+                fetch_published_databases()
+            ]);
+
+            if (sqlite_url === null) {
+                throw new Error("No valid database URL found in published_databases response");
+            }
 
             try {
                 await root.getFileHandle(NRDB_SQLITE_NAME);
@@ -57,7 +65,7 @@
                 }
 
                 console.log("[SQLITE] Fetching and decompressing sqlite db...");
-                const response = await fetch(NRDB_SQLITE_URL);
+                const response = await fetch(sqlite_url);
 
                 if (!response.ok) {
                     throw new Error(
@@ -84,21 +92,27 @@
                 console.log(
                     `[SQLITE] ${NRDB_SQLITE_NAME} downloaded and saved to OPFS.`,
                 );
-            } finally {
-                console.log("[SQLITE] Tables:");
-
-                if (dev) {
-                    console.dir(
-                        await sql`SELECT name FROM sqlite_master WHERE type = 'table'`,
-                    );
-                    console.dir(await sql`SELECT * FROM unified_cards LIMIT 5`);
-                }
-
-                db_ready.set(true);
-
-                // 30 days
-                document.cookie = `${NRDB_CACHE_COOKIE}=1; max-age=2592000; path=/`;
             }
+
+            // Write the current sqlite URL to OPFS so we know which version we have
+            const urlHandle = await root.getFileHandle(CURRENT_SQLITE_URL_FILENAME, { create: true });
+            const writable = await urlHandle.createWritable();
+            await writable.write(sqlite_url);
+            await writable.close();
+
+            // console.log("[SQLITE] Tables:");
+
+            // if (dev) {
+            //     console.dir(
+            //         await sql`SELECT name FROM sqlite_master WHERE type = 'table'`,
+            //     );
+            //     console.dir(await sql`SELECT * FROM unified_cards LIMIT 5`);
+            // }
+
+            db_ready.set(true);
+
+            // 30 days
+            document.cookie = `${NRDB_CACHE_COOKIE}=1; max-age=2592000; path=/`;
         } catch (error) {
             console.error(
                 "[SQLITE] Failed to initialize local database:",

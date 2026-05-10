@@ -1,6 +1,6 @@
 import type { Card, Decklist, FileFormat, CardGroup, Printing } from '$lib/types';
 
-import { NRDB_IMAGE_URL, NRDB_SQLITE_NAME } from '$lib/constants';
+import { NRDB_API_URL, NRDB_IMAGE_URL, NRDB_SQLITE_NAME } from '$lib/constants';
 
 export const reset_opfs_data = async () => {
 	const root = await navigator.storage.getDirectory();
@@ -13,6 +13,28 @@ export const reset_opfs_data = async () => {
 		});
 
 	window.location.reload();
+};
+
+export const fetch_published_databases = (): Promise<string | null> => {
+	return fetch(`${NRDB_API_URL}/published_databases`)
+		.then((dbResponse) => {
+			if (!dbResponse.ok) {
+				console.log(`Failed to fetch published databases: ${dbResponse.status}`);
+				return null;
+			}
+			return dbResponse.json();
+		})
+		.then((dbJson) => {
+			if (!dbJson?.data || dbJson.data.length !== 1 || !dbJson.data[0].attributes?.url) {
+				console.log("Could not find a valid database URL in the published_databases response");
+				return null;
+			}
+			return dbJson.data[0].attributes.url;
+		})
+		.catch((err) => {
+			console.error("Error fetching published databases:", err);
+			return null;
+		});
 };
 
 const parse_sqlite_value = (value: unknown) => {
@@ -71,25 +93,25 @@ export const getHighResImage = (
 	size: 'small' | 'medium' | 'large' = 'large'
 ): string => {
 	/*
-    // if the card includes one of the card cycles that are released by null signal games, use the nsg image
-    const nsgCardCycles = ['elevation', 'liberation', 'borealis', 'ashes', 'system_gateway'];
+	// if the card includes one of the card cycles that are released by null signal games, use the nsg image
+	const nsgCardCycles = ['elevation', 'liberation', 'borealis', 'ashes', 'system_gateway'];
 
-    // If the card is a printing, use the printing image URL structure (id is the printing ID, not the card ID)
-    if (card && 'type' in card && card.type === 'printings') {
-        return `${NRDB_IMAGE_URL}/${size}/${card.id}.jpg`;
-    }
+	// If the card is a printing, use the printing image URL structure (id is the printing ID, not the card ID)
+	if (card && 'type' in card && card.type === 'printings') {
+		return `${NRDB_IMAGE_URL}/${size}/${card.id}.jpg`;
+	}
 
-    // If the card is from a NSG cycle, or doesn't have a NRDB classic image, use the NRDB image
-    if (nsgCardCycles.some((cycle) => card.attributes.card_cycle_ids.includes(cycle))) {
-        return `${NRDB_IMAGE_URL}/xlarge/${card.attributes.latest_printing_id}.webp`;
-    }
+	// If the card is from a NSG cycle, or doesn't have a NRDB classic image, use the NRDB image
+	if (nsgCardCycles.some((cycle) => card.attributes.card_cycle_ids.includes(cycle))) {
+		return `${NRDB_IMAGE_URL}/xlarge/${card.attributes.latest_printing_id}.webp`;
+	}
 
-    if (!card.attributes.latest_printing_images?.nrdb_classic) {
-        return `${NRDB_IMAGE_URL}/large/${card.attributes.latest_printing_id}.jpg`;
-    }
+	if (!card.attributes.latest_printing_images?.nrdb_classic) {
+		return `${NRDB_IMAGE_URL}/large/${card.attributes.latest_printing_id}.jpg`;
+	}
 
-    return card.attributes.latest_printing_images.nrdb_classic[size];
-    */
+	return card.attributes.latest_printing_images.nrdb_classic[size];
+	*/
 
 	return `${NRDB_IMAGE_URL}/${size}/${card.attributes.printing_ids[0]}.jpg`;
 };

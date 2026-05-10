@@ -11,9 +11,8 @@ export const NRDB_IMAGE_URL = 'https://card-images.netrunnerdb.com/v2';
 export const NRDB_API_URL = `${NRDB_API}/public`;
 export const NRDB_PRIVATE_API_URL = `${NRDB_API_PREVIEW}/private`;
 export const NRDB_CLASSIC_URL = 'https://netrunnerdb.com/en';
-export const NRDB_SQLITE_URL =
-	'https://card-images.netrunnerdb.com/sqlite-tmp/netrunnerdb.sqlite3.1773596450.gz';
 export const NRDB_SQLITE_NAME = 'netrunnerdb.sqlite3';
+export const CURRENT_SQLITE_URL_FILENAME = 'current_sqlite_url';
 export const NRDB_CACHE_COOKIE = 'nrdb_cache';
 export const SEARCH_LIMIT = 20;
 
