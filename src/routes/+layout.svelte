@@ -38,23 +38,36 @@
         try {
             const [root, sqlite_url] = await Promise.all([
                 navigator.storage.getDirectory(),
-                fetch_published_databases()
+                fetch_published_databases(),
             ]);
 
             if (sqlite_url === null) {
-                throw new Error("No valid database URL found in published_databases response");
+                throw new Error(
+                    "No valid database URL found in published_databases response",
+                );
             }
 
-            try {
-                await root.getFileHandle(NRDB_SQLITE_NAME);
-                console.log(
-                    `[SQLITE] ${NRDB_SQLITE_NAME} already exists in OPFS. Skipping download.`,
-                );
-            } catch (error) {
-                console.log(
-                    `[SQLITE] ${NRDB_SQLITE_NAME} not found in OPFS. Fetching from network...`,
-                );
+            let needsDownload = false;
+            let dbReady = false;
 
+            try {
+                const urlHandle = await root.getFileHandle(
+                    CURRENT_SQLITE_URL_FILENAME,
+                );
+                const file = await urlHandle.getFile();
+                const storedUrl = await file.text();
+
+                if (storedUrl !== sqlite_url) {
+                    console.log("[SQLITE] Database URL changed. Needs update.");
+                    needsDownload = true;
+                } else {
+                    await root.getFileHandle(NRDB_SQLITE_NAME);
+                    console.log(
+                        `[SQLITE] ${NRDB_SQLITE_NAME} already exists and is up to date in OPFS. Skipping download.`,
+                    );
+                    dbReady = true;
+                }
+            } catch (error) {
                 if (
                     !(
                         error instanceof DOMException &&
@@ -64,6 +77,13 @@
                     throw error;
                 }
 
+                console.log(
+                    "[SQLITE] Database or tracking file not found in OPFS. Needs download.",
+                );
+                needsDownload = true;
+            }
+
+            if (needsDownload) {
                 console.log("[SQLITE] Fetching and decompressing sqlite db...");
                 const response = await fetch(sqlite_url);
 
@@ -92,24 +112,20 @@
                 console.log(
                     `[SQLITE] ${NRDB_SQLITE_NAME} downloaded and saved to OPFS.`,
                 );
+
+                // Write the current sqlite URL to OPFS so we know which version we have
+                const urlHandle = await root.getFileHandle(
+                    CURRENT_SQLITE_URL_FILENAME,
+                    { create: true },
+                );
+                const writable = await urlHandle.createWritable();
+                await writable.write(sqlite_url);
+                await writable.close();
+
+                dbReady = true;
             }
 
-            // Write the current sqlite URL to OPFS so we know which version we have
-            const urlHandle = await root.getFileHandle(CURRENT_SQLITE_URL_FILENAME, { create: true });
-            const writable = await urlHandle.createWritable();
-            await writable.write(sqlite_url);
-            await writable.close();
-
-            // console.log("[SQLITE] Tables:");
-
-            // if (dev) {
-            //     console.dir(
-            //         await sql`SELECT name FROM sqlite_master WHERE type = 'table'`,
-            //     );
-            //     console.dir(await sql`SELECT * FROM unified_cards LIMIT 5`);
-            // }
-
-            db_ready.set(true);
+            db_ready.set(dbReady);
 
             // 30 days
             document.cookie = `${NRDB_CACHE_COOKIE}=1; max-age=2592000; path=/`;
