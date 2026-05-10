@@ -26,13 +26,15 @@ export const fetch_published_databases = (): Promise<string | null> => {
 		})
 		.then((dbJson) => {
 			if (!dbJson?.data || dbJson.data.length !== 1 || !dbJson.data[0].attributes?.url) {
-				console.log("Could not find a valid database URL in the published_databases response");
+				console.log(
+					'Could not find a valid database URL in the published_databases response'
+				);
 				return null;
 			}
 			return dbJson.data[0].attributes.url;
 		})
 		.catch((err) => {
-			console.error("Error fetching published databases:", err);
+			console.error('Error fetching published databases:', err);
 			return null;
 		});
 };
