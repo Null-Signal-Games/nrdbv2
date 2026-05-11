@@ -1,6 +1,35 @@
 import type { Card, Printing } from './types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
+const NO_XLARGE_CYCLES = [
+    'system_core_2019',
+    'magnum_opus_reprint',
+    'salvaged_memories',
+    'system_update_2021'
+];
+
+function parseNumSafe(val: unknown): number | null {
+    return val !== null && val !== undefined ? Number(val) : null;
+}
+
+function parseBoolSafe(val: unknown): boolean {
+    return Boolean(val) || String(val) === '1';
+}
+
+function parseStringArraySafe(val: unknown): string[] {
+    return parseJsonSafe(val, []) as string[];
+}
+
+function buildRel(path: string, filterId?: string | null, filterField: string = 'id') {
+    if (filterId !== undefined && filterId !== null && filterId !== '' && filterId !== 'none') {
+        return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
+    }
+    if (filterId === 'none' || filterId === '') {
+        return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
+    }
+    return { links: { related: `${NRDB_API_URL}/${path}` } };
+}
+
 // Helper to safely parse JSON strings from SQLite
 function parseJsonSafe(val: unknown, fallback: unknown = []): unknown {
 	if (typeof val === 'string') {
@@ -67,15 +96,13 @@ function buildImages(id_prefix: string, hasNarrative: boolean, hasXlarge: boolea
 }
 
 function buildFaces(row: Record<string, unknown>, id_prefix: string | null) {
-	const released_by_check = row.released_by === 'null_signal_games' || (parseJsonSafe(row.printings_released_by, []) as string[]).includes('null_signal_games');
-	const cycle_check = (row.card_cycle_id as string) || (parseJsonSafe(row.card_cycle_ids, []) as string[])[0];
+	const released_by_check =
+		row.released_by === 'null_signal_games' ||
+		parseStringArraySafe(row.printings_released_by).includes('null_signal_games');
+	const cycle_check =
+		(row.card_cycle_id as string) || parseStringArraySafe(row.card_cycle_ids)[0];
 
-	const hasXlarge = released_by_check && ![
-		'system_core_2019',
-		'magnum_opus_reprint',
-		'salvaged_memories',
-		'system_update_2021'
-	].includes(cycle_check as string);
+	const hasXlarge = released_by_check && !NO_XLARGE_CYCLES.includes(cycle_check as string);
 
 	const face_indices = parseJsonSafe(row.face_indices, []) as number[];
 	const faces_title = parseJsonSafe(row.faces_title, []) as (string | null)[];
@@ -83,7 +110,10 @@ function buildFaces(row: Record<string, unknown>, id_prefix: string | null) {
 	const faces_stripped_title = parseJsonSafe(row.faces_stripped_title, []) as (string | null)[];
 	const faces_stripped_text = parseJsonSafe(row.faces_stripped_text, []) as (string | null)[];
 	const faces_card_subtype_ids = parseJsonSafe(row.faces_card_subtype_ids, []) as string[][];
-	const faces_display_subtypes = parseJsonSafe(row.faces_display_subtypes, []) as (string | null)[];
+	const faces_display_subtypes = parseJsonSafe(row.faces_display_subtypes, []) as (
+		| string
+		| null
+	)[];
 	const faces_base_link = parseJsonSafe(row.faces_base_link, []) as (string | number | null)[];
 	const faces_flavor = parseJsonSafe(row.faces_flavor, []) as (string | null)[];
 	const faces_copy_quantity = parseJsonSafe(row.faces_copy_quantity, []) as (number | null)[];
@@ -131,12 +161,10 @@ function getSharedAttributes(row: Record<string, unknown>, id_prefix: string | n
 	const advancement_requirement =
 		row.advancement_requirement === -1
 			? 'X'
-			: row.advancement_requirement !== null
-				? String(row.advancement_requirement)
-				: null;
-	const cost = row.cost === -1 ? 'X' : row.cost !== null ? String(row.cost) : null;
-	const card_subtype_ids = parseJsonSafe(row.card_subtype_ids, []) as string[];
-	const printing_ids = parseJsonSafe(row.printing_ids, []) as string[];
+			: parseNumSafe(row.advancement_requirement) !== null ? String(row.advancement_requirement) : null;
+	const cost = row.cost === -1 ? 'X' : parseNumSafe(row.cost) !== null ? String(row.cost) : null;
+	const card_subtype_ids = parseStringArraySafe(row.card_subtype_ids);
+	const printing_ids = parseStringArraySafe(row.printing_ids);
 
 	return {
 		stripped_title: row.stripped_title,
@@ -146,22 +174,22 @@ function getSharedAttributes(row: Record<string, unknown>, id_prefix: string | n
 		faction_id: row.faction_id,
 		cost,
 		advancement_requirement,
-		agenda_points: row.agenda_points !== null && row.agenda_points !== undefined ? Number(row.agenda_points) : null,
-		base_link: row.base_link !== null && row.base_link !== undefined ? Number(row.base_link) : null,
-		deck_limit: row.deck_limit !== null && row.deck_limit !== undefined ? Number(row.deck_limit) : null,
-		in_restriction: Boolean(row.in_restriction),
-		influence_cost: row.influence_cost !== null && row.influence_cost !== undefined ? Number(row.influence_cost) : null,
-		influence_limit: row.influence_limit !== null && row.influence_limit !== undefined ? Number(row.influence_limit) : null,
-		memory_cost: row.memory_cost !== null && row.memory_cost !== undefined ? Number(row.memory_cost) : null,
-		minimum_deck_size: row.minimum_deck_size !== null && row.minimum_deck_size !== undefined ? Number(row.minimum_deck_size) : null,
-		num_printings: row.num_printings !== null && row.num_printings !== undefined ? Number(row.num_printings) : null,
+		agenda_points: parseNumSafe(row.agenda_points),
+		base_link: parseNumSafe(row.base_link),
+		deck_limit: parseNumSafe(row.deck_limit),
+		in_restriction: parseBoolSafe(row.in_restriction),
+		influence_cost: parseNumSafe(row.influence_cost),
+		influence_limit: parseNumSafe(row.influence_limit),
+		memory_cost: parseNumSafe(row.memory_cost),
+		minimum_deck_size: parseNumSafe(row.minimum_deck_size),
+		num_printings: parseNumSafe(row.num_printings),
 		printing_ids,
-		restriction_ids: parseJsonSafe(row.restriction_ids, []),
-		strength: row.strength !== null && row.strength !== undefined ? Number(row.strength) : null,
+		restriction_ids: parseStringArraySafe(row.restriction_ids),
+		strength: parseNumSafe(row.strength),
 		stripped_text: row.stripped_text,
 		text: row.text,
-		trash_cost: row.trash_cost !== null && row.trash_cost !== undefined ? Number(row.trash_cost) : null,
-		is_unique: Boolean(row.is_unique),
+		trash_cost: parseNumSafe(row.trash_cost),
+		is_unique: parseBoolSafe(row.is_unique),
 		card_subtype_ids,
 		display_subtypes: row.display_subtypes,
 		attribution: row.attribution,
@@ -178,7 +206,10 @@ function getSharedAttributes(row: Record<string, unknown>, id_prefix: string | n
 		pronouns: row.pronouns,
 		pronunciation_approximation: row.pronunciation_approximation,
 		pronunciation_ipa: row.pronunciation_ipa,
-		num_extra_faces: row.num_extra_faces !== null && row.num_extra_faces !== undefined ? Number(row.num_extra_faces) : 0,
+		num_extra_faces:
+			row.num_extra_faces !== null && row.num_extra_faces !== undefined
+				? Number(row.num_extra_faces)
+				: 0,
 		card_abilities: {
 			additional_cost: Boolean(row.additional_cost),
 			advanceable: Boolean(row.advanceable),
@@ -188,13 +219,26 @@ function getSharedAttributes(row: Record<string, unknown>, id_prefix: string | n
 			has_paid_ability: Boolean(row.has_paid_ability),
 			install_effect: Boolean(row.install_effect),
 			interrupt: Boolean(row.interrupt),
-			link_provided: row.link_provided !== null && row.link_provided !== undefined ? Number(row.link_provided) : null,
+			link_provided:
+				row.link_provided !== null && row.link_provided !== undefined
+					? Number(row.link_provided)
+					: null,
 			mark: Boolean(row.mark),
-			mu_provided: row.mu_provided !== null && row.mu_provided !== undefined ? Number(row.mu_provided) : null,
-			num_printed_subroutines: row.num_printed_subroutines !== null && row.num_printed_subroutines !== undefined ? Number(row.num_printed_subroutines) : null,
+			mu_provided:
+				row.mu_provided !== null && row.mu_provided !== undefined
+					? Number(row.mu_provided)
+					: null,
+			num_printed_subroutines:
+				row.num_printed_subroutines !== null && row.num_printed_subroutines !== undefined
+					? Number(row.num_printed_subroutines)
+					: null,
 			on_encounter_effect: Boolean(row.on_encounter_effect),
 			performs_trace: Boolean(row.performs_trace),
-			recurring_credits_provided: row.recurring_credits_provided !== null && row.recurring_credits_provided !== undefined ? Number(row.recurring_credits_provided) : null,
+			recurring_credits_provided:
+				row.recurring_credits_provided !== null &&
+				row.recurring_credits_provided !== undefined
+					? Number(row.recurring_credits_provided)
+					: null,
 			rez_effect: Boolean(row.rez_effect),
 			sabotage: Boolean(row.sabotage),
 			score_effect: Boolean(row.score_effect),
@@ -221,13 +265,9 @@ export function adaptCard(row: Record<string, unknown>): Card {
 	const card_cycle_ids = parseJsonSafe(row.card_cycle_ids, []) as string[];
 	const card_subtype_ids = parseJsonSafe(row.card_subtype_ids, []) as string[];
 
-	const hasXlarge = printings_released_by.includes('null_signal_games') &&
-		![
-			'system_core_2019',
-			'magnum_opus_reprint',
-			'salvaged_memories',
-			'system_update_2021'
-		].includes(card_cycle_ids[0]);
+	const hasXlarge =
+		printings_released_by.includes('null_signal_games') &&
+		!NO_XLARGE_CYCLES.includes(card_cycle_ids[0]);
 	const hasNarrative = Boolean(row.narrative_text);
 
 	return {
@@ -239,64 +279,22 @@ export function adaptCard(row: Record<string, unknown>): Card {
 			layout_id: row.layout_id,
 			printings_released_by: printings_released_by,
 			latest_printing_id,
-			latest_printing_images: latest_printing_id ? buildImages(latest_printing_id, hasNarrative, hasXlarge) : null
+			latest_printing_images: latest_printing_id
+				? buildImages(latest_printing_id, hasNarrative, hasXlarge)
+				: null
 		},
 		relationships: {
-			card_cycles: {
-				links: {
-					related: `${NRDB_API_URL}/card_cycles?filter[id]=${(parseJsonSafe(row.card_cycle_ids, []) as string[]).join(',')}`
-				}
-			},
-			card_sets: {
-				links: {
-					related: `${NRDB_API_URL}/card_sets?filter[id]=${(parseJsonSafe(row.card_set_ids, []) as string[]).join(',')}`
-				}
-			},
-			card_subtypes: {
-				links: {
-					related: `${NRDB_API_URL}/card_subtypes?filter[id]=${card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : 'none'}`
-				}
-			},
-			card_type: {
-				links: {
-					related: `${NRDB_API_URL}/card_types/${row.card_type_id}`
-				}
-			},
-			faction: {
-				links: {
-					related: `${NRDB_API_URL}/factions/${row.faction_id}`
-				}
-			},
-			printings: {
-				links: {
-					related: `${NRDB_API_URL}/printings?filter[card_id]=${id}`
-				}
-			},
-			rulings: {
-				links: {
-					related: `${NRDB_API_URL}/rulings?filter[card_id]=${id}`
-				}
-			},
-			reviews: {
-				links: {
-					related: `${NRDB_API_URL}/reviews?filter[card_id]=${id}`
-				}
-			},
-			side: {
-				links: {
-					related: `${NRDB_API_URL}/sides/${row.side_id}`
-				}
-			},
-			decklists: {
-				links: {
-					related: `${NRDB_API_URL}/decklists?filter[card_id]=${id}`
-				}
-			},
-			card_pools: {
-				links: {
-					related: `${NRDB_API_URL}/card_pools?filter[card_id]=${id}`
-				}
-			}
+			card_cycles: buildRel('card_cycles', parseStringArraySafe(row.card_cycle_ids).join(',')),
+			card_sets: buildRel('card_sets', parseStringArraySafe(row.card_set_ids).join(',')),
+			card_subtypes: buildRel('card_subtypes', card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : 'none'),
+			card_type: buildRel(`card_types/${row.card_type_id}`),
+			faction: buildRel(`factions/${row.faction_id}`),
+			printings: buildRel('printings', id, 'card_id'),
+			rulings: buildRel('rulings', id, 'card_id'),
+			reviews: buildRel('reviews', id, 'card_id'),
+			side: buildRel(`sides/${row.side_id}`),
+			decklists: buildRel('decklists', id, 'card_id'),
+			card_pools: buildRel('card_pools', id, 'card_id')
 		},
 		links: {
 			self: `${NRDB_API_URL}/cards/${id}`
@@ -311,7 +309,8 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 	const printing_ids = parseJsonSafe(row.printing_ids, []) as string[];
 	const card_subtype_ids = parseJsonSafe(row.card_subtype_ids, []) as string[];
 
-	const hasXlarge = row.released_by === 'null_signal_games' &&
+	const hasXlarge =
+		row.released_by === 'null_signal_games' &&
 		![
 			'system_core_2019',
 			'magnum_opus_reprint',
@@ -343,55 +342,23 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 			released_by: row.released_by as string,
 			printings_released_by: parseJsonSafe(row.printings_released_by, []) as string[],
 			images: buildImages(id, hasNarrative, hasXlarge),
-			latest_printing_id: Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1' ? id : (printing_ids[0] || id),
-			is_latest_printing: Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1',
+			latest_printing_id:
+				Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1'
+					? id
+					: printing_ids[0] || id,
+			is_latest_printing:
+				Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1'
 		},
 		relationships: {
-			card: {
-				links: {
-					related: `${NRDB_API_URL}/cards/${card_id}`
-				}
-			},
-			card_cycle: {
-				links: {
-					related: `${NRDB_API_URL}/card_cycles/${row.card_cycle_id}`
-				}
-			},
-			card_set: {
-				links: {
-					related: `${NRDB_API_URL}/card_sets/${row.card_set_id}`
-				}
-			},
-			card_type: {
-				links: {
-					related: `${NRDB_API_URL}/card_types/${row.card_type_id}`
-				}
-			},
-			faction: {
-				links: {
-					related: `${NRDB_API_URL}/factions/${row.faction_id}`
-				}
-			},
-			side: {
-				links: {
-					related: `${NRDB_API_URL}/sides/${row.side_id}`
-				}
-			},
-			card_subtypes: {
-				links: {
-					related: `${NRDB_API_URL}/card_subtypes?filter[id]=${card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : ''}`
-				}
-			},
-			illustrators: {
-				links: {
-					related: `${NRDB_API_URL}/illustrators?filter[id]=${illustrator_ids.length > 0 ? illustrator_ids.join(',') : ''}`
-				}
-			},
-			card_pools: {
-				links: {
-					related: `${NRDB_API_URL}/card_pools?filter[printing_id]=${id}`
-				}
-			}
+			card: buildRel(`cards/${card_id}`),
+			card_cycle: buildRel(`card_cycles/${row.card_cycle_id}`),
+			card_set: buildRel(`card_sets/${row.card_set_id}`),
+			card_type: buildRel(`card_types/${row.card_type_id}`),
+			faction: buildRel(`factions/${row.faction_id}`),
+			side: buildRel(`sides/${row.side_id}`),
+			card_subtypes: buildRel('card_subtypes', card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : ''),
+			illustrators: buildRel('illustrators', illustrator_ids.length > 0 ? illustrator_ids.join(',') : ''),
+			card_pools: buildRel('card_pools', id, 'printing_id')
 		},
 		links: {
 			self: `${NRDB_API_URL}/printings/${id}`
