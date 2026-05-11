@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import Database from 'better-sqlite3';
-import { adaptCard } from './adapter.js';
+import { adaptCard, adaptPrinting } from './adapter.js';
 import fs from 'fs';
 import path from 'path';
-import type { Card } from './types.js';
+import type { Card, Printing } from './types.js';
 
 describe('Card Adapter', () => {
 	it('correctly adapts all cards from sqlite to match API output', () => {
@@ -37,5 +37,37 @@ describe('Card Adapter', () => {
 		}
 
 		console.log('Cards tested by type:', Object.fromEntries(typeCounts));
+	});
+});
+
+describe('Printing Adapter', () => {
+	it('correctly adapts all printings from sqlite to match API output', () => {
+		const printingsJsonPath = path.resolve(__dirname, '../../printings.json');
+		const printingsData = JSON.parse(fs.readFileSync(printingsJsonPath, 'utf8'));
+		const expectedPrintings = printingsData.data as Printing[];
+
+		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
+		const db = new Database(dbPath);
+		const rows = db.prepare('SELECT * FROM unified_printings').all() as Record<string, unknown>[];
+		db.close();
+
+		expect(rows.length).toBeGreaterThan(0);
+		expect(rows.length).toBe(expectedPrintings.length);
+
+		const expectedMap = new Map(expectedPrintings.map((c: Printing) => [c.id, c]));
+		const typeCounts = new Map<string, number>();
+
+		for (const row of rows) {
+			const typeId = (row.card_type_id as string) || 'unknown';
+			typeCounts.set(typeId, (typeCounts.get(typeId) || 0) + 1);
+
+			const expectedPrinting = expectedMap.get(row.id as string);
+			expect(expectedPrinting, `Missing expected printing for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptPrinting(row);
+			expect(adapted).toEqual(expectedPrinting);
+		}
+
+		console.log('Printings tested by type:', Object.fromEntries(typeCounts));
 	});
 });
