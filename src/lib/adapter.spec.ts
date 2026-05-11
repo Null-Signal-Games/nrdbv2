@@ -48,7 +48,10 @@ describe('Printing Adapter', () => {
 
 		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
 		const db = new Database(dbPath);
-		const rows = db.prepare('SELECT * FROM unified_printings').all() as Record<string, unknown>[];
+		const rows = db.prepare('SELECT * FROM unified_printings').all() as Record<
+			string,
+			unknown
+		>[];
 		db.close();
 
 		expect(rows.length).toBeGreaterThan(0);

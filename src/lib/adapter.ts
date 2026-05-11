@@ -1,4 +1,5 @@
 import type { Card, Printing, CardTypeIds, CardSubTypeIds } from './types.js';
+import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
 // Helper to safely parse JSON strings from SQLite
 function parseJsonSafe(val: unknown, fallback: unknown = []): unknown {
@@ -81,7 +82,10 @@ export function adaptCard(row: Record<string, unknown>): Card {
 	const faces_stripped_title = parseJsonSafe(row.faces_stripped_title, []) as (string | null)[];
 	const faces_stripped_text = parseJsonSafe(row.faces_stripped_text, []) as (string | null)[];
 	const faces_card_subtype_ids = parseJsonSafe(row.faces_card_subtype_ids, []) as string[][];
-	const faces_display_subtypes = parseJsonSafe(row.faces_display_subtypes, []) as (string | null)[];
+	const faces_display_subtypes = parseJsonSafe(row.faces_display_subtypes, []) as (
+		| string
+		| null
+	)[];
 	const faces_base_link = parseJsonSafe(row.faces_base_link, []) as (string | number | null)[];
 
 	const faces = face_indices.map((index: number, i: number) => {
@@ -91,13 +95,13 @@ export function adaptCard(row: Record<string, unknown>): Card {
 			images: latest_printing_id
 				? {
 						nrdb_classic: {
-							tiny: `https://card-images.netrunnerdb.com/v2/tiny/${latest_printing_id}-${index}.jpg`,
-							small: `https://card-images.netrunnerdb.com/v2/small/${latest_printing_id}-${index}.jpg`,
-							medium: `https://card-images.netrunnerdb.com/v2/medium/${latest_printing_id}-${index}.jpg`,
-							large: `https://card-images.netrunnerdb.com/v2/large/${latest_printing_id}-${index}.jpg`,
+							tiny: `${NRDB_IMAGE_URL}/tiny/${latest_printing_id}-${index}.jpg`,
+							small: `${NRDB_IMAGE_URL}/small/${latest_printing_id}-${index}.jpg`,
+							medium: `${NRDB_IMAGE_URL}/medium/${latest_printing_id}-${index}.jpg`,
+							large: `${NRDB_IMAGE_URL}/large/${latest_printing_id}-${index}.jpg`,
 							...(hasXlarge
 								? {
-										xlarge: `https://card-images.netrunnerdb.com/v2/xlarge/${latest_printing_id}-${index}.webp`
+										xlarge: `${NRDB_IMAGE_URL}/xlarge/${latest_printing_id}-${index}.webp`
 									}
 								: {})
 						}
@@ -205,18 +209,18 @@ export function adaptCard(row: Record<string, unknown>): Card {
 			latest_printing_images: latest_printing_id
 				? {
 						nrdb_classic: {
-							tiny: `https://card-images.netrunnerdb.com/v2/tiny/${latest_printing_id}.jpg`,
-							small: `https://card-images.netrunnerdb.com/v2/small/${latest_printing_id}.jpg`,
-							medium: `https://card-images.netrunnerdb.com/v2/medium/${latest_printing_id}.jpg`,
-							large: `https://card-images.netrunnerdb.com/v2/large/${latest_printing_id}.jpg`,
+							tiny: `${NRDB_IMAGE_URL}/tiny/${latest_printing_id}.jpg`,
+							small: `${NRDB_IMAGE_URL}/small/${latest_printing_id}.jpg`,
+							medium: `${NRDB_IMAGE_URL}/medium/${latest_printing_id}.jpg`,
+							large: `${NRDB_IMAGE_URL}/large/${latest_printing_id}.jpg`,
 							...(hasNarrative
 								? {
-										narrative: `https://card-images.netrunnerdb.com/v2/xlarge/${latest_printing_id}-narrative.webp`
+										narrative: `${NRDB_IMAGE_URL}/xlarge/${latest_printing_id}-narrative.webp`
 									}
 								: {}),
 							...(hasXlarge
 								? {
-										xlarge: `https://card-images.netrunnerdb.com/v2/xlarge/${latest_printing_id}.webp`
+										xlarge: `${NRDB_IMAGE_URL}/xlarge/${latest_printing_id}.webp`
 									}
 								: {})
 						}
@@ -226,62 +230,62 @@ export function adaptCard(row: Record<string, unknown>): Card {
 		relationships: {
 			card_cycles: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_cycles?filter[id]=${(parseJsonSafe(row.card_cycle_ids, []) as string[]).join(',')}`
+					related: `${NRDB_API_URL}/card_cycles?filter[id]=${(parseJsonSafe(row.card_cycle_ids, []) as string[]).join(',')}`
 				}
 			},
 			card_sets: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_sets?filter[id]=${(parseJsonSafe(row.card_set_ids, []) as string[]).join(',')}`
+					related: `${NRDB_API_URL}/card_sets?filter[id]=${(parseJsonSafe(row.card_set_ids, []) as string[]).join(',')}`
 				}
 			},
 			card_subtypes: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_subtypes?filter[id]=${card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : 'none'}`
+					related: `${NRDB_API_URL}/card_subtypes?filter[id]=${card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : 'none'}`
 				}
 			},
 			card_type: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_types/${row.card_type_id}`
+					related: `${NRDB_API_URL}/card_types/${row.card_type_id}`
 				}
 			},
 			faction: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/factions/${row.faction_id}`
+					related: `${NRDB_API_URL}/factions/${row.faction_id}`
 				}
 			},
 			printings: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/printings?filter[card_id]=${id}`
+					related: `${NRDB_API_URL}/printings?filter[card_id]=${id}`
 				}
 			},
 			rulings: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/rulings?filter[card_id]=${id}`
+					related: `${NRDB_API_URL}/rulings?filter[card_id]=${id}`
 				}
 			},
 			reviews: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/reviews?filter[card_id]=${id}`
+					related: `${NRDB_API_URL}/reviews?filter[card_id]=${id}`
 				}
 			},
 			side: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/sides/${row.side_id}`
+					related: `${NRDB_API_URL}/sides/${row.side_id}`
 				}
 			},
 			decklists: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/decklists?filter[card_id]=${id}`
+					related: `${NRDB_API_URL}/decklists?filter[card_id]=${id}`
 				}
 			},
 			card_pools: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_pools?filter[card_id]=${id}`
+					related: `${NRDB_API_URL}/card_pools?filter[card_id]=${id}`
 				}
 			}
 		},
 		links: {
-			self: `https://api.netrunnerdb.com/api/v3/public/cards/${id}`
+			self: `${NRDB_API_URL}/cards/${id}`
 		}
 	} as unknown as Card; // Cast through unknown to avoid deep Card interface minor discrepancies
 }
@@ -319,7 +323,10 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 	const faces_stripped_title = parseJsonSafe(row.faces_stripped_title, []) as (string | null)[];
 	const faces_stripped_text = parseJsonSafe(row.faces_stripped_text, []) as (string | null)[];
 	const faces_card_subtype_ids = parseJsonSafe(row.faces_card_subtype_ids, []) as string[][];
-	const faces_display_subtypes = parseJsonSafe(row.faces_display_subtypes, []) as (string | null)[];
+	const faces_display_subtypes = parseJsonSafe(row.faces_display_subtypes, []) as (
+		| string
+		| null
+	)[];
 	const faces_base_link = parseJsonSafe(row.faces_base_link, []) as (string | number | null)[];
 	const faces_flavor = parseJsonSafe(row.faces_flavor, []) as (string | null)[];
 	const faces_copy_quantity = parseJsonSafe(row.faces_copy_quantity, []) as (number | null)[];
@@ -328,13 +335,13 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 		const result: Record<string, unknown> = {
 			images: {
 				nrdb_classic: {
-					tiny: `https://card-images.netrunnerdb.com/v2/tiny/${id}-${index}.jpg`,
-					small: `https://card-images.netrunnerdb.com/v2/small/${id}-${index}.jpg`,
-					medium: `https://card-images.netrunnerdb.com/v2/medium/${id}-${index}.jpg`,
-					large: `https://card-images.netrunnerdb.com/v2/large/${id}-${index}.jpg`,
+					tiny: `${NRDB_IMAGE_URL}/tiny/${id}-${index}.jpg`,
+					small: `${NRDB_IMAGE_URL}/small/${id}-${index}.jpg`,
+					medium: `${NRDB_IMAGE_URL}/medium/${id}-${index}.jpg`,
+					large: `${NRDB_IMAGE_URL}/large/${id}-${index}.jpg`,
 					...(hasXlarge
 						? {
-								xlarge: `https://card-images.netrunnerdb.com/v2/xlarge/${id}-${index}.webp`
+								xlarge: `${NRDB_IMAGE_URL}/xlarge/${id}-${index}.webp`
 							}
 						: {})
 				}
@@ -402,9 +409,11 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 			influence_cost: row.influence_cost !== null ? Number(row.influence_cost) : null,
 			influence_limit: row.influence_limit !== null ? Number(row.influence_limit) : null,
 			memory_cost: row.memory_cost !== null ? Number(row.memory_cost) : null,
-			minimum_deck_size: row.minimum_deck_size !== null ? Number(row.minimum_deck_size) : null,
+			minimum_deck_size:
+				row.minimum_deck_size !== null ? Number(row.minimum_deck_size) : null,
 			num_printings: Number(row.num_printings),
-			is_latest_printing: Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1',
+			is_latest_printing:
+				Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1',
 			printing_ids,
 			restriction_ids: parseJsonSafe(row.restriction_ids, []) as string[],
 			strength: row.strength !== null ? Number(row.strength) : null,
@@ -432,18 +441,18 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 			pronunciation_ipa: (row.pronunciation_ipa as string) || null,
 			images: {
 				nrdb_classic: {
-					tiny: `https://card-images.netrunnerdb.com/v2/tiny/${id}.jpg`,
-					small: `https://card-images.netrunnerdb.com/v2/small/${id}.jpg`,
-					medium: `https://card-images.netrunnerdb.com/v2/medium/${id}.jpg`,
-					large: `https://card-images.netrunnerdb.com/v2/large/${id}.jpg`,
+					tiny: `${NRDB_IMAGE_URL}/tiny/${id}.jpg`,
+					small: `${NRDB_IMAGE_URL}/small/${id}.jpg`,
+					medium: `${NRDB_IMAGE_URL}/medium/${id}.jpg`,
+					large: `${NRDB_IMAGE_URL}/large/${id}.jpg`,
 					...(hasNarrative
 						? {
-								narrative: `https://card-images.netrunnerdb.com/v2/xlarge/${id}-narrative.webp`
+								narrative: `${NRDB_IMAGE_URL}/xlarge/${id}-narrative.webp`
 							}
 						: {}),
 					...(hasXlarge
 						? {
-								xlarge: `https://card-images.netrunnerdb.com/v2/xlarge/${id}.webp`
+								xlarge: `${NRDB_IMAGE_URL}/xlarge/${id}.webp`
 							}
 						: {})
 				}
@@ -460,17 +469,26 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 				link_provided: row.link_provided !== null ? Number(row.link_provided) : null,
 				mark: Boolean(row.mark),
 				mu_provided: row.mu_provided !== null ? Number(row.mu_provided) : null,
-				num_printed_subroutines: row.num_printed_subroutines !== null ? Number(row.num_printed_subroutines) : null,
+				num_printed_subroutines:
+					row.num_printed_subroutines !== null
+						? Number(row.num_printed_subroutines)
+						: null,
 				on_encounter_effect: Boolean(row.on_encounter_effect),
 				performs_trace: Boolean(row.performs_trace),
-				recurring_credits_provided: row.recurring_credits_provided !== null ? Number(row.recurring_credits_provided) : null,
+				recurring_credits_provided:
+					row.recurring_credits_provided !== null
+						? Number(row.recurring_credits_provided)
+						: null,
 				rez_effect: Boolean(row.rez_effect),
 				sabotage: Boolean(row.sabotage),
 				score_effect: Boolean(row.score_effect),
 				steal_effect: Boolean(row.steal_effect),
 				trash_ability: Boolean(row.trash_ability)
 			},
-			latest_printing_id: (Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1') ? id : (printing_ids[0] || id),
+			latest_printing_id:
+				Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1'
+					? id
+					: printing_ids[0] || id,
 			restrictions: {
 				banned: parseJsonSafe(row.restrictions_banned, []) as string[],
 				global_penalty: parseJsonSafe(row.restrictions_global_penalty, []) as string[],
@@ -486,52 +504,52 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 		relationships: {
 			card: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/cards/${card_id}`
+					related: `${NRDB_API_URL}/cards/${card_id}`
 				}
 			},
 			card_cycle: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_cycles/${row.card_cycle_id}`
+					related: `${NRDB_API_URL}/card_cycles/${row.card_cycle_id}`
 				}
 			},
 			card_set: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_sets/${row.card_set_id}`
+					related: `${NRDB_API_URL}/card_sets/${row.card_set_id}`
 				}
 			},
 			card_type: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_types/${row.card_type_id}`
+					related: `${NRDB_API_URL}/card_types/${row.card_type_id}`
 				}
 			},
 			faction: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/factions/${row.faction_id}`
+					related: `${NRDB_API_URL}/factions/${row.faction_id}`
 				}
 			},
 			side: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/sides/${row.side_id}`
+					related: `${NRDB_API_URL}/sides/${row.side_id}`
 				}
 			},
 			card_subtypes: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_subtypes?filter[id]=${card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : ''}`
+					related: `${NRDB_API_URL}/card_subtypes?filter[id]=${card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : ''}`
 				}
 			},
 			illustrators: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/illustrators?filter[id]=${illustrator_ids.length > 0 ? illustrator_ids.join(',') : ''}`
+					related: `${NRDB_API_URL}/illustrators?filter[id]=${illustrator_ids.length > 0 ? illustrator_ids.join(',') : ''}`
 				}
 			},
 			card_pools: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_pools?filter[printing_id]=${id}`
+					related: `${NRDB_API_URL}/card_pools?filter[printing_id]=${id}`
 				}
 			}
 		},
 		links: {
-			self: `https://api.netrunnerdb.com/api/v3/public/printings/${id}`
+			self: `${NRDB_API_URL}/printings/${id}`
 		}
 	} as unknown as Printing;
 }
