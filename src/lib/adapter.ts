@@ -1,7 +1,7 @@
 import type { Card } from './types';
 
 // Helper to safely parse JSON strings from SQLite
-function parseJsonSafe(val: any, fallback: any = []): any {
+function parseJsonSafe(val: unknown, fallback: unknown = []): unknown {
 	if (typeof val === 'string') {
 		try {
 			return JSON.parse(val);
@@ -23,67 +23,86 @@ function formatUpdatedAt(dateStr: string | null): string | null {
 }
 
 // Helper to transform ["key=value"] into { "key": "value" }
-function parseKVArrayToObject(val: any): Record<string, any> {
+function parseKVArrayToObject(val: unknown): Record<string, unknown> {
 	const parsed = parseJsonSafe(val, []);
 	if (Array.isArray(parsed) && parsed.length === 0) return {};
 	if (Array.isArray(parsed)) {
-		return parsed.reduce((acc, curr) => {
-			if (typeof curr === 'string' && curr.includes('=')) {
-				const [key, value] = curr.split('=');
+		return parsed.reduce(
+			(acc: Record<string, unknown>, curr: unknown) => {
+				if (typeof curr === 'string' && curr.includes('=')) {
+					const [key, value] = curr.split('=');
 
-				// Try parsing the value as a number if appropriate
-				const num = Number(value);
-				acc[key] = !isNaN(num) ? num : value;
-			}
-			return acc;
-		}, {} as Record<string, any>);
+					// Try parsing the value as a number if appropriate
+					const num = Number(value);
+					acc[key] = !isNaN(num) ? num : value;
+				}
+				return acc;
+			},
+			{} as Record<string, unknown>
+		);
 	}
-	return parsed;
+	return parsed as Record<string, unknown>;
 }
 
-export function adaptCard(row: any): Card {
-	const id = row.id;
+export function adaptCard(row: Record<string, unknown>): Card {
+	const id = row.id as string;
 
-	const card_subtype_ids = parseJsonSafe(row.card_subtype_ids, []);
-	const card_cycle_ids = parseJsonSafe(row.card_cycle_ids, []);
-	const printings_released_by = parseJsonSafe(row.printings_released_by, []);
+	const card_subtype_ids = parseJsonSafe(row.card_subtype_ids, []) as string[];
+	const card_cycle_ids = parseJsonSafe(row.card_cycle_ids, []) as string[];
+	const printings_released_by = parseJsonSafe(row.printings_released_by, []) as string[];
 
-	const printing_ids = parseJsonSafe(row.printing_ids, []);
+	const printing_ids = parseJsonSafe(row.printing_ids, []) as string[];
 
 	// The printing_ids array from the API places the latest printing first natively in the DB array, so we must pick the first.
 	const latest_printing_id = printing_ids.length > 0 ? printing_ids[0] : null;
 
 	// Handle special cases where -1 stands for 'X'
-	const advancement_requirement = row.advancement_requirement === -1 ? 'X' : (row.advancement_requirement !== null ? String(row.advancement_requirement) : null);
-	const cost = row.cost === -1 ? 'X' : (row.cost !== null ? String(row.cost) : null);
+	const advancement_requirement =
+		row.advancement_requirement === -1
+			? 'X'
+			: row.advancement_requirement !== null
+				? String(row.advancement_requirement)
+				: null;
+	const cost = row.cost === -1 ? 'X' : row.cost !== null ? String(row.cost) : null;
 
-	const hasXlarge = printings_released_by.includes('null_signal_games') && !['system_core_2019', 'magnum_opus_reprint', 'salvaged_memories', 'system_update_2021'].includes(card_cycle_ids[0]);
+	const hasXlarge =
+		printings_released_by.includes('null_signal_games') &&
+		![
+			'system_core_2019',
+			'magnum_opus_reprint',
+			'salvaged_memories',
+			'system_update_2021'
+		].includes(card_cycle_ids[0]);
 	const hasNarrative = Boolean(row.narrative_text);
 
-	const face_indices = parseJsonSafe(row.face_indices, []);
-	const faces_title = parseJsonSafe(row.faces_title, []);
-	const faces_text = parseJsonSafe(row.faces_text, []);
-	const faces_stripped_title = parseJsonSafe(row.faces_stripped_title, []);
-	const faces_stripped_text = parseJsonSafe(row.faces_stripped_text, []);
-	const faces_card_subtype_ids = parseJsonSafe(row.faces_card_subtype_ids, []);
-	const faces_display_subtypes = parseJsonSafe(row.faces_display_subtypes, []);
-	const faces_base_link = parseJsonSafe(row.faces_base_link, []);
+	const face_indices = parseJsonSafe(row.face_indices, []) as number[];
+	const faces_title = parseJsonSafe(row.faces_title, []) as (string | null)[];
+	const faces_text = parseJsonSafe(row.faces_text, []) as (string | null)[];
+	const faces_stripped_title = parseJsonSafe(row.faces_stripped_title, []) as (string | null)[];
+	const faces_stripped_text = parseJsonSafe(row.faces_stripped_text, []) as (string | null)[];
+	const faces_card_subtype_ids = parseJsonSafe(row.faces_card_subtype_ids, []) as string[][];
+	const faces_display_subtypes = parseJsonSafe(row.faces_display_subtypes, []) as (string | null)[];
+	const faces_base_link = parseJsonSafe(row.faces_base_link, []) as (string | number | null)[];
 
 	const faces = face_indices.map((index: number, i: number) => {
-		const result: any = {
+		const result: Record<string, unknown> = {
 			card_subtype_ids: faces_card_subtype_ids[i] ?? [],
 			display_subtypes: faces_display_subtypes[i] ?? null,
-			images: latest_printing_id ? {
-				nrdb_classic: {
-					tiny: `https://card-images.netrunnerdb.com/v2/tiny/${latest_printing_id}-${index}.jpg`,
-					small: `https://card-images.netrunnerdb.com/v2/small/${latest_printing_id}-${index}.jpg`,
-					medium: `https://card-images.netrunnerdb.com/v2/medium/${latest_printing_id}-${index}.jpg`,
-					large: `https://card-images.netrunnerdb.com/v2/large/${latest_printing_id}-${index}.jpg`,
-					...(hasXlarge ? {
-						xlarge: `https://card-images.netrunnerdb.com/v2/xlarge/${latest_printing_id}-${index}.webp`
-					} : {})
-				}
-			} : null,
+			images: latest_printing_id
+				? {
+						nrdb_classic: {
+							tiny: `https://card-images.netrunnerdb.com/v2/tiny/${latest_printing_id}-${index}.jpg`,
+							small: `https://card-images.netrunnerdb.com/v2/small/${latest_printing_id}-${index}.jpg`,
+							medium: `https://card-images.netrunnerdb.com/v2/medium/${latest_printing_id}-${index}.jpg`,
+							large: `https://card-images.netrunnerdb.com/v2/large/${latest_printing_id}-${index}.jpg`,
+							...(hasXlarge
+								? {
+										xlarge: `https://card-images.netrunnerdb.com/v2/xlarge/${latest_printing_id}-${index}.webp`
+									}
+								: {})
+						}
+					}
+				: null,
 			index,
 			stripped_text: faces_stripped_text[i] ?? null,
 			stripped_title: faces_stripped_title[i] ?? null,
@@ -91,7 +110,7 @@ export function adaptCard(row: any): Card {
 			title: faces_title[i]
 		};
 		// Only keep properties that are defined
-		Object.keys(result).forEach(key => {
+		Object.keys(result).forEach((key) => {
 			if (result[key] === undefined || result[key] === null) {
 				delete result[key];
 			}
@@ -134,7 +153,7 @@ export function adaptCard(row: any): Card {
 			card_subtype_ids,
 			display_subtypes: row.display_subtypes,
 			attribution: row.attribution,
-			updated_at: formatUpdatedAt(row.updated_at),
+			updated_at: formatUpdatedAt(row.updated_at as string | null),
 			format_ids: parseJsonSafe(row.format_ids, []),
 			card_pool_ids: parseJsonSafe(row.card_pool_ids, []),
 			snapshot_ids: parseJsonSafe(row.snapshot_ids, []),
@@ -178,33 +197,41 @@ export function adaptCard(row: any): Card {
 				global_penalty: parseJsonSafe(row.restrictions_global_penalty, []),
 				points: parseKVArrayToObject(row.restrictions_points),
 				restricted: parseJsonSafe(row.restrictions_restricted, []),
-				universal_faction_cost: parseKVArrayToObject(row.restrictions_universal_faction_cost)
+				universal_faction_cost: parseKVArrayToObject(
+					row.restrictions_universal_faction_cost
+				)
 			},
 			latest_printing_id,
-			latest_printing_images: latest_printing_id ? {
-				nrdb_classic: {
-					tiny: `https://card-images.netrunnerdb.com/v2/tiny/${latest_printing_id}.jpg`,
-					small: `https://card-images.netrunnerdb.com/v2/small/${latest_printing_id}.jpg`,
-					medium: `https://card-images.netrunnerdb.com/v2/medium/${latest_printing_id}.jpg`,
-					large: `https://card-images.netrunnerdb.com/v2/large/${latest_printing_id}.jpg`,
-					...(hasNarrative ? {
-						narrative: `https://card-images.netrunnerdb.com/v2/xlarge/${latest_printing_id}-narrative.webp`
-					} : {}),
-					...(hasXlarge ? {
-						xlarge: `https://card-images.netrunnerdb.com/v2/xlarge/${latest_printing_id}.webp`
-					} : {})
-				}
-			} : null
+			latest_printing_images: latest_printing_id
+				? {
+						nrdb_classic: {
+							tiny: `https://card-images.netrunnerdb.com/v2/tiny/${latest_printing_id}.jpg`,
+							small: `https://card-images.netrunnerdb.com/v2/small/${latest_printing_id}.jpg`,
+							medium: `https://card-images.netrunnerdb.com/v2/medium/${latest_printing_id}.jpg`,
+							large: `https://card-images.netrunnerdb.com/v2/large/${latest_printing_id}.jpg`,
+							...(hasNarrative
+								? {
+										narrative: `https://card-images.netrunnerdb.com/v2/xlarge/${latest_printing_id}-narrative.webp`
+									}
+								: {}),
+							...(hasXlarge
+								? {
+										xlarge: `https://card-images.netrunnerdb.com/v2/xlarge/${latest_printing_id}.webp`
+									}
+								: {})
+						}
+					}
+				: null
 		},
 		relationships: {
 			card_cycles: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_cycles?filter[id]=${parseJsonSafe(row.card_cycle_ids, []).join(',')}`
+					related: `https://api.netrunnerdb.com/api/v3/public/card_cycles?filter[id]=${(parseJsonSafe(row.card_cycle_ids, []) as string[]).join(',')}`
 				}
 			},
 			card_sets: {
 				links: {
-					related: `https://api.netrunnerdb.com/api/v3/public/card_sets?filter[id]=${parseJsonSafe(row.card_set_ids, []).join(',')}`
+					related: `https://api.netrunnerdb.com/api/v3/public/card_sets?filter[id]=${(parseJsonSafe(row.card_set_ids, []) as string[]).join(',')}`
 				}
 			},
 			card_subtypes: {
@@ -256,5 +283,5 @@ export function adaptCard(row: any): Card {
 		links: {
 			self: `https://api.netrunnerdb.com/api/v3/public/cards/${id}`
 		}
-	} as any; // Cast as any temporarily to avoid deep Card interface minor discrepancies
+	} as unknown as Card; // Cast through unknown to avoid deep Card interface minor discrepancies
 }
