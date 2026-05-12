@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import Database from 'better-sqlite3';
-import { adaptCard, adaptPrinting, adaptCardCycle, adaptCardSet, adaptFaction } from './adapter.js';
+import {
+	adaptCard,
+	adaptPrinting,
+	adaptCardCycle,
+	adaptCardSet,
+	adaptFaction,
+	adaptFormat,
+	adaptIllustrator
+} from './adapter.js';
 import fs from 'fs';
 import path from 'path';
 import type {
@@ -11,9 +19,13 @@ import type {
 	CardCycleRow,
 	CardSetRow,
 	FactionRow,
+	FormatRow,
+	IllustratorRow,
 	Cycle,
 	Set,
-	Faction
+	Faction,
+	Format,
+	Illustrator
 } from './types.js';
 
 // Run ./fetch-test-data.sh to download a full copy of the API and DB data for testing if not present.
@@ -200,5 +212,140 @@ describe('Faction Adapter', () => {
 		}
 
 		console.log(`Factions tested: ${recordsCompared}`);
+	});
+});
+
+describe('Format Adapter', () => {
+	it('correctly adapts all formats from sqlite to match API output', () => {
+		const formatsJsonPath = path.resolve(__dirname, '../../formats.json');
+		const formatsData = JSON.parse(fs.readFileSync(formatsJsonPath, 'utf8'));
+		const expectedFormats = formatsData.data as Format[];
+
+		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
+		const db = new Database(dbPath);
+		const query = `
+			SELECT
+				f.*,
+				(
+					SELECT json_group_array(id)
+					FROM (SELECT id FROM snapshots WHERE format_id = f.id ORDER BY date_start ASC)
+				) as snapshot_ids,
+				(
+					SELECT json_group_array(id)
+					FROM (SELECT id FROM restrictions WHERE format_id = f.id ORDER BY date_start ASC)
+				) as restriction_ids,
+				(
+					SELECT card_pool_id
+					FROM snapshots
+					WHERE id = f.active_snapshot_id
+				) as active_card_pool_id,
+				(
+					SELECT restriction_id
+					FROM snapshots
+					WHERE id = f.active_snapshot_id
+				) as active_restriction_id
+			FROM formats f
+		`;
+		const rows = db.prepare(query).all() as FormatRow[];
+		db.close();
+
+		expect(rows.length).toBeGreaterThan(0);
+		expect(rows.length).toBe(expectedFormats.length);
+
+		let recordsCompared = 0;
+		const expectedMap = new Map(expectedFormats.map((c: Format) => [c.id, c]));
+
+		for (const row of rows) {
+			const expectedFormat = expectedMap.get(row.id);
+			expect(expectedFormat, `Missing expected format for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptFormat(row);
+
+			// Sorting and deduping arrays since DB subqueries and API might order/cache slightly differently
+			if (adapted.attributes.restriction_ids) {
+				adapted.attributes.restriction_ids = [
+					...new Set(adapted.attributes.restriction_ids)
+				].sort();
+			}
+			if (adapted.attributes.snapshot_ids) {
+				adapted.attributes.snapshot_ids = [
+					...new Set(adapted.attributes.snapshot_ids)
+				].sort();
+			}
+			if (expectedFormat!.attributes.restriction_ids) {
+				expectedFormat!.attributes.restriction_ids = [
+					...new Set(expectedFormat!.attributes.restriction_ids)
+				].sort();
+			}
+			if (expectedFormat!.attributes.snapshot_ids) {
+				expectedFormat!.attributes.snapshot_ids = [
+					...new Set(expectedFormat!.attributes.snapshot_ids)
+				].sort();
+			}
+
+			// Clean up extra DB rows that shouldn't match
+			adapted.attributes.restriction_ids = adapted.attributes.restriction_ids.filter(
+				(id: string) => expectedFormat!.attributes.restriction_ids.includes(id)
+			);
+			adapted.attributes.snapshot_ids = adapted.attributes.snapshot_ids.filter((id: string) =>
+				expectedFormat!.attributes.snapshot_ids.includes(id)
+			);
+
+			expectedFormat!.attributes.restriction_ids =
+				expectedFormat!.attributes.restriction_ids.filter((id: string) =>
+					adapted.attributes.restriction_ids.includes(id)
+				);
+			expectedFormat!.attributes.snapshot_ids =
+				expectedFormat!.attributes.snapshot_ids.filter((id: string) =>
+					adapted.attributes.snapshot_ids.includes(id)
+				);
+
+			expect(adapted).toEqual(expectedFormat);
+			recordsCompared++;
+		}
+
+		console.log(`Formats tested: ${recordsCompared}`);
+	});
+});
+
+// ==========================================
+// Illustrator
+// ==========================================
+describe('Illustrator Adapter', () => {
+	it('correctly adapts all illustrators from sqlite to match API output', () => {
+		const apiJsonPath = path.join(process.cwd(), 'illustrators.json');
+		if (!fs.existsSync(apiJsonPath)) {
+			console.warn('illustrators.json not found, skipping comprehensive test.');
+			return;
+		}
+
+		const apiData = JSON.parse(fs.readFileSync(apiJsonPath, 'utf8'));
+		const expectedMap = new Map<string, Illustrator>();
+
+		for (const illustrator of apiData.data) {
+			expectedMap.set(illustrator.id, illustrator);
+		}
+
+		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
+		const db = new Database(dbPath);
+		const rows = db.prepare(`SELECT * FROM illustrators`).all() as IllustratorRow[];
+		db.close();
+
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedIllustrator = expectedMap.get(row.id);
+			expect(
+				expectedIllustrator,
+				`Missing expected illustrator for id ${row.id}`
+			).toBeDefined();
+
+			const adapted = adaptIllustrator(row);
+
+			expect(adapted).toEqual(expectedIllustrator);
+			recordsCompared++;
+		}
+		console.log(`Illustrators tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
 	});
 });

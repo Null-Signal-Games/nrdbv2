@@ -655,3 +655,24 @@ export interface FactionRow {
 	updated_at: string;
 	description: string | null;
 }
+
+export interface FormatRow {
+	id: string;
+	name: string;
+	active_snapshot_id: string;
+	created_at: string;
+	updated_at: string;
+
+	// joined from related tables
+	snapshot_ids?: string;
+	restriction_ids?: string;
+	active_card_pool_id?: string;
+	active_restriction_id?: string;
+}
+
+export interface IllustratorRow {
+	id: string;
+	name: string;
+	num_printings: number;
+	updated_at: string;
+}

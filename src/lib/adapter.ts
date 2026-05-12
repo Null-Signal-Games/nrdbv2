@@ -6,9 +6,13 @@ import type {
 	CardCycleRow,
 	CardSetRow,
 	FactionRow,
+	FormatRow,
+	IllustratorRow,
 	Cycle,
 	Set,
-	Faction
+	Faction,
+	Format,
+	Illustrator
 } from './types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
@@ -216,6 +220,32 @@ export function adaptFaction(row: FactionRow): Faction {
 			self: `${NRDB_API_URL}/factions/${id}`
 		}
 	} as unknown as Faction;
+}
+
+export function adaptFormat(row: FormatRow): Format {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'formats',
+		attributes: {
+			name: row.name,
+			active_snapshot_id: row.active_snapshot_id,
+			snapshot_ids: parseJsonWithDefault(row.snapshot_ids) as string[],
+			restriction_ids: parseJsonWithDefault(row.restriction_ids) as string[],
+			active_card_pool_id: row.active_card_pool_id || '',
+			active_restriction_id: row.active_restriction_id || null, // null instead of '' based on API format
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			card_pools: buildRel('card_pools', id, 'format_id'),
+			restrictions: buildRel('restrictions', id, 'format_id'),
+			snapshots: buildRel('snapshots', id, 'format_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/formats/${id}`
+		}
+	} as unknown as Format;
 }
 
 function toStringArray(val: unknown): string[] {
@@ -451,4 +481,24 @@ function getSharedAttributes(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix
 		},
 		faces: buildFaces(row, id_prefix)
 	};
+}
+
+export function adaptIllustrator(row: IllustratorRow): Illustrator {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'illustrators',
+		attributes: {
+			name: row.name,
+			num_printings: row.num_printings,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			printings: buildRel('printings', id, 'illustrator_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/illustrators/${id}`
+		}
+	} as unknown as Illustrator;
 }

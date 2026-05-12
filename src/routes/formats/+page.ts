@@ -1,20 +1,42 @@
 import { sql } from '$lib/sqlite';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { Format } from '$lib/types';
-import { normalize_sqlite } from '$lib/utils';
+import type { FormatRow } from '$lib/types';
+import { adaptFormat } from '$lib/adapter';
 
 export const ssr = false;
 
 export const load: PageLoad = async ({ data }) => {
-	const formats: Array<{ id: string } & Format['attributes']> = await sql`SELECT * FROM formats`;
+	const formats: FormatRow[] = await sql`
+		SELECT
+			f.*,
+			(
+				SELECT json_group_array(id)
+				FROM (SELECT id FROM snapshots WHERE format_id = f.id ORDER BY date_start ASC)
+			) as snapshot_ids,
+			(
+				SELECT json_group_array(id)
+				FROM (SELECT id FROM restrictions WHERE format_id = f.id ORDER BY date_start ASC)
+			) as restriction_ids,
+			(
+				SELECT card_pool_id
+				FROM snapshots
+				WHERE id = f.active_snapshot_id
+			) as active_card_pool_id,
+			(
+				SELECT restriction_id
+				FROM snapshots
+				WHERE id = f.active_snapshot_id
+			) as active_restriction_id
+		FROM formats f
+	`;
 
 	if (!formats.length) {
 		throw error(404, `formats not found`);
 	}
 
 	return {
-		formats: normalize_sqlite(formats) as unknown as Format[],
+		formats: formats.map(adaptFormat),
 		...data
 	};
 };
