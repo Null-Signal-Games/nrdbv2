@@ -616,3 +616,42 @@ export type UnifiedPrintingRow = {
 	faces_copy_quantity: string | null;
 	faces_flavor: string | null;
 };
+
+export interface CardCycleRow {
+	id: string;
+	name: string;
+	description: string | null;
+	created_at: string;
+	updated_at: string;
+	date_release: string | null;
+	legacy_code: string | null;
+	released_by: string | null;
+	position: number | null;
+	card_set_ids?: string; // from join in queries
+	first_printing_id?: string; // from join in queries
+}
+
+export interface CardSetRow {
+	id: string;
+	name: string;
+	date_release: string | null;
+	size: number | null;
+	card_cycle_id: string | null;
+	card_set_type_id: string | null;
+	position: number | null;
+	created_at: string;
+	updated_at: string;
+	legacy_code: string | null;
+	released_by: string | null;
+	first_printing_id?: string; // from join in queries
+}
+
+export interface FactionRow {
+	id: string;
+	is_mini: boolean;
+	name: string;
+	side_id: string;
+	created_at: string;
+	updated_at: string;
+	description: string | null;
+}
