@@ -2,36 +2,37 @@ import type { Card, Printing } from './types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
 const NO_XLARGE_CYCLES = [
-    'system_core_2019',
-    'magnum_opus_reprint',
-    'salvaged_memories',
-    'system_update_2021'
+	'system_core_2019',
+	'magnum_opus_reprint',
+	'salvaged_memories',
+	'system_update_2021'
 ];
 
-function parseNumSafe(val: unknown): number | null {
-    return val !== null && val !== undefined ? Number(val) : null;
+function toNum(val: unknown): number | null {
+	return (val !== null && val !== undefined) ? Number(val) : null;
 }
 
-function parseBoolSafe(val: unknown): boolean {
-    return Boolean(val) || String(val) === '1';
+function toBool(val: unknown): boolean {
+	return Boolean(val);
 }
 
-function parseStringArraySafe(val: unknown): string[] {
-    return parseJsonSafe(val, []) as string[];
+function toStringArrary(val: unknown): string[] {
+	return parseJsonWithDefault(val) as string[];
 }
 
 function buildRel(path: string, filterId?: string | null, filterField: string = 'id') {
-    if (filterId !== undefined && filterId !== null && filterId !== '' && filterId !== 'none') {
-        return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
-    }
-    if (filterId === 'none' || filterId === '') {
-        return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
-    }
-    return { links: { related: `${NRDB_API_URL}/${path}` } };
+	if (filterId !== undefined && filterId !== null && filterId !== '' && filterId !== 'none') {
+		return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
+	}
+	if (filterId === 'none' || filterId === '') {
+		return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
+	}
+	return { links: { related: `${NRDB_API_URL}/${path}` } };
 }
 
-// Helper to safely parse JSON strings from SQLite
-function parseJsonSafe(val: unknown, fallback: unknown = []): unknown {
+// Helper to safely parse JSON strings from SQLite.  Returns [] if undefined or parsing fails.
+function parseJsonWithDefault(val: string | string[]): string | string[] {
+	const fallback = [] as string[];
 	if (typeof val === 'string') {
 		try {
 			return JSON.parse(val);
@@ -43,7 +44,7 @@ function parseJsonSafe(val: unknown, fallback: unknown = []): unknown {
 }
 
 // Convert "2026-05-09 22:43:54.826250" to "2026-05-09T22:43:54+00:00"
-function formatUpdatedAt(dateStr: string | null): string | null {
+function formatTimestamp(dateStr: string | null): string | null {
 	if (!dateStr) return null;
 	const match = dateStr.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}:\d{2})/);
 	if (match) {
@@ -54,7 +55,7 @@ function formatUpdatedAt(dateStr: string | null): string | null {
 
 // Helper to transform ["key=value"] into { "key": "value" }
 function parseKVArrayToObject(val: unknown): Record<string, unknown> {
-	const parsed = parseJsonSafe(val, []);
+	const parsed = parseJsonWithDefault(val);
 	if (Array.isArray(parsed) && parsed.length === 0) return {};
 	if (Array.isArray(parsed)) {
 		return parsed.reduce(
@@ -98,25 +99,25 @@ function buildImages(id_prefix: string, hasNarrative: boolean, hasXlarge: boolea
 function buildFaces(row: Record<string, unknown>, id_prefix: string | null) {
 	const released_by_check =
 		row.released_by === 'null_signal_games' ||
-		parseStringArraySafe(row.printings_released_by).includes('null_signal_games');
+		toStringArrary(row.printings_released_by).includes('null_signal_games');
 	const cycle_check =
-		(row.card_cycle_id as string) || parseStringArraySafe(row.card_cycle_ids)[0];
+		(row.card_cycle_id as string) || toStringArrary(row.card_cycle_ids)[0];
 
 	const hasXlarge = released_by_check && !NO_XLARGE_CYCLES.includes(cycle_check as string);
 
-	const face_indices = parseJsonSafe(row.face_indices, []) as number[];
-	const faces_title = parseJsonSafe(row.faces_title, []) as (string | null)[];
-	const faces_text = parseJsonSafe(row.faces_text, []) as (string | null)[];
-	const faces_stripped_title = parseJsonSafe(row.faces_stripped_title, []) as (string | null)[];
-	const faces_stripped_text = parseJsonSafe(row.faces_stripped_text, []) as (string | null)[];
-	const faces_card_subtype_ids = parseJsonSafe(row.faces_card_subtype_ids, []) as string[][];
-	const faces_display_subtypes = parseJsonSafe(row.faces_display_subtypes, []) as (
+	const face_indices = parseJsonWithDefault(row.face_indices) as number[];
+	const faces_title = parseJsonWithDefault(row.faces_title) as (string | null)[];
+	const faces_text = parseJsonWithDefault(row.faces_text) as (string | null)[];
+	const faces_stripped_title = parseJsonWithDefault(row.faces_stripped_title) as (string | null)[];
+	const faces_stripped_text = parseJsonWithDefault(row.faces_stripped_text) as (string | null)[];
+	const faces_card_subtype_ids = parseJsonWithDefault(row.faces_card_subtype_ids) as string[][];
+	const faces_display_subtypes = parseJsonWithDefault(row.faces_display_subtypes) as (
 		| string
 		| null
 	)[];
-	const faces_base_link = parseJsonSafe(row.faces_base_link, []) as (string | number | null)[];
-	const faces_flavor = parseJsonSafe(row.faces_flavor, []) as (string | null)[];
-	const faces_copy_quantity = parseJsonSafe(row.faces_copy_quantity, []) as (number | null)[];
+	const faces_base_link = parseJsonWithDefault(row.faces_base_link) as (string | number | null)[];
+	const faces_flavor = parseJsonWithDefault(row.faces_flavor) as (string | null)[];
+	const faces_copy_quantity = parseJsonWithDefault(row.faces_copy_quantity) as (number | null)[];
 
 	return face_indices.map((index: number, i: number) => {
 		const result: Record<string, unknown> = {
@@ -161,10 +162,12 @@ function getSharedAttributes(row: Record<string, unknown>, id_prefix: string | n
 	const advancement_requirement =
 		row.advancement_requirement === -1
 			? 'X'
-			: parseNumSafe(row.advancement_requirement) !== null ? String(row.advancement_requirement) : null;
-	const cost = row.cost === -1 ? 'X' : parseNumSafe(row.cost) !== null ? String(row.cost) : null;
-	const card_subtype_ids = parseStringArraySafe(row.card_subtype_ids);
-	const printing_ids = parseStringArraySafe(row.printing_ids);
+			: toNum(row.advancement_requirement) !== null
+				? String(row.advancement_requirement)
+				: null;
+	const cost = row.cost === -1 ? 'X' : toNum(row.cost) !== null ? String(row.cost) : null;
+	const card_subtype_ids = toStringArrary(row.card_subtype_ids);
+	const printing_ids = toStringArrary(row.printing_ids);
 
 	return {
 		stripped_title: row.stripped_title,
@@ -174,33 +177,33 @@ function getSharedAttributes(row: Record<string, unknown>, id_prefix: string | n
 		faction_id: row.faction_id,
 		cost,
 		advancement_requirement,
-		agenda_points: parseNumSafe(row.agenda_points),
-		base_link: parseNumSafe(row.base_link),
-		deck_limit: parseNumSafe(row.deck_limit),
-		in_restriction: parseBoolSafe(row.in_restriction),
-		influence_cost: parseNumSafe(row.influence_cost),
-		influence_limit: parseNumSafe(row.influence_limit),
-		memory_cost: parseNumSafe(row.memory_cost),
-		minimum_deck_size: parseNumSafe(row.minimum_deck_size),
-		num_printings: parseNumSafe(row.num_printings),
+		agenda_points: toNum(row.agenda_points),
+		base_link: toNum(row.base_link),
+		deck_limit: toNum(row.deck_limit),
+		in_restriction: toBool(row.in_restriction),
+		influence_cost: toNum(row.influence_cost),
+		influence_limit: toNum(row.influence_limit),
+		memory_cost: toNum(row.memory_cost),
+		minimum_deck_size: toNum(row.minimum_deck_size),
+		num_printings: toNum(row.num_printings),
 		printing_ids,
-		restriction_ids: parseStringArraySafe(row.restriction_ids),
-		strength: parseNumSafe(row.strength),
+		restriction_ids: toStringArrary(row.restriction_ids),
+		strength: toNum(row.strength),
 		stripped_text: row.stripped_text,
 		text: row.text,
-		trash_cost: parseNumSafe(row.trash_cost),
-		is_unique: parseBoolSafe(row.is_unique),
+		trash_cost: toNum(row.trash_cost),
+		is_unique: toBool(row.is_unique),
 		card_subtype_ids,
 		display_subtypes: row.display_subtypes,
 		attribution: row.attribution,
-		updated_at: formatUpdatedAt(row.updated_at as string | null),
-		format_ids: parseJsonSafe(row.format_ids, []),
-		card_pool_ids: parseJsonSafe(row.card_pool_ids, []),
-		snapshot_ids: parseJsonSafe(row.snapshot_ids, []),
-		card_cycle_ids: parseJsonSafe(row.card_cycle_ids, []),
-		card_cycle_names: parseJsonSafe(row.card_cycle_names, []),
-		card_set_ids: parseJsonSafe(row.card_set_ids, []),
-		card_set_names: parseJsonSafe(row.card_set_names, []),
+		updated_at: formatTimestamp(row.updated_at as string | null),
+		format_ids: parseJsonWithDefault(row.format_ids),
+		card_pool_ids: parseJsonWithDefault(row.card_pool_ids),
+		snapshot_ids: parseJsonWithDefault(row.snapshot_ids),
+		card_cycle_ids: parseJsonWithDefault(row.card_cycle_ids),
+		card_cycle_names: parseJsonWithDefault(row.card_cycle_names),
+		card_set_ids: parseJsonWithDefault(row.card_set_ids),
+		card_set_names: parseJsonWithDefault(row.card_set_names),
 		designed_by: row.designed_by,
 		narrative_text: row.narrative_text as string | null,
 		pronouns: row.pronouns,
@@ -246,10 +249,10 @@ function getSharedAttributes(row: Record<string, unknown>, id_prefix: string | n
 			trash_ability: Boolean(row.trash_ability)
 		},
 		restrictions: {
-			banned: parseJsonSafe(row.restrictions_banned, []),
-			global_penalty: parseJsonSafe(row.restrictions_global_penalty, []),
+			banned: parseJsonWithDefault(row.restrictions_banned),
+			global_penalty: parseJsonWithDefault(row.restrictions_global_penalty),
 			points: parseKVArrayToObject(row.restrictions_points),
-			restricted: parseJsonSafe(row.restrictions_restricted, []),
+			restricted: parseJsonWithDefault(row.restrictions_restricted),
 			universal_faction_cost: parseKVArrayToObject(row.restrictions_universal_faction_cost)
 		},
 		faces: buildFaces(row, id_prefix)
@@ -258,12 +261,12 @@ function getSharedAttributes(row: Record<string, unknown>, id_prefix: string | n
 
 export function adaptCard(row: Record<string, unknown>): Card {
 	const id = row.id as string;
-	const printing_ids = parseJsonSafe(row.printing_ids, []) as string[];
+	const printing_ids = parseJsonWithDefault(row.printing_ids) as string[];
 	const latest_printing_id = printing_ids.length > 0 ? printing_ids[0] : null;
 
-	const printings_released_by = parseJsonSafe(row.printings_released_by, []) as string[];
-	const card_cycle_ids = parseJsonSafe(row.card_cycle_ids, []) as string[];
-	const card_subtype_ids = parseJsonSafe(row.card_subtype_ids, []) as string[];
+	const printings_released_by = parseJsonWithDefault(row.printings_released_by) as string[];
+	const card_cycle_ids = parseJsonWithDefault(row.card_cycle_ids) as string[];
+	const card_subtype_ids = parseJsonWithDefault(row.card_subtype_ids) as string[];
 
 	const hasXlarge =
 		printings_released_by.includes('null_signal_games') &&
@@ -284,9 +287,15 @@ export function adaptCard(row: Record<string, unknown>): Card {
 				: null
 		},
 		relationships: {
-			card_cycles: buildRel('card_cycles', parseStringArraySafe(row.card_cycle_ids).join(',')),
-			card_sets: buildRel('card_sets', parseStringArraySafe(row.card_set_ids).join(',')),
-			card_subtypes: buildRel('card_subtypes', card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : 'none'),
+			card_cycles: buildRel(
+				'card_cycles',
+				toStringArrary(row.card_cycle_ids).join(',')
+			),
+			card_sets: buildRel('card_sets', toStringArrary(row.card_set_ids).join(',')),
+			card_subtypes: buildRel(
+				'card_subtypes',
+				card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : 'none'
+			),
 			card_type: buildRel(`card_types/${row.card_type_id}`),
 			faction: buildRel(`factions/${row.faction_id}`),
 			printings: buildRel('printings', id, 'card_id'),
@@ -305,9 +314,9 @@ export function adaptCard(row: Record<string, unknown>): Card {
 export function adaptPrinting(row: Record<string, unknown>): Printing {
 	const id = row.id as string;
 	const card_id = row.card_id as string;
-	const illustrator_ids = parseJsonSafe(row.illustrator_ids, []) as string[];
-	const printing_ids = parseJsonSafe(row.printing_ids, []) as string[];
-	const card_subtype_ids = parseJsonSafe(row.card_subtype_ids, []) as string[];
+	const illustrator_ids = parseJsonWithDefault(row.illustrator_ids) as string[];
+	const printing_ids = parseJsonWithDefault(row.printing_ids) as string[];
+	const card_subtype_ids = parseJsonWithDefault(row.card_subtype_ids) as string[];
 
 	const hasXlarge =
 		row.released_by === 'null_signal_games' &&
@@ -332,15 +341,15 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 			flavor: (row.flavor as string) || null,
 			display_illustrators: (row.display_illustrators as string) || null,
 			illustrator_ids,
-			illustrator_names: parseJsonSafe(row.illustrator_names, []) as string[],
+			illustrator_names: parseJsonWithDefault(row.illustrator_names) as string[],
 			position: Number(row.position),
 			position_in_set: Number(row.position_in_set),
 			quantity: Number(row.quantity),
 			date_release: row.date_release as string,
 			...getSharedAttributes(row, id),
-			card_subtype_names: parseJsonSafe(row.card_subtype_names, []) as string[],
+			card_subtype_names: parseJsonWithDefault(row.card_subtype_names) as string[],
 			released_by: row.released_by as string,
-			printings_released_by: parseJsonSafe(row.printings_released_by, []) as string[],
+			printings_released_by: parseJsonWithDefault(row.printings_released_by) as string[],
 			images: buildImages(id, hasNarrative, hasXlarge),
 			latest_printing_id:
 				Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1'
@@ -356,8 +365,14 @@ export function adaptPrinting(row: Record<string, unknown>): Printing {
 			card_type: buildRel(`card_types/${row.card_type_id}`),
 			faction: buildRel(`factions/${row.faction_id}`),
 			side: buildRel(`sides/${row.side_id}`),
-			card_subtypes: buildRel('card_subtypes', card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : ''),
-			illustrators: buildRel('illustrators', illustrator_ids.length > 0 ? illustrator_ids.join(',') : ''),
+			card_subtypes: buildRel(
+				'card_subtypes',
+				card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : ''
+			),
+			illustrators: buildRel(
+				'illustrators',
+				illustrator_ids.length > 0 ? illustrator_ids.join(',') : ''
+			),
 			card_pools: buildRel('card_pools', id, 'printing_id')
 		},
 		links: {
