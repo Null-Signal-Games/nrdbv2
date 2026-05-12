@@ -9,7 +9,14 @@
     import { dev } from "$app/environment";
     import Debug from "$lib/components/Debug.svelte";
     import Tooltip from "$lib/components/Tooltip.svelte";
-    import { sql, overwriteDatabaseFile } from "$lib/sqlite";
+    import {
+        sql,
+        overwriteDatabaseFile,
+        get_current_sqlite_url,
+        set_current_sqlite_url,
+        check_sqlite_db_exists,
+        download_and_extract_sqlite,
+    } from "$lib/sqlite";
     import { fetch_published_databases } from "$lib/utils";
     import {
         CURRENT_SQLITE_URL_FILENAME,
@@ -36,9 +43,10 @@
 
     onMount(async () => {
         try {
-            const [root, sqlite_url] = await Promise.all([
-                navigator.storage.getDirectory(),
+            const [sqlite_url, storedUrl, dbExists] = await Promise.all([
                 fetch_published_databases(),
+                get_current_sqlite_url(),
+                check_sqlite_db_exists(),
             ]);
 
             if (sqlite_url === null) {
@@ -50,77 +58,29 @@
             let needsDownload = false;
             let dbReady = false;
 
-            try {
-                const urlHandle = await root.getFileHandle(
-                    CURRENT_SQLITE_URL_FILENAME,
-                );
-                const file = await urlHandle.getFile();
-                const storedUrl = await file.text();
-
-                if (storedUrl !== sqlite_url) {
-                    console.log("[SQLITE] Database URL changed. Needs update.");
-                    needsDownload = true;
-                } else {
-                    await root.getFileHandle(NRDB_SQLITE_NAME);
-                    console.log(
-                        `[SQLITE] ${NRDB_SQLITE_NAME} already exists and is up to date in OPFS. Skipping download.`,
-                    );
-                    dbReady = true;
-                }
-            } catch (error) {
-                if (
-                    !(
-                        error instanceof DOMException &&
-                        error.name === "NotFoundError"
-                    )
-                ) {
-                    throw error;
-                }
-
-                console.log(
-                    "[SQLITE] Database or tracking file not found in OPFS. Needs download.",
-                );
+            if (storedUrl !== sqlite_url) {
+                console.log("[SQLITE] Database URL changed. Needs update.");
                 needsDownload = true;
+            } else if (!dbExists) {
+                console.log("[SQLITE] Database not found in OPFS. Needs download.");
+                needsDownload = true;
+            } else {
+                console.log(
+                    `[SQLITE] ${NRDB_SQLITE_NAME} already exists and is up to date in OPFS. Skipping download.`,
+                );
+                dbReady = true;
             }
 
             if (needsDownload) {
                 console.log("[SQLITE] Fetching and decompressing sqlite db...");
-                const response = await fetch(sqlite_url);
-
-                if (!response.ok) {
-                    throw new Error(
-                        `Network response failed: ${response.status}`,
-                    );
-                }
-
-                if (!response.body) {
-                    throw new Error("Response body was empty");
-                }
-
-                if (typeof DecompressionStream === "undefined") {
-                    throw new Error(
-                        "DecompressionStream is not supported in this browser",
-                    );
-                }
-
-                const decompressedStream = response.body.pipeThrough(
-                    new DecompressionStream("gzip"),
-                );
-
-                await overwriteDatabaseFile(decompressedStream);
+                await download_and_extract_sqlite(sqlite_url);
 
                 console.log(
                     `[SQLITE] ${NRDB_SQLITE_NAME} downloaded and saved to OPFS.`,
                 );
 
                 // Write the current sqlite URL to OPFS so we know which version we have
-                const urlHandle = await root.getFileHandle(
-                    CURRENT_SQLITE_URL_FILENAME,
-                    { create: true },
-                );
-                const writable = await urlHandle.createWritable();
-                await writable.write(sqlite_url);
-                await writable.close();
+                await set_current_sqlite_url(sqlite_url);
 
                 dbReady = true;
             }
