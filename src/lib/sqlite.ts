@@ -39,6 +39,11 @@ export const check_sqlite_db_exists = async (): Promise<boolean> => {
 };
 
 export const download_and_extract_sqlite = async (sqlite_url: string): Promise<void> => {
+	// Exit immediately if DecompressionStream is not supported, as we won't be able to process the downloaded gzip file.
+	if (typeof DecompressionStream === 'undefined') {
+		throw new Error('DecompressionStream is not supported in this browser');
+	}
+
 	const response = await fetch(sqlite_url);
 
 	if (!response.ok) {
@@ -47,10 +52,6 @@ export const download_and_extract_sqlite = async (sqlite_url: string): Promise<v
 
 	if (!response.body) {
 		throw new Error('Response body was empty');
-	}
-
-	if (typeof DecompressionStream === 'undefined') {
-		throw new Error('DecompressionStream is not supported in this browser');
 	}
 
 	const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
