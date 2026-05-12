@@ -1,8 +1,9 @@
 import { sql } from '$lib/sqlite';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { Illustrator, Printing } from '$lib/types';
+import type { Illustrator, Printing, UnifiedPrintingRow } from '$lib/types';
 import { normalize_sqlite } from '$lib/utils';
+import { adaptPrinting } from '$lib/adapter';
 
 export const ssr = false;
 
@@ -39,38 +40,27 @@ export const load: PageLoad = async ({ data }) => {
 		throw error(404, `Illustrator not found`);
 	}
 
-	const normalized_illustrators = normalize_sqlite(illustrators) as Illustrator[];
-	const normalized_printings = normalize_sqlite(printings) as Array<
-		Printing & {
-			attributes: Printing['attributes'] & {
-				illustrator_id: string;
-				illustrator_rank: number;
-			};
-		}
-	>;
+	const normalized_illustrators = normalize_sqlite(illustrators) as unknown as Illustrator[];
+	const illustrator_printings = (
+		printings as Array<
+			UnifiedPrintingRow & { illustrator_id: string; illustrator_rank: number }
+		>
+	).reduce<Record<string, Printing[]>>((accumulator, printing_row) => {
+		const adapted = adaptPrinting(printing_row);
+		const { illustrator_id } = printing_row;
 
-	const illustrator_printings = normalized_printings.reduce<Record<string, Printing[]>>(
-		(accumulator, printing) => {
-			const { illustrator_id, illustrator_rank, ...attributes } = printing.attributes;
+		const existing_printings = accumulator[illustrator_id] ?? [];
+		accumulator[illustrator_id] = [
+			...existing_printings,
+			{
+				...adapted,
+				relationships: empty_relationships,
+				links: { self: '' }
+			}
+		];
 
-			void illustrator_rank;
-
-			const existing_printings = accumulator[illustrator_id] ?? [];
-			accumulator[illustrator_id] = [
-				...existing_printings,
-				{
-					id: printing.id,
-					type: printing.type,
-					attributes,
-					relationships: empty_relationships,
-					links: { self: '' }
-				}
-			];
-
-			return accumulator;
-		},
-		{}
-	);
+		return accumulator;
+	}, {});
 
 	return {
 		illustrators: normalized_illustrators,

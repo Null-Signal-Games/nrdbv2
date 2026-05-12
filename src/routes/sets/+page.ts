@@ -16,8 +16,8 @@ export const load: PageLoad = async ({ data }) => {
 	}
 
 	return {
-		sets: normalize_sqlite(sets) as Set[],
-		cycles: normalize_sqlite(cycles) as Cycle[],
+		sets: normalize_sqlite(sets) as unknown as Set[],
+		cycles: normalize_sqlite(cycles) as unknown as Cycle[],
 		...data
 	};
 };

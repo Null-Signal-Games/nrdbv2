@@ -14,7 +14,7 @@ export const load: PageLoad = async ({ data }) => {
 	}
 
 	return {
-		formats: normalize_sqlite(formats) as Format[],
+		formats: normalize_sqlite(formats) as unknown as Format[],
 		...data
 	};
 };
