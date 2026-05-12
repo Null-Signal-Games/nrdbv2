@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import type { Card, Printing, UnifiedCardRow, UnifiedPrintingRow } from './types.js';
 
+// Run ./fetch-test-data.sh to download a full copy of the API and DB data for testing if not present.
 describe('Card Adapter', () => {
 	it('correctly adapts all cards from sqlite to match API output', () => {
 		// 1. Get ground truth from cards.json
