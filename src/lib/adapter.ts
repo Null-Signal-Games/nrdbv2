@@ -10,12 +10,12 @@ const NO_XLARGE_CYCLES = [
 
 export function adaptCard(row: UnifiedCardRow): Card {
 	const id = row.id;
-	const printing_ids = parseJsonWithDefault(row.printing_ids) as string[];
+	const printing_ids = toStringArray(row.printing_ids);
 	const latest_printing_id = printing_ids.length > 0 ? printing_ids[0] : null;
 
-	const printings_released_by = parseJsonWithDefault(row.printings_released_by) as string[];
-	const card_cycle_ids = parseJsonWithDefault(row.card_cycle_ids) as string[];
-	const card_subtype_ids = parseJsonWithDefault(row.card_subtype_ids) as string[];
+	const printings_released_by = toStringArray(row.printings_released_by);
+	const card_cycle_ids = toStringArray(row.card_cycle_ids);
+	const card_subtype_ids = toStringArray(row.card_subtype_ids);
 
 	const hasXlarge =
 		printings_released_by.includes('null_signal_games') &&
@@ -36,8 +36,8 @@ export function adaptCard(row: UnifiedCardRow): Card {
 				: null
 		},
 		relationships: {
-			card_cycles: buildRel('card_cycles', toStringArrary(row.card_cycle_ids).join(',')),
-			card_sets: buildRel('card_sets', toStringArrary(row.card_set_ids).join(',')),
+			card_cycles: buildRel('card_cycles', toStringArray(row.card_cycle_ids).join(',')),
+			card_sets: buildRel('card_sets', toStringArray(row.card_set_ids).join(',')),
 			card_subtypes: buildRel(
 				'card_subtypes',
 				card_subtype_ids.length > 0 ? card_subtype_ids.join(',') : 'none'
@@ -60,9 +60,9 @@ export function adaptCard(row: UnifiedCardRow): Card {
 export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 	const id = row.id;
 	const card_id = row.card_id;
-	const illustrator_ids = parseJsonWithDefault(row.illustrator_ids) as string[];
-	const printing_ids = parseJsonWithDefault(row.printing_ids) as string[];
-	const card_subtype_ids = parseJsonWithDefault(row.card_subtype_ids) as string[];
+	const illustrator_ids = toStringArray(row.illustrator_ids);
+	const printing_ids = toStringArray(row.printing_ids);
+	const card_subtype_ids = toStringArray(row.card_subtype_ids);
 
 	const hasXlarge =
 		row.released_by === 'null_signal_games' &&
@@ -87,22 +87,18 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 			flavor: row.flavor || null,
 			display_illustrators: row.display_illustrators || null,
 			illustrator_ids,
-			illustrator_names: parseJsonWithDefault(row.illustrator_names) as string[],
+			illustrator_names: toStringArray(row.illustrator_names),
 			position: row.position,
 			position_in_set: row.position_in_set,
 			quantity: row.quantity,
 			date_release: row.date_release,
 			...getSharedAttributes(row, id),
-			card_subtype_names: parseJsonWithDefault(row.card_subtype_names) as string[],
+			card_subtype_names: toStringArray(row.card_subtype_names),
 			released_by: row.released_by,
-			printings_released_by: parseJsonWithDefault(row.printings_released_by) as string[],
+			printings_released_by: toStringArray(row.printings_released_by),
 			images: buildImages(id, hasNarrative, hasXlarge),
-			latest_printing_id:
-				Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1'
-					? id
-					: printing_ids[0] || id,
-			is_latest_printing:
-				Boolean(row.is_latest_printing) || String(row.is_latest_printing) === '1'
+			latest_printing_id: row.is_latest_printing ? id : printing_ids[0] || id,
+			is_latest_printing: Boolean(row.is_latest_printing)
 		},
 		relationships: {
 			card: buildRel(`cards/${card_id}`),
@@ -127,15 +123,7 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 	} as unknown as Printing;
 }
 
-function toNum(val: unknown): number | null {
-	return val !== null && val !== undefined ? Number(val) : null;
-}
-
-function toBool(val: unknown): boolean {
-	return Boolean(val);
-}
-
-function toStringArrary(val: unknown): string[] {
+function toStringArray(val: unknown): string[] {
 	return parseJsonWithDefault(val) as string[];
 }
 
@@ -218,10 +206,9 @@ function buildImages(id_prefix: string, hasNarrative: boolean, hasXlarge: boolea
 function buildFaces(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix: string | null) {
 	const released_by_check =
 		('released_by' in row ? row.released_by === 'null_signal_games' : false) ||
-		toStringArrary(row.printings_released_by).includes('null_signal_games');
+		toStringArray(row.printings_released_by).includes('null_signal_games');
 	const cycle_check =
-		('card_cycle_id' in row ? row.card_cycle_id : '') ||
-		toStringArrary(row.card_cycle_ids)[0];
+		('card_cycle_id' in row ? row.card_cycle_id : '') || toStringArray(row.card_cycle_ids)[0];
 
 	const hasXlarge = released_by_check && !NO_XLARGE_CYCLES.includes(cycle_check);
 
@@ -290,12 +277,12 @@ function getSharedAttributes(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix
 	const advancement_requirement =
 		row.advancement_requirement === -1
 			? 'X'
-			: toNum(row.advancement_requirement) !== null
+			: row.advancement_requirement !== null
 				? String(row.advancement_requirement)
 				: null;
-	const cost = row.cost === -1 ? 'X' : toNum(row.cost) !== null ? String(row.cost) : null;
-	const card_subtype_ids = toStringArrary(row.card_subtype_ids);
-	const printing_ids = toStringArrary(row.printing_ids);
+	const cost = row.cost === -1 ? 'X' : row.cost !== null ? String(row.cost) : null;
+	const card_subtype_ids = toStringArray(row.card_subtype_ids);
+	const printing_ids = toStringArray(row.printing_ids);
 
 	return {
 		stripped_title: row.stripped_title,
@@ -305,22 +292,22 @@ function getSharedAttributes(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix
 		faction_id: row.faction_id,
 		cost,
 		advancement_requirement,
-		agenda_points: toNum(row.agenda_points),
-		base_link: toNum(row.base_link),
-		deck_limit: toNum(row.deck_limit),
-		in_restriction: toBool(row.in_restriction),
-		influence_cost: toNum(row.influence_cost),
-		influence_limit: toNum(row.influence_limit),
-		memory_cost: toNum(row.memory_cost),
-		minimum_deck_size: toNum(row.minimum_deck_size),
-		num_printings: toNum(row.num_printings),
+		agenda_points: row.agenda_points,
+		base_link: row.base_link,
+		deck_limit: row.deck_limit,
+		in_restriction: Boolean(row.in_restriction),
+		influence_cost: row.influence_cost,
+		influence_limit: row.influence_limit,
+		memory_cost: row.memory_cost,
+		minimum_deck_size: row.minimum_deck_size,
+		num_printings: row.num_printings,
 		printing_ids,
-		restriction_ids: toStringArrary(row.restriction_ids),
-		strength: toNum(row.strength),
+		restriction_ids: toStringArray(row.restriction_ids),
+		strength: row.strength,
 		stripped_text: row.stripped_text,
 		text: row.text,
-		trash_cost: toNum(row.trash_cost),
-		is_unique: toBool(row.is_unique),
+		trash_cost: row.trash_cost,
+		is_unique: Boolean(row.is_unique),
 		card_subtype_ids,
 		display_subtypes: row.display_subtypes,
 		attribution: row.attribution,
@@ -337,10 +324,7 @@ function getSharedAttributes(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix
 		pronouns: row.pronouns,
 		pronunciation_approximation: row.pronunciation_approximation,
 		pronunciation_ipa: row.pronunciation_ipa,
-		num_extra_faces:
-			row.num_extra_faces !== null && row.num_extra_faces !== undefined
-				? Number(row.num_extra_faces)
-				: 0,
+		num_extra_faces: row.num_extra_faces ?? 0,
 		card_abilities: {
 			additional_cost: Boolean(row.additional_cost),
 			advanceable: Boolean(row.advanceable),
@@ -350,26 +334,13 @@ function getSharedAttributes(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix
 			has_paid_ability: Boolean(row.has_paid_ability),
 			install_effect: Boolean(row.install_effect),
 			interrupt: Boolean(row.interrupt),
-			link_provided:
-				row.link_provided !== null && row.link_provided !== undefined
-					? Number(row.link_provided)
-					: null,
+			link_provided: row.link_provided,
 			mark: Boolean(row.mark),
-			mu_provided:
-				row.mu_provided !== null && row.mu_provided !== undefined
-					? Number(row.mu_provided)
-					: null,
-			num_printed_subroutines:
-				row.num_printed_subroutines !== null && row.num_printed_subroutines !== undefined
-					? Number(row.num_printed_subroutines)
-					: null,
+			mu_provided: row.mu_provided,
+			num_printed_subroutines: row.num_printed_subroutines,
 			on_encounter_effect: Boolean(row.on_encounter_effect),
 			performs_trace: Boolean(row.performs_trace),
-			recurring_credits_provided:
-				row.recurring_credits_provided !== null &&
-				row.recurring_credits_provided !== undefined
-					? Number(row.recurring_credits_provided)
-					: null,
+			recurring_credits_provided: row.recurring_credits_provided,
 			rez_effect: Boolean(row.rez_effect),
 			sabotage: Boolean(row.sabotage),
 			score_effect: Boolean(row.score_effect),
