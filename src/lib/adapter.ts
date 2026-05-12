@@ -8,9 +8,8 @@ const NO_XLARGE_CYCLES = [
 	'system_update_2021'
 ];
 
-
 export function adaptCard(row: UnifiedCardRow): Card {
-	const id = row.id as string;
+	const id = row.id;
 	const printing_ids = parseJsonWithDefault(row.printing_ids) as string[];
 	const latest_printing_id = printing_ids.length > 0 ? printing_ids[0] : null;
 
@@ -37,10 +36,7 @@ export function adaptCard(row: UnifiedCardRow): Card {
 				: null
 		},
 		relationships: {
-			card_cycles: buildRel(
-				'card_cycles',
-				toStringArrary(row.card_cycle_ids).join(',')
-			),
+			card_cycles: buildRel('card_cycles', toStringArrary(row.card_cycle_ids).join(',')),
 			card_sets: buildRel('card_sets', toStringArrary(row.card_set_ids).join(',')),
 			card_subtypes: buildRel(
 				'card_subtypes',
@@ -62,8 +58,8 @@ export function adaptCard(row: UnifiedCardRow): Card {
 }
 
 export function adaptPrinting(row: UnifiedPrintingRow): Printing {
-	const id = row.id as string;
-	const card_id = row.card_id as string;
+	const id = row.id;
+	const card_id = row.card_id;
 	const illustrator_ids = parseJsonWithDefault(row.illustrator_ids) as string[];
 	const printing_ids = parseJsonWithDefault(row.printing_ids) as string[];
 	const card_subtype_ids = parseJsonWithDefault(row.card_subtype_ids) as string[];
@@ -75,7 +71,7 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 			'magnum_opus_reprint',
 			'salvaged_memories',
 			'system_update_2021'
-		].includes(row.card_cycle_id as string);
+		].includes(row.card_cycle_id);
 
 	const hasNarrative = Boolean(row.narrative_text);
 
@@ -84,21 +80,21 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 		type: 'printings',
 		attributes: {
 			card_id,
-			card_cycle_id: row.card_cycle_id as string,
-			card_cycle_name: row.card_cycle_name as string,
-			card_set_id: row.card_set_id as string,
-			card_set_name: row.card_set_name as string,
-			flavor: (row.flavor as string) || null,
-			display_illustrators: (row.display_illustrators as string) || null,
+			card_cycle_id: row.card_cycle_id,
+			card_cycle_name: row.card_cycle_name,
+			card_set_id: row.card_set_id,
+			card_set_name: row.card_set_name,
+			flavor: row.flavor || null,
+			display_illustrators: row.display_illustrators || null,
 			illustrator_ids,
 			illustrator_names: parseJsonWithDefault(row.illustrator_names) as string[],
-			position: Number(row.position),
-			position_in_set: Number(row.position_in_set),
-			quantity: Number(row.quantity),
-			date_release: row.date_release as string,
+			position: row.position,
+			position_in_set: row.position_in_set,
+			quantity: row.quantity,
+			date_release: row.date_release,
 			...getSharedAttributes(row, id),
 			card_subtype_names: parseJsonWithDefault(row.card_subtype_names) as string[],
-			released_by: row.released_by as string,
+			released_by: row.released_by,
 			printings_released_by: parseJsonWithDefault(row.printings_released_by) as string[],
 			images: buildImages(id, hasNarrative, hasXlarge),
 			latest_printing_id:
@@ -132,7 +128,7 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 }
 
 function toNum(val: unknown): number | null {
-	return (val !== null && val !== undefined) ? Number(val) : null;
+	return val !== null && val !== undefined ? Number(val) : null;
 }
 
 function toBool(val: unknown): boolean {
@@ -224,14 +220,18 @@ function buildFaces(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix: string 
 		('released_by' in row ? row.released_by === 'null_signal_games' : false) ||
 		toStringArrary(row.printings_released_by).includes('null_signal_games');
 	const cycle_check =
-		('card_cycle_id' in row ? row.card_cycle_id as string : '') || toStringArrary(row.card_cycle_ids)[0];
+		('card_cycle_id' in row ? row.card_cycle_id : '') ||
+		toStringArrary(row.card_cycle_ids)[0];
 
-	const hasXlarge = released_by_check && !NO_XLARGE_CYCLES.includes(cycle_check as string);
+	const hasXlarge = released_by_check && !NO_XLARGE_CYCLES.includes(cycle_check);
 
 	const face_indices = parseJsonWithDefault(row.face_indices) as number[];
 	const faces_title = parseJsonWithDefault(row.faces_title) as (string | null)[];
 	const faces_text = parseJsonWithDefault(row.faces_text) as (string | null)[];
-	const faces_stripped_title = parseJsonWithDefault(row.faces_stripped_title) as (string | null)[];
+	const faces_stripped_title = parseJsonWithDefault(row.faces_stripped_title) as (
+		| string
+		| null
+	)[];
 	const faces_stripped_text = parseJsonWithDefault(row.faces_stripped_text) as (string | null)[];
 	const faces_card_subtype_ids = parseJsonWithDefault(row.faces_card_subtype_ids) as string[][];
 	const faces_display_subtypes = parseJsonWithDefault(row.faces_display_subtypes) as (
@@ -239,8 +239,13 @@ function buildFaces(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix: string 
 		| null
 	)[];
 	const faces_base_link = parseJsonWithDefault(row.faces_base_link) as (string | number | null)[];
-	const faces_flavor = parseJsonWithDefault('faces_flavor' in row ? row.faces_flavor : null) as (string | null)[];
-	const faces_copy_quantity = parseJsonWithDefault('faces_copy_quantity' in row ? row.faces_copy_quantity : null) as (number | null)[];
+	const faces_flavor = parseJsonWithDefault('faces_flavor' in row ? row.faces_flavor : null) as (
+		| string
+		| null
+	)[];
+	const faces_copy_quantity = parseJsonWithDefault(
+		'faces_copy_quantity' in row ? row.faces_copy_quantity : null
+	) as (number | null)[];
 
 	return face_indices.map((index: number, i: number) => {
 		const result: Record<string, unknown> = {
@@ -319,7 +324,7 @@ function getSharedAttributes(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix
 		card_subtype_ids,
 		display_subtypes: row.display_subtypes,
 		attribution: row.attribution,
-		updated_at: formatTimestamp(row.updated_at as string | null),
+		updated_at: formatTimestamp(row.updated_at),
 		format_ids: parseJsonWithDefault(row.format_ids),
 		card_pool_ids: parseJsonWithDefault(row.card_pool_ids),
 		snapshot_ids: parseJsonWithDefault(row.snapshot_ids),
@@ -328,7 +333,7 @@ function getSharedAttributes(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix
 		card_set_ids: parseJsonWithDefault(row.card_set_ids),
 		card_set_names: parseJsonWithDefault(row.card_set_names),
 		designed_by: row.designed_by,
-		narrative_text: row.narrative_text as string | null,
+		narrative_text: row.narrative_text,
 		pronouns: row.pronouns,
 		pronunciation_approximation: row.pronunciation_approximation,
 		pronunciation_ipa: row.pronunciation_ipa,
