@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import Database from 'better-sqlite3';
-import {
-	adaptCard,
-	adaptPrinting
-} from './adapter.js';
+import { adaptCard, adaptPrinting } from './adapter.js';
 import fs from 'fs';
 import path from 'path';
 import type { Card, Printing, UnifiedCardRow, UnifiedPrintingRow } from './types.js';
