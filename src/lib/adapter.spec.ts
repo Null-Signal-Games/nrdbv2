@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import Database from 'better-sqlite3';
-import { adaptCard, adaptPrinting } from './adapter.js';
+import {
+	adaptCard,
+	adaptPrinting
+} from './adapter.js';
 import fs from 'fs';
 import path from 'path';
-import type { Card, Printing } from './types.js';
+import type { Card, Printing, UnifiedCardRow, UnifiedPrintingRow } from './types.js';
 
 describe('Card Adapter', () => {
 	it('correctly adapts all cards from sqlite to match API output', () => {
@@ -15,7 +18,7 @@ describe('Card Adapter', () => {
 		// 2. Fetch rows from database
 		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
 		const db = new Database(dbPath);
-		const rows = db.prepare('SELECT * FROM unified_cards').all() as Record<string, unknown>[];
+		const rows = db.prepare('SELECT * FROM unified_cards').all() as UnifiedCardRow[];
 		db.close();
 
 		expect(rows.length).toBeGreaterThan(0);
@@ -26,10 +29,10 @@ describe('Card Adapter', () => {
 
 		// 3. Adapt rows and compare
 		for (const row of rows) {
-			const typeId = (row.card_type_id as string) || 'unknown';
+			const typeId = row.card_type_id || 'unknown';
 			typeCounts.set(typeId, (typeCounts.get(typeId) || 0) + 1);
 
-			const expectedCard = expectedMap.get(row.id as string);
+			const expectedCard = expectedMap.get(row.id);
 			expect(expectedCard, `Missing expected card for id ${row.id}`).toBeDefined();
 
 			const adaptedCard = adaptCard(row);
@@ -48,10 +51,7 @@ describe('Printing Adapter', () => {
 
 		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
 		const db = new Database(dbPath);
-		const rows = db.prepare('SELECT * FROM unified_printings').all() as Record<
-			string,
-			unknown
-		>[];
+		const rows = db.prepare('SELECT * FROM unified_printings').all() as UnifiedPrintingRow[];
 		db.close();
 
 		expect(rows.length).toBeGreaterThan(0);
@@ -61,10 +61,10 @@ describe('Printing Adapter', () => {
 		const typeCounts = new Map<string, number>();
 
 		for (const row of rows) {
-			const typeId = (row.card_type_id as string) || 'unknown';
+			const typeId = row.card_type_id || 'unknown';
 			typeCounts.set(typeId, (typeCounts.get(typeId) || 0) + 1);
 
-			const expectedPrinting = expectedMap.get(row.id as string);
+			const expectedPrinting = expectedMap.get(row.id);
 			expect(expectedPrinting, `Missing expected printing for id ${row.id}`).toBeDefined();
 
 			const adapted = adaptPrinting(row);
