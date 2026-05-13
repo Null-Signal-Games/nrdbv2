@@ -80,13 +80,7 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 	const card_subtype_ids = toStringArray(row.card_subtype_ids);
 
 	const hasXlarge =
-		row.released_by === 'null_signal_games' &&
-		![
-			'system_core_2019',
-			'magnum_opus_reprint',
-			'salvaged_memories',
-			'system_update_2021'
-		].includes(row.card_cycle_id);
+		row.released_by === 'null_signal_games' && !NO_XLARGE_CYCLES.includes(row.card_cycle_id);
 
 	const hasNarrative = Boolean(row.narrative_text);
 
@@ -278,6 +272,7 @@ function parseJsonWithDefault(val: unknown): unknown {
 // Convert "2026-05-09 22:43:54.826250" to "2026-05-09T22:43:54+00:00"
 function formatTimestamp(dateStr: string | null): string | null {
 	if (!dateStr) return null;
+
 	const match = dateStr.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}:\d{2})/);
 	if (match) {
 		return `${match[1]}T${match[2]}+00:00`;
