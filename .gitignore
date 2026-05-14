@@ -8,6 +8,7 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+/test-data/netrunnerdb.sqlite3*
 
 # OS
 .DS_Store
