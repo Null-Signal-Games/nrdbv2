@@ -57,6 +57,11 @@ export interface Relationships {
 			related: string;
 		};
 	};
+	format?: {
+		links: {
+			related: string;
+		};
+	};
 	printings?: {
 		links: {
 			related: string;
@@ -782,6 +787,48 @@ export interface CardPool {
 		card_cycle_ids: string[];
 		updated_at: string;
 		num_cards: number;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface RestrictionVerdicts {
+	banned: string[];
+	restricted: string[];
+	universal_faction_cost: Record<string, number>;
+	global_penalty: string[];
+	points: Record<string, number>;
+}
+
+export interface RestrictionRow {
+	id: string;
+	name: string;
+	date_start: string;
+	point_limit: number | null;
+	format_id: string;
+	created_at: string;
+	updated_at: string;
+	banned?: string;
+	restricted?: string;
+	universal_faction_cost?: string;
+	global_penalty?: string;
+	points?: string;
+	banned_subtypes?: string;
+	size?: number;
+}
+
+export interface Restriction {
+	id: string;
+	type: 'restrictions';
+	attributes: {
+		name: string;
+		date_start: string;
+		point_limit: number | null;
+		format_id: string;
+		verdicts: RestrictionVerdicts;
+		banned_subtypes: string[];
+		size: number;
+		updated_at: string;
 	};
 	relationships: Relationships;
 	links: Links;

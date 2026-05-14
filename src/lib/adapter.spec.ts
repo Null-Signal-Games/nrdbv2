@@ -5,6 +5,7 @@ import {
 	adaptPrinting,
 	adaptCardCycle,
 	adaptCardPool,
+	adaptRestriction,
 	adaptCardSet,
 	adaptFaction,
 	adaptFormat,
@@ -41,7 +42,9 @@ import type {
 	CardSetType,
 	CardSetTypeRow,
 	CardSubtype,
-	CardSubtypeRow
+	CardSubtypeRow,
+	Restriction,
+	RestrictionRow
 } from './types.js';
 
 // Our SQLite database.
@@ -502,6 +505,102 @@ describe('Card Subtype Adapter', () => {
 			recordsCompared++;
 		}
 		console.log(`Card Subtypes tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Restriction Adapter', () => {
+	it('correctly adapts all restrictions from sqlite to match API output', () => {
+		const expectedRestrictions = (readJsonDataFor('restrictions') as { data: Restriction[] })
+			.data;
+
+		const expectedMap = new Map<string, Restriction>();
+
+		for (const restriction of expectedRestrictions) {
+			expectedMap.set(restriction.id, restriction);
+		}
+
+		const rows = db
+			.prepare(
+				`
+			WITH
+				banned AS (
+					SELECT restriction_id, json_group_array(card_id) as banned
+					FROM restrictions_cards_banned
+					GROUP BY restriction_id
+				),
+				restricted AS (
+					SELECT restriction_id, json_group_array(card_id) as restricted
+					FROM restrictions_cards_restricted
+					GROUP BY restriction_id
+				),
+				global_penalty AS (
+					SELECT restriction_id, json_group_array(card_id) as global_penalty
+					FROM restrictions_cards_global_penalty
+					GROUP BY restriction_id
+				),
+				points AS (
+					SELECT restriction_id, json_group_object(card_id, value) as points
+					FROM restrictions_cards_points
+					GROUP BY restriction_id
+				),
+				ufc AS (
+					SELECT restriction_id, json_group_object(card_id, value) as universal_faction_cost
+					FROM restrictions_cards_universal_faction_cost
+					GROUP BY restriction_id
+				),
+				banned_subtypes AS (
+					SELECT restriction_id, json_group_array(card_subtype_id) as banned_subtypes
+					FROM restrictions_card_subtypes_banned
+					GROUP BY restriction_id
+				),
+				all_cards AS (
+					SELECT restriction_id, card_id FROM restrictions_cards_banned
+					UNION
+					SELECT restriction_id, card_id FROM restrictions_cards_global_penalty
+					UNION
+					SELECT restriction_id, card_id FROM restrictions_cards_points
+					UNION
+					SELECT restriction_id, card_id FROM restrictions_cards_restricted
+					UNION
+					SELECT restriction_id, card_id FROM restrictions_cards_universal_faction_cost
+				),
+				size AS (
+					SELECT restriction_id, count(*) as size
+					FROM all_cards
+					GROUP BY restriction_id
+				)
+			SELECT
+				r.id, r.name, r.date_start, r.point_limit, r.format_id, r.created_at, r.updated_at,
+				b.banned, re.restricted, g.global_penalty, p.points, u.universal_faction_cost,
+				bs.banned_subtypes, s.size
+			FROM restrictions r
+			LEFT JOIN banned b ON r.id = b.restriction_id
+			LEFT JOIN restricted re ON r.id = re.restriction_id
+			LEFT JOIN global_penalty g ON r.id = g.restriction_id
+			LEFT JOIN points p ON r.id = p.restriction_id
+			LEFT JOIN ufc u ON r.id = u.restriction_id
+			LEFT JOIN banned_subtypes bs ON r.id = bs.restriction_id
+			LEFT JOIN size s ON r.id = s.restriction_id
+			`
+			)
+			.all() as RestrictionRow[];
+
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedRestriction = expectedMap.get(row.id);
+			expect(
+				expectedRestriction,
+				`Missing expected restriction for id ${row.id}`
+			).toBeDefined();
+
+			const adapted = adaptRestriction(row);
+
+			expect(adapted).toEqual(expectedRestriction);
+			recordsCompared++;
+		}
+		console.log(`Restrictions tested: ${recordsCompared}`);
 		expect(recordsCompared).toBe(expectedMap.size);
 	});
 });

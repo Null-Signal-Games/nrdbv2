@@ -22,7 +22,9 @@ import type {
 	CardSubtype,
 	CardSubtypeRow,
 	CardPool,
-	CardPoolRow
+	CardPoolRow,
+	Restriction,
+	RestrictionRow
 } from './types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
@@ -612,4 +614,41 @@ export function adaptCardSubtype(row: CardSubtypeRow): CardSubtype {
 			self: `${NRDB_API_URL}/card_subtypes/${id}`
 		}
 	} as CardSubtype;
+}
+
+export function adaptRestriction(row: RestrictionRow): Restriction {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'restrictions',
+		attributes: {
+			name: row.name,
+			date_start: row.date_start,
+			point_limit: row.point_limit,
+			format_id: row.format_id,
+			verdicts: {
+				banned: row.banned ? JSON.parse(row.banned) : [],
+				restricted: row.restricted ? JSON.parse(row.restricted) : [],
+				universal_faction_cost: row.universal_faction_cost
+					? JSON.parse(row.universal_faction_cost)
+					: {},
+				global_penalty: row.global_penalty ? JSON.parse(row.global_penalty) : [],
+				points: row.points ? JSON.parse(row.points) : {}
+			},
+			banned_subtypes: row.banned_subtypes ? JSON.parse(row.banned_subtypes) : [],
+			size: row.size || 0,
+			updated_at: formatTimestamp(row.updated_at) as string
+		},
+		relationships: {
+			format: {
+				links: {
+					related: `${NRDB_API_URL}/formats/${row.format_id}`
+				}
+			}
+		},
+		links: {
+			self: `${NRDB_API_URL}/restrictions/${id}`
+		}
+	};
 }
