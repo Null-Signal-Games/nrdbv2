@@ -28,17 +28,24 @@ import type {
 	Illustrator
 } from './types.js';
 
+function getSqliteDb() : Database.Database {
+	const dbPath = path.resolve(__dirname, '../../test-data/netrunnerdb.sqlite3');
+	return new Database(dbPath);
+}
+
+function readJsonDataFor(objectType: string) : unknown {
+	const jsonPath = path.resolve(__dirname, `../../test-data/${objectType}.json`);
+	return JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+}
+
 // Run ./fetch-test-data.sh to download a full copy of the API and DB data for testing if not present.
 describe('Card Adapter', () => {
 	it('correctly adapts all cards from sqlite to match API output', () => {
 		// 1. Get ground truth from cards.json
-		const cardsJsonPath = path.resolve(__dirname, '../../cards.json');
-		const cardsData = JSON.parse(fs.readFileSync(cardsJsonPath, 'utf8'));
-		const expectedCards = cardsData.data as Card[];
+		const expectedCards = (readJsonDataFor('cards') as { data: Card[] }).data;
 
 		// 2. Fetch rows from database
-		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
-		const db = new Database(dbPath);
+		const db = getSqliteDb();
 		const rows = db.prepare('SELECT * FROM unified_cards').all() as UnifiedCardRow[];
 		db.close();
 
@@ -66,12 +73,9 @@ describe('Card Adapter', () => {
 
 describe('Printing Adapter', () => {
 	it('correctly adapts all printings from sqlite to match API output', () => {
-		const printingsJsonPath = path.resolve(__dirname, '../../printings.json');
-		const printingsData = JSON.parse(fs.readFileSync(printingsJsonPath, 'utf8'));
-		const expectedPrintings = printingsData.data as Printing[];
+		const expectedPrintings = (readJsonDataFor('printings') as { data: Printing[] }).data;
 
-		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
-		const db = new Database(dbPath);
+		const db = getSqliteDb();
 		const rows = db.prepare('SELECT * FROM unified_printings').all() as UnifiedPrintingRow[];
 		db.close();
 
@@ -98,12 +102,9 @@ describe('Printing Adapter', () => {
 
 describe('Card Cycle Adapter', () => {
 	it('correctly adapts all cycles from sqlite to match API output', () => {
-		const cyclesJsonPath = path.resolve(__dirname, '../../card_cycles.json');
-		const cyclesData = JSON.parse(fs.readFileSync(cyclesJsonPath, 'utf8'));
-		const expectedCycles = cyclesData.data as Cycle[];
+		const expectedCycles = (readJsonDataFor('card_cycles') as { data: Cycle[] }).data;
 
-		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
-		const db = new Database(dbPath);
+		const db = getSqliteDb();
 		const query = `
 			SELECT
 				cc.*,
@@ -145,12 +146,9 @@ describe('Card Cycle Adapter', () => {
 
 describe('Card Set Adapter', () => {
 	it('correctly adapts all sets from sqlite to match API output', () => {
-		const setsJsonPath = path.resolve(__dirname, '../../card_sets.json');
-		const setsData = JSON.parse(fs.readFileSync(setsJsonPath, 'utf8'));
-		const expectedSets = setsData.data as Set[];
+		const expectedSets = (readJsonDataFor('card_sets') as { data: Set[] }).data;
 
-		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
-		const db = new Database(dbPath);
+		const db = getSqliteDb();
 		const query = `
 			SELECT
 				cs.*,
@@ -187,12 +185,9 @@ describe('Card Set Adapter', () => {
 
 describe('Faction Adapter', () => {
 	it('correctly adapts all factions from sqlite to match API output', () => {
-		const factionsJsonPath = path.resolve(__dirname, '../../factions.json');
-		const factionsData = JSON.parse(fs.readFileSync(factionsJsonPath, 'utf8'));
-		const expectedFactions = factionsData.data as Faction[];
+		const expectedFactions = (readJsonDataFor('factions') as { data: Faction[] }).data;
 
-		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
-		const db = new Database(dbPath);
+		const db = getSqliteDb();
 		const rows = db.prepare('SELECT * FROM factions').all() as FactionRow[];
 		db.close();
 
@@ -217,12 +212,9 @@ describe('Faction Adapter', () => {
 
 describe('Format Adapter', () => {
 	it('correctly adapts all formats from sqlite to match API output', () => {
-		const formatsJsonPath = path.resolve(__dirname, '../../formats.json');
-		const formatsData = JSON.parse(fs.readFileSync(formatsJsonPath, 'utf8'));
-		const expectedFormats = formatsData.data as Format[];
+		const expectedFormats = (readJsonDataFor('formats') as { data: Format[] }).data;
 
-		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
-		const db = new Database(dbPath);
+		const db = getSqliteDb();
 		const query = `
 			SELECT
 				f.*,
@@ -313,21 +305,15 @@ describe('Format Adapter', () => {
 // ==========================================
 describe('Illustrator Adapter', () => {
 	it('correctly adapts all illustrators from sqlite to match API output', () => {
-		const apiJsonPath = path.join(process.cwd(), 'illustrators.json');
-		if (!fs.existsSync(apiJsonPath)) {
-			console.warn('illustrators.json not found, skipping comprehensive test.');
-			return;
-		}
+		const expectedIllustrators = (readJsonDataFor('illustrators') as { data: Illustrator[] }).data;
 
-		const apiData = JSON.parse(fs.readFileSync(apiJsonPath, 'utf8'));
 		const expectedMap = new Map<string, Illustrator>();
 
-		for (const illustrator of apiData.data) {
+		for (const illustrator of expectedIllustrators) {
 			expectedMap.set(illustrator.id, illustrator);
 		}
 
-		const dbPath = path.resolve(__dirname, '../../netrunnerdb.sqlite3');
-		const db = new Database(dbPath);
+		const db = getSqliteDb();
 		const rows = db.prepare(`SELECT * FROM illustrators`).all() as IllustratorRow[];
 		db.close();
 
