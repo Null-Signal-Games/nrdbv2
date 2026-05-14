@@ -276,8 +276,9 @@ export interface Restriction {
 	attributes: {
 		name: string;
 		date_start: string;
-		format_id: Format;
+		format_id: string;
 		banned_subtypes: string[];
+		point_limit: number | null;
 		verdicts: {
 			banned: string[];
 			restricted: string[];
@@ -285,6 +286,7 @@ export interface Restriction {
 			points: { [card_id: string]: number };
 			universal_faction_cost: { [card_id: string]: number };
 		};
+		size: number;
 		updated_at: string;
 	};
 	relationships: Relationships;
@@ -757,6 +759,29 @@ export interface CardSubtype {
 	attributes: {
 		name: string;
 		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+export interface CardPoolRow {
+	id: string;
+	name: string;
+	format_id: string;
+	created_at: string;
+	updated_at: string;
+	card_cycle_ids?: string; // from join
+	num_cards?: number; // from join
+}
+
+export interface CardPool {
+	id: string;
+	type: 'card_pools';
+	attributes: {
+		name: string;
+		format_id: string;
+		card_cycle_ids: string[];
+		updated_at: string;
+		num_cards: number;
 	};
 	relationships: Relationships;
 	links: Links;

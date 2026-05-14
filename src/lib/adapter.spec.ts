@@ -4,6 +4,7 @@ import {
 	adaptCard,
 	adaptPrinting,
 	adaptCardCycle,
+	adaptCardPool,
 	adaptCardSet,
 	adaptFaction,
 	adaptFormat,
@@ -18,6 +19,8 @@ import path from 'path';
 import zlib from 'zlib';
 import type {
 	Card,
+	CardPool,
+	CardPoolRow,
 	Printing,
 	UnifiedCardRow,
 	UnifiedPrintingRow,
@@ -364,6 +367,54 @@ describe('Side Adapter', () => {
 		}
 
 		console.log(`Sides tested: ${recordsCompared}`);
+	});
+});
+
+describe('Card Pool Adapter', () => {
+	it('correctly adapts all card pools from sqlite to match API output', () => {
+		const expectedCardPools = (readJsonDataFor('card_pools') as { data: CardPool[] }).data;
+
+		const expectedMap = new Map<string, CardPool>();
+
+		for (const cardPool of expectedCardPools) {
+			expectedMap.set(cardPool.id, cardPool);
+		}
+
+		const rows = db
+			.prepare(`
+			WITH
+				num_cards AS (
+					SELECT cp.value AS card_pool_id, COUNT(*) AS num_cards
+					FROM unified_cards c, json_each(c.card_pool_ids) AS cp
+					GROUP BY 1
+				),
+				cycles AS (
+					SELECT card_pool_id, json_group_array(card_cycle_id) AS card_cycle_ids
+					FROM card_pools_card_cycles
+					GROUP BY 1
+				)
+				SELECT
+					cp.id, cp.name, cp.format_id, cp.created_at, cp.updated_at,
+					num_cards.num_cards, cycles.card_cycle_ids
+				FROM card_pools AS cp
+				LEFT JOIN num_cards ON cp.id = num_cards.card_pool_id
+				LEFT JOIN cycles ON cp.id = cycles.card_pool_id
+			`)
+			.all() as CardPoolRow[];
+
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedCardType = expectedMap.get(row.id);
+			expect(expectedCardType, `Missing expected card pool for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptCardPool(row);
+
+			expect(adapted).toEqual(expectedCardType);
+			recordsCompared++;
+		}
+		console.log(`Card Pools tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
 	});
 });
 

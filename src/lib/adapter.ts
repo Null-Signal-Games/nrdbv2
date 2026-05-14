@@ -20,7 +20,9 @@ import type {
 	CardSetType,
 	CardSetTypeRow,
 	CardSubtype,
-	CardSubtypeRow
+	CardSubtypeRow,
+	CardPool,
+	CardPoolRow
 } from './types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
@@ -166,6 +168,33 @@ export function adaptCardCycle(row: CardCycleRow): Cycle {
 			self: `${NRDB_API_URL}/card_cycles/${id}`
 		}
 	} as Cycle;
+}
+
+export function adaptCardPool(row: CardPoolRow): CardPool {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_pools',
+		attributes: {
+			name: row.name,
+			format_id: row.format_id,
+			card_cycle_ids: parseJsonWithDefault(row.card_cycle_ids) as string[],
+			num_cards: row.num_cards,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			format: buildRel(`formats/${row.format_id}`),
+			card_cycles: buildRel('card_cycles', row.id, 'card_pool_id'),
+			card_sets: buildRel('card_sets', row.id, 'card_pool_id'),
+			snapshots: buildRel('snapshots', row.id, 'card_pool_id'),
+			cards: buildRel('cards', row.id, 'card_pool_id'),
+			printings: buildRel('printings', row.id, 'card_pool_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_pools/${id}`
+		}
+	} as CardPool;
 }
 
 export function adaptCardSet(row: CardSetRow): Set {
