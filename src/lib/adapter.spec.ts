@@ -6,6 +6,7 @@ import {
 	adaptCardCycle,
 	adaptCardPool,
 	adaptRestriction,
+	adaptSnapshot,
 	adaptCardSet,
 	adaptFaction,
 	adaptFormat,
@@ -44,7 +45,9 @@ import type {
 	CardSubtype,
 	CardSubtypeRow,
 	Restriction,
-	RestrictionRow
+	RestrictionRow,
+	Snapshot,
+	SnapshotRow
 } from './types.js';
 
 // Our SQLite database.
@@ -601,6 +604,84 @@ describe('Restriction Adapter', () => {
 			recordsCompared++;
 		}
 		console.log(`Restrictions tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Snapshot Adapter', () => {
+	it('correctly adapts all snapshots from sqlite to match API output', () => {
+		const expectedSnapshots = (readJsonDataFor('snapshots') as { data: Snapshot[] }).data;
+
+		const expectedMap = new Map<string, Snapshot>();
+
+		for (const snapshot of expectedSnapshots) {
+			expectedMap.set(snapshot.id, snapshot);
+		}
+
+		const rows = db
+			.prepare(
+				`
+			WITH
+				num_cards AS (
+					SELECT cp.value AS card_pool_id, COUNT(*) AS num_cards
+					FROM unified_cards c, json_each(c.card_pool_ids) AS cp
+					GROUP BY 1
+				),
+				cycles AS (
+					SELECT card_pool_id, json_group_array(card_cycle_id) AS card_cycle_ids
+					FROM card_pools_card_cycles
+					GROUP BY 1
+				),
+				sets AS (
+					SELECT card_pool_id, json_group_array(card_set_id) AS card_set_ids
+					FROM card_pools_card_sets
+					GROUP BY 1
+				)
+			SELECT
+				s.id, s.format_id, s.card_pool_id, s.date_start, s.restriction_id, s.active, s.created_at, s.updated_at,
+				num_cards.num_cards, cycles.card_cycle_ids, sets.card_set_ids
+			FROM snapshots AS s
+			LEFT JOIN num_cards ON s.card_pool_id = num_cards.card_pool_id
+			LEFT JOIN cycles ON s.card_pool_id = cycles.card_pool_id
+			LEFT JOIN sets ON s.card_pool_id = sets.card_pool_id
+			`
+			)
+			.all() as SnapshotRow[];
+
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedSnapshot = expectedMap.get(row.id);
+			expect(expectedSnapshot, `Missing expected snapshot for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptSnapshot(row);
+
+			if (adapted.attributes.card_cycle_ids) {
+				adapted.attributes.card_cycle_ids = [
+					...new Set(adapted.attributes.card_cycle_ids)
+				].sort();
+			}
+			if (adapted.attributes.card_set_ids) {
+				adapted.attributes.card_set_ids = [
+					...new Set(adapted.attributes.card_set_ids)
+				].sort();
+			}
+
+			if (expectedSnapshot!.attributes.card_cycle_ids) {
+				expectedSnapshot!.attributes.card_cycle_ids = [
+					...new Set(expectedSnapshot!.attributes.card_cycle_ids)
+				].sort();
+			}
+			if (expectedSnapshot!.attributes.card_set_ids) {
+				expectedSnapshot!.attributes.card_set_ids = [
+					...new Set(expectedSnapshot!.attributes.card_set_ids)
+				].sort();
+			}
+
+			expect(adapted).toEqual(expectedSnapshot);
+			recordsCompared++;
+		}
+		console.log(`Snapshots tested: ${recordsCompared}`);
 		expect(recordsCompared).toBe(expectedMap.size);
 	});
 });

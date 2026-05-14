@@ -24,7 +24,9 @@ import type {
 	CardPool,
 	CardPoolRow,
 	Restriction,
-	RestrictionRow
+	RestrictionRow,
+	Snapshot,
+	SnapshotRow
 } from './types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
@@ -649,6 +651,48 @@ export function adaptRestriction(row: RestrictionRow): Restriction {
 		},
 		links: {
 			self: `${NRDB_API_URL}/restrictions/${id}`
+		}
+	};
+}
+
+export function adaptSnapshot(row: SnapshotRow): Snapshot {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'snapshots',
+		attributes: {
+			format_id: row.format_id,
+			active: Boolean(row.active),
+			card_cycle_ids: parseJsonWithDefault(row.card_cycle_ids) as string[],
+			card_set_ids: parseJsonWithDefault(row.card_set_ids) as string[],
+			card_pool_id: row.card_pool_id,
+			restriction_id: row.restriction_id,
+			num_cards: row.num_cards || 0,
+			date_start: row.date_start,
+			updated_at: formatTimestamp(row.updated_at) as string
+		},
+		relationships: {
+			format: {
+				links: {
+					related: `${NRDB_API_URL}/formats/${row.format_id}`
+				}
+			},
+			card_pool: {
+				links: {
+					related: `${NRDB_API_URL}/card_pools/${row.card_pool_id}`
+				}
+			},
+			restriction: {
+				links: {
+					related: row.restriction_id
+						? `${NRDB_API_URL}/restrictions/${row.restriction_id}`
+						: null
+				}
+			}
+		},
+		links: {
+			self: `${NRDB_API_URL}/snapshots/${id}`
 		}
 	};
 }

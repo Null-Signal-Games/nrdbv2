@@ -37,6 +37,11 @@ export type FactionIds =
 	| 'neutral_runner';
 
 export interface Relationships {
+	card_pool?: {
+		links: {
+			related: string;
+		};
+	};
 	card_types?: {
 		links: {
 			related: string;
@@ -65,6 +70,11 @@ export interface Relationships {
 	printings?: {
 		links: {
 			related: string;
+		};
+	};
+	restriction?: {
+		links: {
+			related: string | null;
 		};
 	};
 	side?: {
@@ -828,6 +838,38 @@ export interface Restriction {
 		verdicts: RestrictionVerdicts;
 		banned_subtypes: string[];
 		size: number;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface SnapshotRow {
+	id: string;
+	format_id: string;
+	card_pool_id: string;
+	date_start: string;
+	restriction_id: string | null;
+	active: boolean | number;
+	created_at: string;
+	updated_at: string;
+	card_cycle_ids?: string; // from join
+	card_set_ids?: string; // from join
+	num_cards?: number; // from join
+}
+
+export interface Snapshot {
+	id: string;
+	type: 'snapshots';
+	attributes: {
+		format_id: string;
+		active: boolean;
+		card_cycle_ids: string[];
+		card_set_ids: string[];
+		card_pool_id: string;
+		restriction_id: string | null;
+		num_cards: number;
+		date_start: string;
 		updated_at: string;
 	};
 	relationships: Relationships;
