@@ -7,7 +7,11 @@ import {
 	adaptCardSet,
 	adaptFaction,
 	adaptFormat,
-	adaptIllustrator
+	adaptIllustrator,
+	adaptSide,
+	adaptCardType,
+	adaptCardSetType,
+	adaptCardSubtype
 } from './adapter.js';
 import fs from 'fs';
 import path from 'path';
@@ -26,7 +30,15 @@ import type {
 	Set,
 	Faction,
 	Format,
-	Illustrator
+	Illustrator,
+	Side,
+	SideRow,
+	CardType,
+	CardTypeRow,
+	CardSetType,
+	CardSetTypeRow,
+	CardSubtype,
+	CardSubtypeRow
 } from './types.js';
 
 // Our SQLite database.
@@ -55,10 +67,7 @@ function readJsonDataFor(objectType: string): unknown {
 // Run ./fetch-test-data.sh to download a full, fresh copy of the API and DB data for testing if not present.
 describe('Card Adapter', () => {
 	it('correctly adapts all cards from sqlite to match API output', () => {
-		// 1. Get ground truth from cards.json
 		const expectedCards = (readJsonDataFor('cards') as { data: Card[] }).data;
-
-		// 2. Fetch rows from database
 		const rows = db.prepare('SELECT * FROM unified_cards').all() as UnifiedCardRow[];
 
 		expect(rows.length).toBeGreaterThan(0);
@@ -67,7 +76,6 @@ describe('Card Adapter', () => {
 		const expectedMap = new Map(expectedCards.map((c: Card) => [c.id, c]));
 		const typeCounts = new Map<string, number>();
 
-		// 3. Adapt rows and compare
 		for (const row of rows) {
 			const typeId = row.card_type_id || 'unknown';
 			typeCounts.set(typeId, (typeCounts.get(typeId) || 0) + 1);
@@ -302,9 +310,6 @@ describe('Format Adapter', () => {
 	});
 });
 
-// ==========================================
-// Illustrator
-// ==========================================
 describe('Illustrator Adapter', () => {
 	it('correctly adapts all illustrators from sqlite to match API output', () => {
 		const expectedIllustrators = (readJsonDataFor('illustrators') as { data: Illustrator[] })
@@ -333,6 +338,119 @@ describe('Illustrator Adapter', () => {
 			recordsCompared++;
 		}
 		console.log(`Illustrators tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Side Adapter', () => {
+	it('correctly adapts all sides from sqlite to match API output', () => {
+		const expectedSides = (readJsonDataFor('sides') as { data: Side[] }).data;
+
+		const rows = db.prepare('SELECT * FROM sides').all() as SideRow[];
+
+		expect(rows.length).toBeGreaterThan(0);
+		expect(rows.length).toBe(expectedSides.length);
+
+		let recordsCompared = 0;
+		const expectedMap = new Map(expectedSides.map((c: Side) => [c.id, c]));
+
+		for (const row of rows) {
+			const expectedSide = expectedMap.get(row.id);
+			expect(expectedSide, `Missing expected side for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptSide(row);
+			expect(adapted).toEqual(expectedSide);
+			recordsCompared++;
+		}
+
+		console.log(`Sides tested: ${recordsCompared}`);
+	});
+});
+
+describe('Card Type Adapter', () => {
+	it('correctly adapts all card types from sqlite to match API output', () => {
+		const expectedCardTypes = (readJsonDataFor('card_types') as { data: CardType[] }).data;
+
+		const expectedMap = new Map<string, CardType>();
+
+		for (const cardType of expectedCardTypes) {
+			expectedMap.set(cardType.id, cardType);
+		}
+
+		const rows = db.prepare(`SELECT * FROM card_types`).all() as CardTypeRow[];
+
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedCardType = expectedMap.get(row.id);
+			expect(expectedCardType, `Missing expected card type for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptCardType(row);
+
+			expect(adapted).toEqual(expectedCardType);
+			recordsCompared++;
+		}
+		console.log(`Card Types tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Card Set Type Adapter', () => {
+	it('correctly adapts all card set types from sqlite to match API output', () => {
+		const expectedCardSetTypes = (readJsonDataFor('card_set_types') as { data: CardSetType[] })
+			.data;
+		const expectedMap = new Map<string, CardSetType>();
+
+		for (const cardSetType of expectedCardSetTypes) {
+			expectedMap.set(cardSetType.id, cardSetType);
+		}
+
+		const rows = db.prepare(`SELECT * FROM card_set_types`).all() as CardSetTypeRow[];
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedCardSetType = expectedMap.get(row.id);
+			expect(
+				expectedCardSetType,
+				`Missing expected card set type for id ${row.id}`
+			).toBeDefined();
+
+			const adapted = adaptCardSetType(row);
+
+			expect(adapted).toEqual(expectedCardSetType);
+			recordsCompared++;
+		}
+		console.log(`Card Set Types tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Card Subtype Adapter', () => {
+	it('correctly adapts all card subtypes from sqlite to match API output', () => {
+		const expectedCardSubtypes = (readJsonDataFor('card_subtypes') as { data: CardSubtype[] })
+			.data;
+		const expectedMap = new Map<string, CardSubtype>();
+
+		for (const cardSubtype of expectedCardSubtypes) {
+			expectedMap.set(cardSubtype.id, cardSubtype);
+		}
+
+		const rows = db.prepare(`SELECT * FROM card_subtypes`).all() as CardSubtypeRow[];
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedCardSubtype = expectedMap.get(row.id);
+			expect(
+				expectedCardSubtype,
+				`Missing expected card subtype for id ${row.id}`
+			).toBeDefined();
+
+			const adapted = adaptCardSubtype(row);
+
+			expect(adapted).toEqual(expectedCardSubtype);
+			recordsCompared++;
+		}
+		console.log(`Card Subtypes tested: ${recordsCompared}`);
 		expect(recordsCompared).toBe(expectedMap.size);
 	});
 });

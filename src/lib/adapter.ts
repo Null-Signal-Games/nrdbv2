@@ -12,7 +12,15 @@ import type {
 	Set,
 	Faction,
 	Format,
-	Illustrator
+	Illustrator,
+	Side,
+	SideRow,
+	CardType,
+	CardTypeRow,
+	CardSetType,
+	CardSetTypeRow,
+	CardSubtype,
+	CardSubtypeRow
 } from './types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
@@ -69,7 +77,7 @@ export function adaptCard(row: UnifiedCardRow): Card {
 		links: {
 			self: `${NRDB_API_URL}/cards/${id}`
 		}
-	} as unknown as Card;
+	} as Card;
 }
 
 export function adaptPrinting(row: UnifiedPrintingRow): Printing {
@@ -129,7 +137,7 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 		links: {
 			self: `${NRDB_API_URL}/printings/${id}`
 		}
-	} as unknown as Printing;
+	} as Printing;
 }
 
 export function adaptCardCycle(row: CardCycleRow): Cycle {
@@ -157,7 +165,7 @@ export function adaptCardCycle(row: CardCycleRow): Cycle {
 		links: {
 			self: `${NRDB_API_URL}/card_cycles/${id}`
 		}
-	} as unknown as Cycle;
+	} as Cycle;
 }
 
 export function adaptCardSet(row: CardSetRow): Set {
@@ -188,7 +196,7 @@ export function adaptCardSet(row: CardSetRow): Set {
 		links: {
 			self: `${NRDB_API_URL}/card_sets/${id}`
 		}
-	} as unknown as Set;
+	} as Set;
 }
 
 export function adaptFaction(row: FactionRow): Faction {
@@ -213,7 +221,7 @@ export function adaptFaction(row: FactionRow): Faction {
 		links: {
 			self: `${NRDB_API_URL}/factions/${id}`
 		}
-	} as unknown as Faction;
+	} as Faction;
 }
 
 export function adaptFormat(row: FormatRow): Format {
@@ -239,7 +247,28 @@ export function adaptFormat(row: FormatRow): Format {
 		links: {
 			self: `${NRDB_API_URL}/formats/${id}`
 		}
-	} as unknown as Format;
+	} as Format;
+}
+
+export function adaptSide(row: SideRow): Side {
+	return {
+		id: row.id,
+		type: 'sides',
+		attributes: {
+			name: row.name,
+			updated_at: formatTimestamp(row.updated_at)
+		},
+		relationships: {
+			factions: buildRel('factions', row.id, 'side_id'),
+			card_types: buildRel('card_types', row.id, 'side_id'),
+			cards: buildRel('cards', row.id, 'side_id'),
+			decklists: buildRel('decklists', row.id, 'side_id'),
+			printings: buildRel('printings', row.id, 'side_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/sides/${row.id}`
+		}
+	} as Side;
 }
 
 function toStringArray(val: unknown): string[] {
@@ -492,5 +521,66 @@ export function adaptIllustrator(row: IllustratorRow): Illustrator {
 		links: {
 			self: `${NRDB_API_URL}/illustrators/${id}`
 		}
-	} as unknown as Illustrator;
+	} as Illustrator;
+}
+
+export function adaptCardType(row: CardTypeRow): CardType {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_types',
+		attributes: {
+			name: row.name,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			side: buildRel(`sides/${row.side_id}`),
+			cards: buildRel('cards', id, 'card_type_id'),
+			printings: buildRel('printings', id, 'card_type_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_types/${id}`
+		}
+	} as CardType;
+}
+
+export function adaptCardSetType(row: CardSetTypeRow): CardSetType {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_set_types',
+		attributes: {
+			name: row.name,
+			description: row.description,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			card_sets: buildRel('card_sets', id, 'card_set_type_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_set_types/${id}`
+		}
+	} as CardSetType;
+}
+
+export function adaptCardSubtype(row: CardSubtypeRow): CardSubtype {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_subtypes',
+		attributes: {
+			name: row.name,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			cards: buildRel('cards', id, 'card_subtype_id'),
+			printings: buildRel('printings', id, 'card_subtype_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_subtypes/${id}`
+		}
+	} as CardSubtype;
 }

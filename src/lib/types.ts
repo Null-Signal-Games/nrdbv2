@@ -37,22 +37,32 @@ export type FactionIds =
 	| 'neutral_runner';
 
 export interface Relationships {
-	side: {
+	card_types?: {
 		links: {
 			related: string;
 		};
 	};
-	cards: {
+	cards?: {
 		links: {
 			related: string;
 		};
 	};
-	decklists: {
+	decklists?: {
 		links: {
 			related: string;
 		};
 	};
-	printings: {
+	factions?: {
+		links: {
+			related: string;
+		};
+	};
+	printings?: {
+		links: {
+			related: string;
+		};
+	};
+	side?: {
 		links: {
 			related: string;
 		};
@@ -77,6 +87,24 @@ export interface ApiResponse<T> {
 			};
 		};
 	};
+}
+
+export interface Side {
+	id: string;
+	type: 'sides';
+	attributes: {
+		name: string;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface SideRow {
+	id: string;
+	name: string;
+	created_at: string;
+	updated_at: string;
 }
 
 export interface Card {
@@ -675,4 +703,61 @@ export interface IllustratorRow {
 	name: string;
 	num_printings: number;
 	updated_at: string;
+}
+
+export interface CardType {
+	id: string;
+	type: 'card_types';
+	attributes: {
+		name: string;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface CardTypeRow {
+	id: string;
+	name: string;
+	created_at: string;
+	updated_at: string;
+	side_id: string;
+}
+
+export interface CardSetTypeRow {
+	id: string;
+	name: string;
+	description: string | null;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CardSetType {
+	id: string;
+	type: 'card_set_types';
+	attributes: {
+		name: string;
+		description: string | null;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface CardSubtypeRow {
+	id: string;
+	name: string;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CardSubtype {
+	id: string;
+	type: 'card_subtypes';
+	attributes: {
+		name: string;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
 }
