@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import Database from 'better-sqlite3';
 import {
 	adaptCard,
@@ -11,6 +11,7 @@ import {
 } from './adapter.js';
 import fs from 'fs';
 import path from 'path';
+import zlib from 'zlib';
 import type {
 	Card,
 	Printing,
@@ -28,26 +29,37 @@ import type {
 	Illustrator
 } from './types.js';
 
-function getSqliteDb() : Database.Database {
+// Our SQLite database.
+let db: Database.Database;
+
+beforeAll(() => {
+	const compressedDbPath = path.resolve(__dirname, '../../test-data/netrunnerdb.sqlite3.gz');
 	const dbPath = path.resolve(__dirname, '../../test-data/netrunnerdb.sqlite3');
-	return new Database(dbPath);
+
+	const compressedData = fs.readFileSync(compressedDbPath);
+	fs.writeFileSync(dbPath, zlib.gunzipSync(compressedData));
+
+	db = new Database(dbPath, { readonly: true });
+});
+
+afterAll(() => {
+	db.close();
+});
+
+function readJsonDataFor(objectType: string): unknown {
+	const jsonPath = path.resolve(__dirname, `../../test-data/${objectType}.json.gz`);
+	const compressedData = fs.readFileSync(jsonPath);
+	return JSON.parse(zlib.gunzipSync(compressedData).toString('utf8'));
 }
 
-function readJsonDataFor(objectType: string) : unknown {
-	const jsonPath = path.resolve(__dirname, `../../test-data/${objectType}.json`);
-	return JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-}
-
-// Run ./fetch-test-data.sh to download a full copy of the API and DB data for testing if not present.
+// Run ./fetch-test-data.sh to download a full, fresh copy of the API and DB data for testing if not present.
 describe('Card Adapter', () => {
 	it('correctly adapts all cards from sqlite to match API output', () => {
 		// 1. Get ground truth from cards.json
 		const expectedCards = (readJsonDataFor('cards') as { data: Card[] }).data;
 
 		// 2. Fetch rows from database
-		const db = getSqliteDb();
 		const rows = db.prepare('SELECT * FROM unified_cards').all() as UnifiedCardRow[];
-		db.close();
 
 		expect(rows.length).toBeGreaterThan(0);
 		expect(rows.length).toBe(expectedCards.length);
@@ -75,9 +87,7 @@ describe('Printing Adapter', () => {
 	it('correctly adapts all printings from sqlite to match API output', () => {
 		const expectedPrintings = (readJsonDataFor('printings') as { data: Printing[] }).data;
 
-		const db = getSqliteDb();
 		const rows = db.prepare('SELECT * FROM unified_printings').all() as UnifiedPrintingRow[];
-		db.close();
 
 		expect(rows.length).toBeGreaterThan(0);
 		expect(rows.length).toBe(expectedPrintings.length);
@@ -104,7 +114,6 @@ describe('Card Cycle Adapter', () => {
 	it('correctly adapts all cycles from sqlite to match API output', () => {
 		const expectedCycles = (readJsonDataFor('card_cycles') as { data: Cycle[] }).data;
 
-		const db = getSqliteDb();
 		const query = `
 			SELECT
 				cc.*,
@@ -123,7 +132,6 @@ describe('Card Cycle Adapter', () => {
 			FROM card_cycles cc
 		`;
 		const rows = db.prepare(query).all() as CardCycleRow[];
-		db.close();
 
 		expect(rows.length).toBeGreaterThan(0);
 		expect(rows.length).toBe(expectedCycles.length);
@@ -148,7 +156,6 @@ describe('Card Set Adapter', () => {
 	it('correctly adapts all sets from sqlite to match API output', () => {
 		const expectedSets = (readJsonDataFor('card_sets') as { data: Set[] }).data;
 
-		const db = getSqliteDb();
 		const query = `
 			SELECT
 				cs.*,
@@ -162,7 +169,6 @@ describe('Card Set Adapter', () => {
 			FROM card_sets cs
 		`;
 		const rows = db.prepare(query).all() as CardSetRow[];
-		db.close();
 
 		expect(rows.length).toBeGreaterThan(0);
 		expect(rows.length).toBe(expectedSets.length);
@@ -187,9 +193,7 @@ describe('Faction Adapter', () => {
 	it('correctly adapts all factions from sqlite to match API output', () => {
 		const expectedFactions = (readJsonDataFor('factions') as { data: Faction[] }).data;
 
-		const db = getSqliteDb();
 		const rows = db.prepare('SELECT * FROM factions').all() as FactionRow[];
-		db.close();
 
 		expect(rows.length).toBeGreaterThan(0);
 		expect(rows.length).toBe(expectedFactions.length);
@@ -214,7 +218,6 @@ describe('Format Adapter', () => {
 	it('correctly adapts all formats from sqlite to match API output', () => {
 		const expectedFormats = (readJsonDataFor('formats') as { data: Format[] }).data;
 
-		const db = getSqliteDb();
 		const query = `
 			SELECT
 				f.*,
@@ -239,7 +242,6 @@ describe('Format Adapter', () => {
 			FROM formats f
 		`;
 		const rows = db.prepare(query).all() as FormatRow[];
-		db.close();
 
 		expect(rows.length).toBeGreaterThan(0);
 		expect(rows.length).toBe(expectedFormats.length);
@@ -305,7 +307,8 @@ describe('Format Adapter', () => {
 // ==========================================
 describe('Illustrator Adapter', () => {
 	it('correctly adapts all illustrators from sqlite to match API output', () => {
-		const expectedIllustrators = (readJsonDataFor('illustrators') as { data: Illustrator[] }).data;
+		const expectedIllustrators = (readJsonDataFor('illustrators') as { data: Illustrator[] })
+			.data;
 
 		const expectedMap = new Map<string, Illustrator>();
 
@@ -313,9 +316,7 @@ describe('Illustrator Adapter', () => {
 			expectedMap.set(illustrator.id, illustrator);
 		}
 
-		const db = getSqliteDb();
 		const rows = db.prepare(`SELECT * FROM illustrators`).all() as IllustratorRow[];
-		db.close();
 
 		let recordsCompared = 0;
 
