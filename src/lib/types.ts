@@ -153,6 +153,7 @@ export interface Card {
 				small: string;
 				medium: string;
 				large: string;
+				xlarge?: string;
 			};
 		};
 	};

@@ -1,6 +1,6 @@
 import type { Card, Decklist, FileFormat, CardGroup, Printing } from '$lib/types';
 
-import { NRDB_API_URL, NRDB_IMAGE_URL, NRDB_SQLITE_NAME } from '$lib/constants';
+import { NRDB_API_URL, NRDB_SQLITE_NAME, NRDB_IMAGE_URL } from '$lib/constants';
 
 export const reset_opfs_data = async () => {
 	const root = await navigator.storage.getDirectory();
@@ -80,11 +80,11 @@ export const normalize_sqlite_single = <T extends Record<string, unknown>>(
 
 export const normalize_sqlite = <T extends Record<string, unknown>>(
 	rows: T[],
-	type: 'cards' | 'printing' = 'cards'
+	type: 'cards' | 'printings' = 'cards'
 ) => {
 	// Infer type from data
 	if (rows.length > 0 && rows.every((row) => 'is_latest_printing' in row)) {
-		type = 'printing';
+		type = 'printings';
 	}
 
 	return rows.map((row) => normalize_sqlite_single(row, type));
@@ -92,30 +92,33 @@ export const normalize_sqlite = <T extends Record<string, unknown>>(
 
 export const getHighResImage = (
 	card: Card | Printing,
-	size: 'small' | 'medium' | 'large' = 'large'
+	size: 'small' | 'medium' | 'large' | 'xlarge' = 'large'
 ): string => {
-	/*
 	// if the card includes one of the card cycles that are released by null signal games, use the nsg image
 	const nsgCardCycles = ['elevation', 'liberation', 'borealis', 'ashes', 'system_gateway'];
 
-	// If the card is a printing, use the printing image URL structure (id is the printing ID, not the card ID)
-	if (card && 'type' in card && card.type === 'printings') {
+	const isPrinting = 'card_id' in card.attributes;
+	const printingId = isPrinting ? card.id : (card as Card).attributes.latest_printing_id;
+
+	if (isPrinting) {
 		return `${NRDB_IMAGE_URL}/${size}/${card.id}.jpg`;
 	}
 
+	const c = card as Card;
+
 	// If the card is from a NSG cycle, or doesn't have a NRDB classic image, use the NRDB image
-	if (nsgCardCycles.some((cycle) => card.attributes.card_cycle_ids.includes(cycle))) {
-		return `${NRDB_IMAGE_URL}/xlarge/${card.attributes.latest_printing_id}.webp`;
+	if (nsgCardCycles.some((cycle) => c.attributes.card_cycle_ids.includes(cycle))) {
+		return `${NRDB_IMAGE_URL}/xlarge/${printingId}.webp`;
 	}
 
-	if (!card.attributes.latest_printing_images?.nrdb_classic) {
-		return `${NRDB_IMAGE_URL}/large/${card.attributes.latest_printing_id}.jpg`;
+	if (!c.attributes.latest_printing_images?.nrdb_classic) {
+		return `${NRDB_IMAGE_URL}/large/${printingId}.jpg`;
 	}
 
-	return card.attributes.latest_printing_images.nrdb_classic[size];
-	*/
-
-	return `${NRDB_IMAGE_URL}/${size}/${card.attributes.printing_ids[0]}.jpg`;
+	return (
+		c.attributes.latest_printing_images.nrdb_classic[size] ||
+		c.attributes.latest_printing_images.nrdb_classic.large
+	);
 };
 
 export const group_cards_by_type = (cards: Card[]): CardGroup[] => {

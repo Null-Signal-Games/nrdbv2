@@ -7,22 +7,8 @@
     import { onMount } from "svelte";
     import Icon from "./Icon.svelte";
     import { sql } from "$lib/sqlite";
-    import type { Card } from "$lib/types";
-    import { normalize_sqlite } from "$lib/utils";
-
-    const empty_relationships = {
-        side: { links: { related: "" } },
-        cards: { links: { related: "" } },
-        decklists: { links: { related: "" } },
-        printings: { links: { related: "" } },
-    };
-
-    const to_card = (card: Pick<Card, "id" | "attributes">): Card => ({
-        id: card.id,
-        attributes: card.attributes,
-        relationships: empty_relationships,
-        links: { self: "" },
-    });
+    import type { Card, UnifiedCardRow } from "$lib/types";
+    import { adaptCard } from "$lib/adapter";
 
     let search_input: HTMLInputElement | null = null;
     let is_open = $state(false);
@@ -58,9 +44,7 @@
                     return;
                 }
 
-                filtered_cards = normalize_sqlite(
-                    cards as Array<Card["attributes"] & { id: string }>,
-                ).map(to_card);
+                filtered_cards = (cards as UnifiedCardRow[]).map(adaptCard);
             } catch (error) {
                 if (request_id !== search_request_id) {
                     return;
