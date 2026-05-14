@@ -65,13 +65,7 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 	const card_subtype_ids = toStringArray(row.card_subtype_ids);
 
 	const hasXlarge =
-		row.released_by === 'null_signal_games' &&
-		![
-			'system_core_2019',
-			'magnum_opus_reprint',
-			'salvaged_memories',
-			'system_update_2021'
-		].includes(row.card_cycle_id);
+		row.released_by === 'null_signal_games' && !NO_XLARGE_CYCLES.includes(row.card_cycle_id);
 
 	const hasNarrative = Boolean(row.narrative_text);
 
@@ -128,10 +122,7 @@ function toStringArray(val: unknown): string[] {
 }
 
 function buildRel(path: string, filterId?: string | null, filterField: string = 'id') {
-	if (filterId !== undefined && filterId !== null && filterId !== '' && filterId !== 'none') {
-		return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
-	}
-	if (filterId === 'none' || filterId === '') {
+	if (filterId !== undefined && filterId !== null) {
 		return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
 	}
 	return { links: { related: `${NRDB_API_URL}/${path}` } };
