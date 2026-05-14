@@ -199,7 +199,7 @@ export function adaptFaction(row: FactionRow): Faction {
 		type: 'factions',
 		attributes: {
 			name: row.name,
-			description: row.description !== null ? row.description : null,
+			description: row.description,
 			is_mini: Boolean(row.is_mini),
 			side_id: row.side_id,
 			updated_at: formatTimestamp(row.updated_at) || ''
