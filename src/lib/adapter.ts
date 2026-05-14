@@ -1,4 +1,19 @@
-import type { Card, Printing, UnifiedCardRow, UnifiedPrintingRow } from './types.js';
+import type {
+	Card,
+	Printing,
+	UnifiedCardRow,
+	UnifiedPrintingRow,
+	CardCycleRow,
+	CardSetRow,
+	FactionRow,
+	FormatRow,
+	IllustratorRow,
+	Cycle,
+	Set,
+	Faction,
+	Format,
+	Illustrator
+} from './types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
 const NO_XLARGE_CYCLES = [
@@ -117,6 +132,116 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 	} as unknown as Printing;
 }
 
+export function adaptCardCycle(row: CardCycleRow): Cycle {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_cycles',
+		attributes: {
+			name: row.name,
+			date_release: row.date_release || '',
+			legacy_code: row.legacy_code || '',
+			card_set_ids: parseJsonWithDefault(row.card_set_ids) as string[],
+			first_printing_id: row.first_printing_id || '',
+			position: row.position || 0,
+			released_by: row.released_by || '',
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			card_pools: buildRel('card_pools', id, 'card_cycle_id'),
+			card_sets: buildRel('card_sets', id, 'card_cycle_id'),
+			cards: buildRel('cards', id, 'card_cycle_id'),
+			printings: buildRel('printings', id, 'card_cycle_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_cycles/${id}`
+		}
+	} as unknown as Cycle;
+}
+
+export function adaptCardSet(row: CardSetRow): Set {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_sets',
+		attributes: {
+			name: row.name,
+			date_release: row.date_release || '',
+			size: row.size || 0,
+			card_cycle_id: row.card_cycle_id || '',
+			card_set_type_id: row.card_set_type_id || '',
+			legacy_code: row.legacy_code || '',
+			position: row.position || 0,
+			first_printing_id: row.first_printing_id || '',
+			released_by: row.released_by || '',
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			card_cycle: buildRel(`card_cycles/${row.card_cycle_id}`),
+			card_pools: buildRel('card_pools', id, 'card_set_id'),
+			card_set_type: buildRel(`card_set_types/${row.card_set_type_id}`),
+			cards: buildRel('cards', id, 'card_set_id'),
+			printings: buildRel('printings', id, 'card_set_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_sets/${id}`
+		}
+	} as unknown as Set;
+}
+
+export function adaptFaction(row: FactionRow): Faction {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'factions',
+		attributes: {
+			name: row.name,
+			description: row.description !== null ? row.description : null,
+			is_mini: Boolean(row.is_mini),
+			side_id: row.side_id,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			cards: buildRel('cards', id, 'faction_id'),
+			decklists: buildRel('decklists', id, 'faction_id'),
+			printings: buildRel('printings', id, 'faction_id'),
+			side: buildRel(`sides/${row.side_id}`)
+		},
+		links: {
+			self: `${NRDB_API_URL}/factions/${id}`
+		}
+	} as unknown as Faction;
+}
+
+export function adaptFormat(row: FormatRow): Format {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'formats',
+		attributes: {
+			name: row.name,
+			active_snapshot_id: row.active_snapshot_id,
+			snapshot_ids: parseJsonWithDefault(row.snapshot_ids) as string[],
+			restriction_ids: parseJsonWithDefault(row.restriction_ids) as string[],
+			active_card_pool_id: row.active_card_pool_id || '',
+			active_restriction_id: row.active_restriction_id || null, // null instead of '' based on API format
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			card_pools: buildRel('card_pools', id, 'format_id'),
+			restrictions: buildRel('restrictions', id, 'format_id'),
+			snapshots: buildRel('snapshots', id, 'format_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/formats/${id}`
+		}
+	} as unknown as Format;
+}
+
 function toStringArray(val: unknown): string[] {
 	return parseJsonWithDefault(val) as string[];
 }
@@ -144,6 +269,7 @@ function parseJsonWithDefault(val: unknown): unknown {
 // Convert "2026-05-09 22:43:54.826250" to "2026-05-09T22:43:54+00:00"
 function formatTimestamp(dateStr: string | null): string | null {
 	if (!dateStr) return null;
+
 	const match = dateStr.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}:\d{2})/);
 	if (match) {
 		return `${match[1]}T${match[2]}+00:00`;
@@ -347,4 +473,24 @@ function getSharedAttributes(row: UnifiedCardRow | UnifiedPrintingRow, id_prefix
 		},
 		faces: buildFaces(row, id_prefix)
 	};
+}
+
+export function adaptIllustrator(row: IllustratorRow): Illustrator {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'illustrators',
+		attributes: {
+			name: row.name,
+			num_printings: row.num_printings,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			printings: buildRel('printings', id, 'illustrator_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/illustrators/${id}`
+		}
+	} as unknown as Illustrator;
 }

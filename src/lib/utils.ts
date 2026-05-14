@@ -39,57 +39,6 @@ export const fetch_published_databases = (): Promise<string | null> => {
 		});
 };
 
-const parse_sqlite_value = (value: unknown) => {
-	if (typeof value !== 'string') {
-		return value;
-	}
-
-	const trimmed = value.trim();
-
-	if (!trimmed.startsWith('[') && !trimmed.startsWith('{')) {
-		return value;
-	}
-
-	try {
-		return JSON.parse(trimmed) as unknown;
-	} catch {
-		return value;
-	}
-};
-
-export const normalize_sqlite_single = <T extends Record<string, unknown>>(
-	row: T,
-	_type: 'cards' | 'printings'
-): {
-	id: string;
-	type?: string;
-	attributes: T;
-} => {
-	const normalized_row = Object.fromEntries(
-		Object.entries(row).map(([key, value]) => [key, parse_sqlite_value(value)])
-	) as T & { id?: string; type?: string };
-
-	const { id, type } = normalized_row;
-
-	return {
-		id: id as string,
-		...(typeof type === 'string' ? { type } : { type: _type }),
-		attributes: normalized_row as T
-	};
-};
-
-export const normalize_sqlite = <T extends Record<string, unknown>>(
-	rows: T[],
-	type: 'cards' | 'printings' = 'cards'
-) => {
-	// Infer type from data
-	if (rows.length > 0 && rows.every((row) => 'is_latest_printing' in row)) {
-		type = 'printings';
-	}
-
-	return rows.map((row) => normalize_sqlite_single(row, type));
-};
-
 export const getHighResImage = (
 	card: Card | Printing,
 	size: 'small' | 'medium' | 'large' | 'xlarge' = 'large'

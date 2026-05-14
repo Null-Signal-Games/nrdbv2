@@ -1,9 +1,8 @@
 import { sql } from '$lib/sqlite';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { Illustrator, Printing, UnifiedPrintingRow } from '$lib/types';
-import { normalize_sqlite } from '$lib/utils';
-import { adaptPrinting } from '$lib/adapter';
+import type { Printing, UnifiedPrintingRow, IllustratorRow } from '$lib/types';
+import { adaptPrinting, adaptIllustrator } from '$lib/adapter';
 
 export const ssr = false;
 
@@ -15,8 +14,7 @@ const empty_relationships = {
 };
 
 export const load: PageLoad = async ({ data }) => {
-	const illustrators: Array<{ id: string } & Illustrator['attributes']> =
-		await sql`SELECT * FROM illustrators`;
+	const illustrators: IllustratorRow[] = await sql`SELECT * FROM illustrators`;
 	const printings = await sql`
         WITH illustrator_printings AS (
             SELECT
@@ -40,7 +38,7 @@ export const load: PageLoad = async ({ data }) => {
 		throw error(404, `Illustrator not found`);
 	}
 
-	const normalized_illustrators = normalize_sqlite(illustrators) as unknown as Illustrator[];
+	const normalized_illustrators = illustrators.map(adaptIllustrator);
 	const illustrator_printings = (
 		printings as Array<
 			UnifiedPrintingRow & { illustrator_id: string; illustrator_rank: number }
