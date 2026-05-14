@@ -134,7 +134,7 @@ export interface Card {
 		text: string;
 		trash_cost: null;
 		is_unique: false;
-		card_subtype_ids: CardSubTypeIds;
+		card_subtype_ids: string[];
 		display_subtypes: null;
 		attribution: null;
 		updated_at: string;
@@ -152,7 +152,7 @@ export interface Card {
 		pronunciation_ipa: null;
 		layout_id: string;
 		num_extra_faces: number;
-		faces: string[];
+		faces: unknown[];
 		card_abilities: {
 			additional_cost: boolean;
 			advanceable: boolean;
@@ -345,7 +345,7 @@ export interface Printing {
 		text: string;
 		trash_cost: number | null;
 		is_unique: boolean;
-		card_subtype_ids: CardSubTypeIds;
+		card_subtype_ids: string[];
 		card_subtype_names: string[];
 		display_subtypes: string | null;
 		attribution: string | null;
@@ -397,7 +397,7 @@ export interface Printing {
 			};
 		};
 		num_extra_faces: number;
-		faces: string[];
+		faces: unknown[];
 	};
 	relationships: Relationships;
 	links: Links;
