@@ -122,10 +122,7 @@ function toStringArray(val: unknown): string[] {
 }
 
 function buildRel(path: string, filterId?: string | null, filterField: string = 'id') {
-	if (filterId !== undefined && filterId !== null && filterId !== '' && filterId !== 'none') {
-		return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
-	}
-	if (filterId === 'none' || filterId === '') {
+	if (filterId !== undefined && filterId !== null) {
 		return { links: { related: `${NRDB_API_URL}/${path}?filter[${filterField}]=${filterId}` } };
 	}
 	return { links: { related: `${NRDB_API_URL}/${path}` } };
