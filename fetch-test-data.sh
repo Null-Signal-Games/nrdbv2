@@ -9,9 +9,25 @@ echo "Downloading Card Cycle data..."
 curl -g 'https://api.netrunnerdb.com/api/v3/public/card_cycles?page[size]=1000' \
   | gzip -9 > test-data/card_cycles.json.gz
 
+echo "Downloading Card Pool data..."
+curl -g 'https://api.netrunnerdb.com/api/v3/public/card_pools?page[size]=1000' \
+  | gzip -9 > test-data/card_pools.json.gz
+
 echo "Downloading Card Set data..."
 curl -g 'https://api.netrunnerdb.com/api/v3/public/card_sets?page[size]=1000' \
   | gzip -9 > test-data/card_sets.json.gz
+
+echo "Downloading Card Set Type data..."
+curl -g 'https://api.netrunnerdb.com/api/v3/public/card_set_types?page[size]=1000' \
+  | gzip -9 > test-data/card_set_types.json.gz
+
+echo "Downloading Card Subtypes data..."
+curl -g 'https://api.netrunnerdb.com/api/v3/public/card_subtypes?page[size]=1000' \
+  | gzip -9 > test-data/card_subtypes.json.gz
+
+echo "Downloading Card Types data..."
+curl -g 'https://api.netrunnerdb.com/api/v3/public/card_types?page[size]=1000' \
+  | gzip -9 > test-data/card_types.json.gz
 
 echo "Downloading Card data..."
 curl -g 'https://api.netrunnerdb.com/api/v3/public/cards?page[size]=5000' \
@@ -32,6 +48,18 @@ curl -g 'https://api.netrunnerdb.com/api/v3/public/illustrators?page[size]=1000'
 echo "Downloading Printing data..."
 curl -g 'https://api.netrunnerdb.com/api/v3/public/printings?page[size]=5000' \
   | gzip -9 > test-data/printings.json.gz
+
+echo "Downloading Restriction data..."
+curl -g 'https://api.netrunnerdb.com/api/v3/public/restrictions?page[size]=1000' \
+  | gzip -9 > test-data/restrictions.json.gz
+
+echo "Downloading Side data..."
+curl -g 'https://api.netrunnerdb.com/api/v3/public/sides?page[size]=1000' \
+  | gzip -9 > test-data/sides.json.gz
+
+echo "Downloading Snapshot data..."
+curl -g 'https://api.netrunnerdb.com/api/v3/public/snapshots?page[size]=1000' \
+  | gzip -9 > test-data/snapshots.json.gz
 
 echo "Downloading latest published database from NetrunnerDB..."
 DB_URL=$(curl https://api.netrunnerdb.com/api/v3/public/published_databases 2>/dev/null \

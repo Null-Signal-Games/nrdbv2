@@ -12,7 +12,21 @@ import type {
 	Set,
 	Faction,
 	Format,
-	Illustrator
+	Illustrator,
+	Side,
+	SideRow,
+	CardType,
+	CardTypeRow,
+	CardSetType,
+	CardSetTypeRow,
+	CardSubtype,
+	CardSubtypeRow,
+	CardPool,
+	CardPoolRow,
+	Restriction,
+	RestrictionRow,
+	Snapshot,
+	SnapshotRow
 } from './types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
@@ -69,7 +83,7 @@ export function adaptCard(row: UnifiedCardRow): Card {
 		links: {
 			self: `${NRDB_API_URL}/cards/${id}`
 		}
-	} as unknown as Card;
+	} as Card;
 }
 
 export function adaptPrinting(row: UnifiedPrintingRow): Printing {
@@ -129,7 +143,7 @@ export function adaptPrinting(row: UnifiedPrintingRow): Printing {
 		links: {
 			self: `${NRDB_API_URL}/printings/${id}`
 		}
-	} as unknown as Printing;
+	} as Printing;
 }
 
 export function adaptCardCycle(row: CardCycleRow): Cycle {
@@ -157,7 +171,34 @@ export function adaptCardCycle(row: CardCycleRow): Cycle {
 		links: {
 			self: `${NRDB_API_URL}/card_cycles/${id}`
 		}
-	} as unknown as Cycle;
+	} as Cycle;
+}
+
+export function adaptCardPool(row: CardPoolRow): CardPool {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_pools',
+		attributes: {
+			name: row.name,
+			format_id: row.format_id,
+			card_cycle_ids: parseJsonWithDefault(row.card_cycle_ids) as string[],
+			num_cards: row.num_cards,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			format: buildRel(`formats/${row.format_id}`),
+			card_cycles: buildRel('card_cycles', row.id, 'card_pool_id'),
+			card_sets: buildRel('card_sets', row.id, 'card_pool_id'),
+			snapshots: buildRel('snapshots', row.id, 'card_pool_id'),
+			cards: buildRel('cards', row.id, 'card_pool_id'),
+			printings: buildRel('printings', row.id, 'card_pool_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_pools/${id}`
+		}
+	} as CardPool;
 }
 
 export function adaptCardSet(row: CardSetRow): Set {
@@ -188,7 +229,7 @@ export function adaptCardSet(row: CardSetRow): Set {
 		links: {
 			self: `${NRDB_API_URL}/card_sets/${id}`
 		}
-	} as unknown as Set;
+	} as Set;
 }
 
 export function adaptFaction(row: FactionRow): Faction {
@@ -213,7 +254,7 @@ export function adaptFaction(row: FactionRow): Faction {
 		links: {
 			self: `${NRDB_API_URL}/factions/${id}`
 		}
-	} as unknown as Faction;
+	} as Faction;
 }
 
 export function adaptFormat(row: FormatRow): Format {
@@ -239,7 +280,28 @@ export function adaptFormat(row: FormatRow): Format {
 		links: {
 			self: `${NRDB_API_URL}/formats/${id}`
 		}
-	} as unknown as Format;
+	} as Format;
+}
+
+export function adaptSide(row: SideRow): Side {
+	return {
+		id: row.id,
+		type: 'sides',
+		attributes: {
+			name: row.name,
+			updated_at: formatTimestamp(row.updated_at)
+		},
+		relationships: {
+			factions: buildRel('factions', row.id, 'side_id'),
+			card_types: buildRel('card_types', row.id, 'side_id'),
+			cards: buildRel('cards', row.id, 'side_id'),
+			decklists: buildRel('decklists', row.id, 'side_id'),
+			printings: buildRel('printings', row.id, 'side_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/sides/${row.id}`
+		}
+	} as Side;
 }
 
 function toStringArray(val: unknown): string[] {
@@ -492,5 +554,145 @@ export function adaptIllustrator(row: IllustratorRow): Illustrator {
 		links: {
 			self: `${NRDB_API_URL}/illustrators/${id}`
 		}
-	} as unknown as Illustrator;
+	} as Illustrator;
+}
+
+export function adaptCardType(row: CardTypeRow): CardType {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_types',
+		attributes: {
+			name: row.name,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			side: buildRel(`sides/${row.side_id}`),
+			cards: buildRel('cards', id, 'card_type_id'),
+			printings: buildRel('printings', id, 'card_type_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_types/${id}`
+		}
+	} as CardType;
+}
+
+export function adaptCardSetType(row: CardSetTypeRow): CardSetType {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_set_types',
+		attributes: {
+			name: row.name,
+			description: row.description,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			card_sets: buildRel('card_sets', id, 'card_set_type_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_set_types/${id}`
+		}
+	} as CardSetType;
+}
+
+export function adaptCardSubtype(row: CardSubtypeRow): CardSubtype {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'card_subtypes',
+		attributes: {
+			name: row.name,
+			updated_at: formatTimestamp(row.updated_at) || ''
+		},
+		relationships: {
+			cards: buildRel('cards', id, 'card_subtype_id'),
+			printings: buildRel('printings', id, 'card_subtype_id')
+		},
+		links: {
+			self: `${NRDB_API_URL}/card_subtypes/${id}`
+		}
+	} as CardSubtype;
+}
+
+export function adaptRestriction(row: RestrictionRow): Restriction {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'restrictions',
+		attributes: {
+			name: row.name,
+			date_start: row.date_start,
+			point_limit: row.point_limit,
+			format_id: row.format_id,
+			verdicts: {
+				banned: row.banned ? JSON.parse(row.banned) : [],
+				restricted: row.restricted ? JSON.parse(row.restricted) : [],
+				universal_faction_cost: row.universal_faction_cost
+					? JSON.parse(row.universal_faction_cost)
+					: {},
+				global_penalty: row.global_penalty ? JSON.parse(row.global_penalty) : [],
+				points: row.points ? JSON.parse(row.points) : {}
+			},
+			banned_subtypes: row.banned_subtypes ? JSON.parse(row.banned_subtypes) : [],
+			size: row.size || 0,
+			updated_at: formatTimestamp(row.updated_at) as string
+		},
+		relationships: {
+			format: {
+				links: {
+					related: `${NRDB_API_URL}/formats/${row.format_id}`
+				}
+			}
+		},
+		links: {
+			self: `${NRDB_API_URL}/restrictions/${id}`
+		}
+	};
+}
+
+export function adaptSnapshot(row: SnapshotRow): Snapshot {
+	const id = row.id;
+
+	return {
+		id,
+		type: 'snapshots',
+		attributes: {
+			format_id: row.format_id,
+			active: Boolean(row.active),
+			card_cycle_ids: parseJsonWithDefault(row.card_cycle_ids) as string[],
+			card_set_ids: parseJsonWithDefault(row.card_set_ids) as string[],
+			card_pool_id: row.card_pool_id,
+			restriction_id: row.restriction_id,
+			num_cards: row.num_cards || 0,
+			date_start: row.date_start,
+			updated_at: formatTimestamp(row.updated_at) as string
+		},
+		relationships: {
+			format: {
+				links: {
+					related: `${NRDB_API_URL}/formats/${row.format_id}`
+				}
+			},
+			card_pool: {
+				links: {
+					related: `${NRDB_API_URL}/card_pools/${row.card_pool_id}`
+				}
+			},
+			restriction: {
+				links: {
+					related: row.restriction_id
+						? `${NRDB_API_URL}/restrictions/${row.restriction_id}`
+						: null
+				}
+			}
+		},
+		links: {
+			self: `${NRDB_API_URL}/snapshots/${id}`
+		}
+	};
 }

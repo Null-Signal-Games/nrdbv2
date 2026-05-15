@@ -4,16 +4,25 @@ import {
 	adaptCard,
 	adaptPrinting,
 	adaptCardCycle,
+	adaptCardPool,
+	adaptRestriction,
+	adaptSnapshot,
 	adaptCardSet,
 	adaptFaction,
 	adaptFormat,
-	adaptIllustrator
+	adaptIllustrator,
+	adaptSide,
+	adaptCardType,
+	adaptCardSetType,
+	adaptCardSubtype
 } from './adapter.js';
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import type {
 	Card,
+	CardPool,
+	CardPoolRow,
 	Printing,
 	UnifiedCardRow,
 	UnifiedPrintingRow,
@@ -26,7 +35,19 @@ import type {
 	Set,
 	Faction,
 	Format,
-	Illustrator
+	Illustrator,
+	Side,
+	SideRow,
+	CardType,
+	CardTypeRow,
+	CardSetType,
+	CardSetTypeRow,
+	CardSubtype,
+	CardSubtypeRow,
+	Restriction,
+	RestrictionRow,
+	Snapshot,
+	SnapshotRow
 } from './types.js';
 
 // Our SQLite database.
@@ -55,10 +76,7 @@ function readJsonDataFor(objectType: string): unknown {
 // Run ./fetch-test-data.sh to download a full, fresh copy of the API and DB data for testing if not present.
 describe('Card Adapter', () => {
 	it('correctly adapts all cards from sqlite to match API output', () => {
-		// 1. Get ground truth from cards.json
 		const expectedCards = (readJsonDataFor('cards') as { data: Card[] }).data;
-
-		// 2. Fetch rows from database
 		const rows = db.prepare('SELECT * FROM unified_cards').all() as UnifiedCardRow[];
 
 		expect(rows.length).toBeGreaterThan(0);
@@ -67,7 +85,6 @@ describe('Card Adapter', () => {
 		const expectedMap = new Map(expectedCards.map((c: Card) => [c.id, c]));
 		const typeCounts = new Map<string, number>();
 
-		// 3. Adapt rows and compare
 		for (const row of rows) {
 			const typeId = row.card_type_id || 'unknown';
 			typeCounts.set(typeId, (typeCounts.get(typeId) || 0) + 1);
@@ -302,9 +319,6 @@ describe('Format Adapter', () => {
 	});
 });
 
-// ==========================================
-// Illustrator
-// ==========================================
 describe('Illustrator Adapter', () => {
 	it('correctly adapts all illustrators from sqlite to match API output', () => {
 		const expectedIllustrators = (readJsonDataFor('illustrators') as { data: Illustrator[] })
@@ -333,6 +347,341 @@ describe('Illustrator Adapter', () => {
 			recordsCompared++;
 		}
 		console.log(`Illustrators tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Side Adapter', () => {
+	it('correctly adapts all sides from sqlite to match API output', () => {
+		const expectedSides = (readJsonDataFor('sides') as { data: Side[] }).data;
+
+		const rows = db.prepare('SELECT * FROM sides').all() as SideRow[];
+
+		expect(rows.length).toBeGreaterThan(0);
+		expect(rows.length).toBe(expectedSides.length);
+
+		let recordsCompared = 0;
+		const expectedMap = new Map(expectedSides.map((c: Side) => [c.id, c]));
+
+		for (const row of rows) {
+			const expectedSide = expectedMap.get(row.id);
+			expect(expectedSide, `Missing expected side for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptSide(row);
+			expect(adapted).toEqual(expectedSide);
+			recordsCompared++;
+		}
+
+		console.log(`Sides tested: ${recordsCompared}`);
+	});
+});
+
+describe('Card Pool Adapter', () => {
+	it('correctly adapts all card pools from sqlite to match API output', () => {
+		const expectedCardPools = (readJsonDataFor('card_pools') as { data: CardPool[] }).data;
+
+		const expectedMap = new Map<string, CardPool>();
+
+		for (const cardPool of expectedCardPools) {
+			expectedMap.set(cardPool.id, cardPool);
+		}
+
+		const rows = db
+			.prepare(`
+			WITH
+				num_cards AS (
+					SELECT cp.value AS card_pool_id, COUNT(*) AS num_cards
+					FROM unified_cards c, json_each(c.card_pool_ids) AS cp
+					GROUP BY 1
+				),
+				cycles AS (
+					SELECT card_pool_id, json_group_array(card_cycle_id) AS card_cycle_ids
+					FROM card_pools_card_cycles
+					GROUP BY 1
+				)
+				SELECT
+					cp.id, cp.name, cp.format_id, cp.created_at, cp.updated_at,
+					num_cards.num_cards, cycles.card_cycle_ids
+				FROM card_pools AS cp
+				LEFT JOIN num_cards ON cp.id = num_cards.card_pool_id
+				LEFT JOIN cycles ON cp.id = cycles.card_pool_id
+			`)
+			.all() as CardPoolRow[];
+
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedCardType = expectedMap.get(row.id);
+			expect(expectedCardType, `Missing expected card pool for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptCardPool(row);
+
+			expect(adapted).toEqual(expectedCardType);
+			recordsCompared++;
+		}
+		console.log(`Card Pools tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Card Type Adapter', () => {
+	it('correctly adapts all card types from sqlite to match API output', () => {
+		const expectedCardTypes = (readJsonDataFor('card_types') as { data: CardType[] }).data;
+
+		const expectedMap = new Map<string, CardType>();
+
+		for (const cardType of expectedCardTypes) {
+			expectedMap.set(cardType.id, cardType);
+		}
+
+		const rows = db.prepare(`SELECT * FROM card_types`).all() as CardTypeRow[];
+
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedCardType = expectedMap.get(row.id);
+			expect(expectedCardType, `Missing expected card type for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptCardType(row);
+
+			expect(adapted).toEqual(expectedCardType);
+			recordsCompared++;
+		}
+		console.log(`Card Types tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Card Set Type Adapter', () => {
+	it('correctly adapts all card set types from sqlite to match API output', () => {
+		const expectedCardSetTypes = (readJsonDataFor('card_set_types') as { data: CardSetType[] })
+			.data;
+		const expectedMap = new Map<string, CardSetType>();
+
+		for (const cardSetType of expectedCardSetTypes) {
+			expectedMap.set(cardSetType.id, cardSetType);
+		}
+
+		const rows = db.prepare(`SELECT * FROM card_set_types`).all() as CardSetTypeRow[];
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedCardSetType = expectedMap.get(row.id);
+			expect(
+				expectedCardSetType,
+				`Missing expected card set type for id ${row.id}`
+			).toBeDefined();
+
+			const adapted = adaptCardSetType(row);
+
+			expect(adapted).toEqual(expectedCardSetType);
+			recordsCompared++;
+		}
+		console.log(`Card Set Types tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Card Subtype Adapter', () => {
+	it('correctly adapts all card subtypes from sqlite to match API output', () => {
+		const expectedCardSubtypes = (readJsonDataFor('card_subtypes') as { data: CardSubtype[] })
+			.data;
+		const expectedMap = new Map<string, CardSubtype>();
+
+		for (const cardSubtype of expectedCardSubtypes) {
+			expectedMap.set(cardSubtype.id, cardSubtype);
+		}
+
+		const rows = db.prepare(`SELECT * FROM card_subtypes`).all() as CardSubtypeRow[];
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedCardSubtype = expectedMap.get(row.id);
+			expect(
+				expectedCardSubtype,
+				`Missing expected card subtype for id ${row.id}`
+			).toBeDefined();
+
+			const adapted = adaptCardSubtype(row);
+
+			expect(adapted).toEqual(expectedCardSubtype);
+			recordsCompared++;
+		}
+		console.log(`Card Subtypes tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Restriction Adapter', () => {
+	it('correctly adapts all restrictions from sqlite to match API output', () => {
+		const expectedRestrictions = (readJsonDataFor('restrictions') as { data: Restriction[] })
+			.data;
+
+		const expectedMap = new Map<string, Restriction>();
+
+		for (const restriction of expectedRestrictions) {
+			expectedMap.set(restriction.id, restriction);
+		}
+
+		const rows = db
+			.prepare(
+				`
+			WITH
+				banned AS (
+					SELECT restriction_id, json_group_array(card_id) as banned
+					FROM restrictions_cards_banned
+					GROUP BY restriction_id
+				),
+				restricted AS (
+					SELECT restriction_id, json_group_array(card_id) as restricted
+					FROM restrictions_cards_restricted
+					GROUP BY restriction_id
+				),
+				global_penalty AS (
+					SELECT restriction_id, json_group_array(card_id) as global_penalty
+					FROM restrictions_cards_global_penalty
+					GROUP BY restriction_id
+				),
+				points AS (
+					SELECT restriction_id, json_group_object(card_id, value) as points
+					FROM restrictions_cards_points
+					GROUP BY restriction_id
+				),
+				ufc AS (
+					SELECT restriction_id, json_group_object(card_id, value) as universal_faction_cost
+					FROM restrictions_cards_universal_faction_cost
+					GROUP BY restriction_id
+				),
+				banned_subtypes AS (
+					SELECT restriction_id, json_group_array(card_subtype_id) as banned_subtypes
+					FROM restrictions_card_subtypes_banned
+					GROUP BY restriction_id
+				),
+				all_cards AS (
+					SELECT restriction_id, card_id FROM restrictions_cards_banned
+					UNION
+					SELECT restriction_id, card_id FROM restrictions_cards_global_penalty
+					UNION
+					SELECT restriction_id, card_id FROM restrictions_cards_points
+					UNION
+					SELECT restriction_id, card_id FROM restrictions_cards_restricted
+					UNION
+					SELECT restriction_id, card_id FROM restrictions_cards_universal_faction_cost
+				),
+				size AS (
+					SELECT restriction_id, count(*) as size
+					FROM all_cards
+					GROUP BY restriction_id
+				)
+			SELECT
+				r.id, r.name, r.date_start, r.point_limit, r.format_id, r.created_at, r.updated_at,
+				b.banned, re.restricted, g.global_penalty, p.points, u.universal_faction_cost,
+				bs.banned_subtypes, s.size
+			FROM restrictions r
+			LEFT JOIN banned b ON r.id = b.restriction_id
+			LEFT JOIN restricted re ON r.id = re.restriction_id
+			LEFT JOIN global_penalty g ON r.id = g.restriction_id
+			LEFT JOIN points p ON r.id = p.restriction_id
+			LEFT JOIN ufc u ON r.id = u.restriction_id
+			LEFT JOIN banned_subtypes bs ON r.id = bs.restriction_id
+			LEFT JOIN size s ON r.id = s.restriction_id
+			`
+			)
+			.all() as RestrictionRow[];
+
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedRestriction = expectedMap.get(row.id);
+			expect(
+				expectedRestriction,
+				`Missing expected restriction for id ${row.id}`
+			).toBeDefined();
+
+			const adapted = adaptRestriction(row);
+
+			expect(adapted).toEqual(expectedRestriction);
+			recordsCompared++;
+		}
+		console.log(`Restrictions tested: ${recordsCompared}`);
+		expect(recordsCompared).toBe(expectedMap.size);
+	});
+});
+
+describe('Snapshot Adapter', () => {
+	it('correctly adapts all snapshots from sqlite to match API output', () => {
+		const expectedSnapshots = (readJsonDataFor('snapshots') as { data: Snapshot[] }).data;
+
+		const expectedMap = new Map<string, Snapshot>();
+
+		for (const snapshot of expectedSnapshots) {
+			expectedMap.set(snapshot.id, snapshot);
+		}
+
+		const rows = db
+			.prepare(
+				`
+			WITH
+				num_cards AS (
+					SELECT cp.value AS card_pool_id, COUNT(*) AS num_cards
+					FROM unified_cards c, json_each(c.card_pool_ids) AS cp
+					GROUP BY 1
+				),
+				cycles AS (
+					SELECT card_pool_id, json_group_array(card_cycle_id) AS card_cycle_ids
+					FROM card_pools_card_cycles
+					GROUP BY 1
+				),
+				sets AS (
+					SELECT card_pool_id, json_group_array(card_set_id) AS card_set_ids
+					FROM card_pools_card_sets
+					GROUP BY 1
+				)
+			SELECT
+				s.id, s.format_id, s.card_pool_id, s.date_start, s.restriction_id, s.active, s.created_at, s.updated_at,
+				num_cards.num_cards, cycles.card_cycle_ids, sets.card_set_ids
+			FROM snapshots AS s
+			LEFT JOIN num_cards ON s.card_pool_id = num_cards.card_pool_id
+			LEFT JOIN cycles ON s.card_pool_id = cycles.card_pool_id
+			LEFT JOIN sets ON s.card_pool_id = sets.card_pool_id
+			`
+			)
+			.all() as SnapshotRow[];
+
+		let recordsCompared = 0;
+
+		for (const row of rows) {
+			const expectedSnapshot = expectedMap.get(row.id);
+			expect(expectedSnapshot, `Missing expected snapshot for id ${row.id}`).toBeDefined();
+
+			const adapted = adaptSnapshot(row);
+
+			if (adapted.attributes.card_cycle_ids) {
+				adapted.attributes.card_cycle_ids = [
+					...new Set(adapted.attributes.card_cycle_ids)
+				].sort();
+			}
+			if (adapted.attributes.card_set_ids) {
+				adapted.attributes.card_set_ids = [
+					...new Set(adapted.attributes.card_set_ids)
+				].sort();
+			}
+
+			if (expectedSnapshot!.attributes.card_cycle_ids) {
+				expectedSnapshot!.attributes.card_cycle_ids = [
+					...new Set(expectedSnapshot!.attributes.card_cycle_ids)
+				].sort();
+			}
+			if (expectedSnapshot!.attributes.card_set_ids) {
+				expectedSnapshot!.attributes.card_set_ids = [
+					...new Set(expectedSnapshot!.attributes.card_set_ids)
+				].sort();
+			}
+
+			expect(adapted).toEqual(expectedSnapshot);
+			recordsCompared++;
+		}
+		console.log(`Snapshots tested: ${recordsCompared}`);
 		expect(recordsCompared).toBe(expectedMap.size);
 	});
 });

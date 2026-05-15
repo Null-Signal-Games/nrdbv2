@@ -37,22 +37,47 @@ export type FactionIds =
 	| 'neutral_runner';
 
 export interface Relationships {
-	side: {
+	card_pool?: {
 		links: {
 			related: string;
 		};
 	};
-	cards: {
+	card_types?: {
 		links: {
 			related: string;
 		};
 	};
-	decklists: {
+	cards?: {
 		links: {
 			related: string;
 		};
 	};
-	printings: {
+	decklists?: {
+		links: {
+			related: string;
+		};
+	};
+	factions?: {
+		links: {
+			related: string;
+		};
+	};
+	format?: {
+		links: {
+			related: string;
+		};
+	};
+	printings?: {
+		links: {
+			related: string;
+		};
+	};
+	restriction?: {
+		links: {
+			related: string | null;
+		};
+	};
+	side?: {
 		links: {
 			related: string;
 		};
@@ -77,6 +102,24 @@ export interface ApiResponse<T> {
 			};
 		};
 	};
+}
+
+export interface Side {
+	id: string;
+	type: 'sides';
+	attributes: {
+		name: string;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface SideRow {
+	id: string;
+	name: string;
+	created_at: string;
+	updated_at: string;
 }
 
 export interface Card {
@@ -106,7 +149,7 @@ export interface Card {
 		text: string;
 		trash_cost: null;
 		is_unique: false;
-		card_subtype_ids: CardSubTypeIds;
+		card_subtype_ids: string[];
 		display_subtypes: null;
 		attribution: null;
 		updated_at: string;
@@ -124,7 +167,7 @@ export interface Card {
 		pronunciation_ipa: null;
 		layout_id: string;
 		num_extra_faces: number;
-		faces: string[];
+		faces: unknown[];
 		card_abilities: {
 			additional_cost: boolean;
 			advanceable: boolean;
@@ -248,8 +291,9 @@ export interface Restriction {
 	attributes: {
 		name: string;
 		date_start: string;
-		format_id: Format;
+		format_id: string;
 		banned_subtypes: string[];
+		point_limit: number | null;
 		verdicts: {
 			banned: string[];
 			restricted: string[];
@@ -257,6 +301,7 @@ export interface Restriction {
 			points: { [card_id: string]: number };
 			universal_faction_cost: { [card_id: string]: number };
 		};
+		size: number;
 		updated_at: string;
 	};
 	relationships: Relationships;
@@ -317,7 +362,7 @@ export interface Printing {
 		text: string;
 		trash_cost: number | null;
 		is_unique: boolean;
-		card_subtype_ids: CardSubTypeIds;
+		card_subtype_ids: string[];
 		card_subtype_names: string[];
 		display_subtypes: string | null;
 		attribution: string | null;
@@ -369,7 +414,7 @@ export interface Printing {
 			};
 		};
 		num_extra_faces: number;
-		faces: string[];
+		faces: unknown[];
 	};
 	relationships: Relationships;
 	links: Links;
@@ -675,4 +720,158 @@ export interface IllustratorRow {
 	name: string;
 	num_printings: number;
 	updated_at: string;
+}
+
+export interface CardType {
+	id: string;
+	type: 'card_types';
+	attributes: {
+		name: string;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface CardTypeRow {
+	id: string;
+	name: string;
+	created_at: string;
+	updated_at: string;
+	side_id: string;
+}
+
+export interface CardSetTypeRow {
+	id: string;
+	name: string;
+	description: string | null;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CardSetType {
+	id: string;
+	type: 'card_set_types';
+	attributes: {
+		name: string;
+		description: string | null;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface CardSubtypeRow {
+	id: string;
+	name: string;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CardSubtype {
+	id: string;
+	type: 'card_subtypes';
+	attributes: {
+		name: string;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+export interface CardPoolRow {
+	id: string;
+	name: string;
+	format_id: string;
+	created_at: string;
+	updated_at: string;
+	card_cycle_ids?: string; // from join
+	num_cards?: number; // from join
+}
+
+export interface CardPool {
+	id: string;
+	type: 'card_pools';
+	attributes: {
+		name: string;
+		format_id: string;
+		card_cycle_ids: string[];
+		updated_at: string;
+		num_cards: number;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface RestrictionVerdicts {
+	banned: string[];
+	restricted: string[];
+	universal_faction_cost: Record<string, number>;
+	global_penalty: string[];
+	points: Record<string, number>;
+}
+
+export interface RestrictionRow {
+	id: string;
+	name: string;
+	date_start: string;
+	point_limit: number | null;
+	format_id: string;
+	created_at: string;
+	updated_at: string;
+	banned?: string;
+	restricted?: string;
+	universal_faction_cost?: string;
+	global_penalty?: string;
+	points?: string;
+	banned_subtypes?: string;
+	size?: number;
+}
+
+export interface Restriction {
+	id: string;
+	type: 'restrictions';
+	attributes: {
+		name: string;
+		date_start: string;
+		point_limit: number | null;
+		format_id: string;
+		verdicts: RestrictionVerdicts;
+		banned_subtypes: string[];
+		size: number;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
+export interface SnapshotRow {
+	id: string;
+	format_id: string;
+	card_pool_id: string;
+	date_start: string;
+	restriction_id: string | null;
+	active: boolean | number;
+	created_at: string;
+	updated_at: string;
+	card_cycle_ids?: string; // from join
+	card_set_ids?: string; // from join
+	num_cards?: number; // from join
+}
+
+export interface Snapshot {
+	id: string;
+	type: 'snapshots';
+	attributes: {
+		format_id: string;
+		active: boolean;
+		card_cycle_ids: string[];
+		card_set_ids: string[];
+		card_pool_id: string;
+		restriction_id: string | null;
+		num_cards: number;
+		date_start: string;
+		updated_at: string;
+	};
+	relationships: Relationships;
+	links: Links;
 }
