@@ -1,2 +1,4 @@
 packages:
-    - '../common-components'
+  - '../common-components'
+allowBuilds:
+  better-sqlite3: true
