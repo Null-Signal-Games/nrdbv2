@@ -1,4 +1,4 @@
-import type { Card } from "./api.types";
+import type { Card } from './api.types';
 
 export type SidesIds = 'corp' | 'runner';
 

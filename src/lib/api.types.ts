@@ -1,6 +1,6 @@
 // Types for NRDB API results.
 
-import type { CardTypeIds } from "./types";
+import type { CardTypeIds } from './types';
 
 // The JSON::API response types common between all entity types.
 export interface ApiResponse<T> {
