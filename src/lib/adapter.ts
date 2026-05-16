@@ -1,6 +1,21 @@
+
 import type {
 	Card,
 	Printing,
+	Cycle,
+	Set,
+	Faction,
+	Format,
+	Illustrator,
+	Side,
+	CardType,
+	CardSetType,
+	CardSubtype,
+	CardPool,
+	Restriction,
+	Snapshot
+} from './api.types.js';
+import type {
 	UnifiedCardRow,
 	UnifiedPrintingRow,
 	CardCycleRow,
@@ -8,26 +23,14 @@ import type {
 	FactionRow,
 	FormatRow,
 	IllustratorRow,
-	Cycle,
-	Set,
-	Faction,
-	Format,
-	Illustrator,
-	Side,
 	SideRow,
-	CardType,
 	CardTypeRow,
-	CardSetType,
 	CardSetTypeRow,
-	CardSubtype,
 	CardSubtypeRow,
-	CardPool,
 	CardPoolRow,
-	Restriction,
 	RestrictionRow,
-	Snapshot,
 	SnapshotRow
-} from './types.js';
+} from './sqlite.types.js';
 import { NRDB_API_URL, NRDB_IMAGE_URL } from './constants.js';
 
 const NO_XLARGE_CYCLES = [
