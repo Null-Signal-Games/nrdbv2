@@ -1,5 +1,25 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import Database from 'better-sqlite3';
+import fs from 'fs';
+import path from 'path';
+import zlib from 'zlib';
+
+import type {
+	Card,
+	CardPool,
+	Printing,
+	Cycle,
+	Set,
+	Faction,
+	Format,
+	Illustrator,
+	Side,
+	CardType,
+	CardSetType,
+	CardSubtype,
+	Restriction,
+	Snapshot
+} from './api.types.js';
 import {
 	adaptCard,
 	adaptPrinting,
@@ -16,14 +36,8 @@ import {
 	adaptCardSetType,
 	adaptCardSubtype
 } from './adapter.js';
-import fs from 'fs';
-import path from 'path';
-import zlib from 'zlib';
 import type {
-	Card,
-	CardPool,
 	CardPoolRow,
-	Printing,
 	UnifiedCardRow,
 	UnifiedPrintingRow,
 	CardCycleRow,
@@ -31,24 +45,13 @@ import type {
 	FactionRow,
 	FormatRow,
 	IllustratorRow,
-	Cycle,
-	Set,
-	Faction,
-	Format,
-	Illustrator,
-	Side,
 	SideRow,
-	CardType,
 	CardTypeRow,
-	CardSetType,
 	CardSetTypeRow,
-	CardSubtype,
 	CardSubtypeRow,
-	Restriction,
 	RestrictionRow,
-	Snapshot,
 	SnapshotRow
-} from './types.js';
+} from './sqlite.types.js';
 
 // Our SQLite database.
 let db: Database.Database;
