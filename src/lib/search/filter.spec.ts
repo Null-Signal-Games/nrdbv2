@@ -5,9 +5,9 @@ import {
 	filterCards,
 	rankCards,
 	filterAndRankCards
-} from './search';
-import { createMockCard } from './test-helpers';
-import type { Card } from './types';
+} from './filter';
+import { createMockCard } from '../test-helpers';
+import type { Card } from '../types';
 
 // Realistic mock card data based on NetrunnerDB API
 const mockCards: Card[] = [

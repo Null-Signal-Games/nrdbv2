@@ -18,6 +18,7 @@
         download_and_extract_sqlite,
     } from "$lib/sqlite";
     import { fetch_published_databases } from "$lib/utils";
+    import { prepareSearch } from "$lib/search";
     import {
         CURRENT_SQLITE_URL_FILENAME,
         NRDB_SQLITE_NAME,
@@ -85,7 +86,14 @@
                 dbReady = true;
             }
 
-            db_ready.set(dbReady);
+            // Populate the search vocabulary before marking ready, so searches never run
+            // against empty subtype/set/cycle maps. A vocab failure is logged but still
+            // marks ready (search degrades to the static vocabulary rather than never running).
+            if (dbReady) {
+                await prepareSearch(() => db_ready.set(true));
+            } else {
+                db_ready.set(false);
+            }
 
             // 30 days
             document.cookie = `${NRDB_CACHE_COOKIE}=1; max-age=2592000; path=/`;
