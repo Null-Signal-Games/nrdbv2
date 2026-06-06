@@ -724,11 +724,13 @@ semantics.addOperation('eval', {
 });
 
 function stripText(text: string): string {
-	return text
-		.toLowerCase()
-		.normalize('NFD')
-		// oxlint-disable-next-line no-control-regex
-		.replace(/[^\x00-\x7F]/g, '');
+	return (
+		text
+			.toLowerCase()
+			.normalize('NFD')
+			// oxlint-disable-next-line no-control-regex
+			.replace(/[^\x00-\x7F]/g, '')
+	);
 }
 
 function hasRegex(valuesNode: any): boolean {
@@ -923,7 +925,7 @@ export class SearchQueryBuilder {
 			}
 			const ast = semantics(matchResult).eval();
 			this.where = compileNode(ast, fields, this.where_values);
-		// oxlint-disable-next-line no-useless-catch
+			// oxlint-disable-next-line no-useless-catch
 		} catch (e: any) {
 			throw e;
 		}
