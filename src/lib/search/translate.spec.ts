@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { interpretSearch } from './interpret';
-import { buildQuery } from './translate';
+import { translateToQuery } from './translate';
 import { populateSubtypeMap } from './vocabulary';
 import { SUBTYPE_FIXTURE } from './subtypes.fixture';
 
 beforeAll(() => populateSubtypeMap(SUBTYPE_FIXTURE));
 
 // Exercises the full text -> SQL path the orchestrator runs: interpret then translate.
-const build = (input: string, limit?: number) => buildQuery(interpretSearch(input), limit);
+const build = (input: string, limit?: number) => translateToQuery(interpretSearch(input), limit);
 
-describe('buildQuery (interpreted text -> SQL)', () => {
+describe('translateToQuery (interpreted text -> SQL)', () => {
 	it('compiles a plain word to a title LIKE search', () => {
 		const result = build('corroder');
 		expect(result.error).toBeNull();

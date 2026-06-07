@@ -2,6 +2,7 @@
 
 import type { VocabOption } from './vocabulary';
 
+// TODO: add synonyms / aliases, for both the literal and interpretive versions.
 export const SUBTYPE_FIXTURE: VocabOption[] = [
 	{ id: 'ai', name: 'AI' },
 	{ id: 'barrier', name: 'Barrier' },

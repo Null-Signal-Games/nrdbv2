@@ -1,19 +1,19 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { interpretSearch } from './interpret';
-import { buildQuery } from './translate';
+import { translateToQuery } from './translate';
 import { populateSubtypeMap } from './vocabulary';
 import { SUBTYPE_FIXTURE } from './subtypes.fixture';
 
 beforeAll(() => populateSubtypeMap(SUBTYPE_FIXTURE));
 
 // Pins the interpreted output (snapshot) AND proves that output is valid input for
-// the query builder, not just an unchanged string. buildQuery feeds the expression
+// the query builder, not just an unchanged string. translateToQuery feeds the expression
 // to CardSearchQueryBuilder, so an interpretation the grammar rejects fails here
 // even if the snapshot still matches.
 function expectTransform(input: string, expected: string) {
 	const expression = interpretSearch(input);
 	expect(expression).toBe(expected);
-	const { sql, error } = buildQuery(expression);
+	const { sql, error } = translateToQuery(expression);
 	expect(error).toBeNull();
 	expect(sql).not.toBeNull();
 }

@@ -1,6 +1,6 @@
 import { sql } from '$lib/sqlite';
 import { interpretSearch } from '$lib/search/interpret';
-import { buildQuery } from '$lib/search/translate';
+import { translateToQuery } from '$lib/search/translate';
 import { populateDynamicVocab, type VocabOption } from '$lib/search/vocabulary';
 import { adaptCard } from '$lib/adapter';
 import type { Card } from '$lib/api.types';
@@ -14,7 +14,7 @@ export async function searchCards(
 	// 1. interpret: natural-language words -> NRDB search expression
 	const expression = interpretSearch(input);
 	// 2. translate: expression -> SQL
-	const { sql: text, params, error } = buildQuery(expression, limit);
+	const { sql: text, params, error } = translateToQuery(expression, limit);
 	if (error || !text) {
 		return { cards: [], error };
 	}
@@ -25,6 +25,7 @@ export async function searchCards(
 }
 
 // Loads set/cycle/subtype names into the search vocabulary; call once the DB is ready.
+// TODO: move these lookups into a shared global state - many other places will need them.
 export async function initSearchVocab(): Promise<void> {
 	const [sets, cycles, subtypes] = (await Promise.all([
 		sql(`SELECT id, name FROM card_sets`),

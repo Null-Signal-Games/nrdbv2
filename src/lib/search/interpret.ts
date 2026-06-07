@@ -11,11 +11,11 @@ import { RE_QUOTED_TERM } from './patterns';
 export { NEUTRAL_FACTION_OR_QUERY } from './intents';
 
 // A quoted term swapped out for a positional placeholder. The placeholder is delimited by
-// NUL so it survives lowercasing/normalization and the numeric pre-pass untouched, and is a
+// NULL so it survives lowercasing/normalization and the numeric pre-pass untouched, and is a
 // single whitespace-free token so recognizeIntents keeps it whole. Restoring it in place
 // (rather than extracting and re-appending) preserves its position relative to `or` - pulling
 // quoted terms out would orphan the or-marker and turn `x:"tag" or x:"damage"` into an AND.
-// oxlint-disable-next-line no-control-regex -- NUL is an intentional, collision-proof delimiter
+// oxlint-disable-next-line no-control-regex -- NULL is an intentional, collision-proof delimiter
 const RE_PLACEHOLDER = /^\x00(\d+)\x00$/;
 const RE_QUOTED_GROUP = /!?\([^()]*"[^"]+"[^()]*\)/g;
 

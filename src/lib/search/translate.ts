@@ -7,7 +7,7 @@ export interface CardQuery {
 }
 
 // Translate an NRDB search expression into SQL.
-export function buildQuery(query: string, limit = 5): CardQuery {
+export function translateToQuery(query: string, limit = 5): CardQuery {
 	if (!query.trim()) {
 		return { sql: null, params: [], error: null };
 	}
