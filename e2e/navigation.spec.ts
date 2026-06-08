@@ -1,10 +1,13 @@
 import { test, expect } from './helpers/fixtures';
+import { isMac } from './helpers/platform';
 import {
 	navigationLogo,
 	localeSelect,
 	themeSelect,
 	searchInput,
-	searchDropdown
+	searchDropdown,
+	interpretedSearchCheckbox,
+	waitForSearchDatabase
 } from './helpers/navigation';
 
 test.describe('Navigation', () => {
@@ -133,9 +136,33 @@ test.describe('Search input', () => {
 		await expect(searchDropdown(page)).toBeVisible();
 	});
 
-	test('Dropdown shows card results', async ({ page }) => {
+	test('Dropdown shows interpreted checkbox unchecked by default', async ({ page }) => {
 		await searchInput(page).fill('archive');
+
 		await expect(searchDropdown(page)).toBeVisible();
+		await expect(interpretedSearchCheckbox(page)).toBeVisible();
+		await expect(interpretedSearchCheckbox(page)).not.toBeChecked();
+	});
+
+	test('Dropdown shows card results', async ({ page }) => {
+		await waitForSearchDatabase(page);
+		await searchInput(page).fill('Sure Gamble');
+		await expect(searchDropdown(page)).toBeVisible();
+		await expect(searchDropdown(page).locator('.card-grid-item a').first()).toBeVisible();
+	});
+
+	test('Switching to interpreted reruns the current query with one card grid visible', async ({
+		page
+	}) => {
+		await waitForSearchDatabase(page);
+		await searchInput(page).fill('f:shaper s:console');
+		await expect(searchDropdown(page)).toBeVisible();
+		await expect(searchDropdown(page).locator('.card-grid')).toHaveCount(1);
+
+		await interpretedSearchCheckbox(page).check();
+
+		await expect(interpretedSearchCheckbox(page)).toBeChecked();
+		await expect(searchDropdown(page).locator('.card-grid')).toHaveCount(1);
 		await expect(searchDropdown(page).locator('.card-grid-item a').first()).toBeVisible();
 	});
 
@@ -152,7 +179,8 @@ test.describe('Search input', () => {
 	});
 
 	test('Clicking a card result navigates to card page', async ({ page }) => {
-		await searchInput(page).fill('archive');
+		await waitForSearchDatabase(page);
+		await searchInput(page).fill('Sure Gamble');
 		await expect(searchDropdown(page)).toBeVisible();
 		const firstResult = searchDropdown(page).locator('.card-grid-item a').first();
 		await expect(firstResult).toBeVisible();
@@ -161,14 +189,15 @@ test.describe('Search input', () => {
 	});
 
 	test('Dropdown closes after navigating to a card', async ({ page }) => {
-		await searchInput(page).fill('archive');
+		await waitForSearchDatabase(page);
+		await searchInput(page).fill('Sure Gamble');
 		await searchDropdown(page).locator('.card-grid-item a').first().click();
 		await expect(page).toHaveURL(/\/card\//);
 		await expect(searchDropdown(page)).not.toBeVisible();
 	});
 
 	test('Ctrl+F focuses the search input', async ({ page }) => {
-		await page.keyboard.press('Control+f');
+		await page.keyboard.press((await isMac(page)) ? 'Meta+f' : 'Control+f');
 		await expect(searchInput(page)).toBeFocused();
 		await expect(searchDropdown(page)).not.toBeVisible();
 	});
@@ -184,5 +213,19 @@ test.describe('Search input', () => {
 		await searchInput(page).fill('abcdefghijklmnopqrstuvwxyz1234567890');
 		const items = page.locator('.search-dropdown .card-grid-item');
 		await expect(items).toHaveCount(0);
+	});
+
+	test('Invalid literal syntax clears card results without showing an error', async ({
+		page
+	}) => {
+		await waitForSearchDatabase(page);
+		await searchInput(page).fill('Sure Gamble');
+		await expect(searchDropdown(page).locator('.card-grid-item a').first()).toBeVisible();
+
+		await searchInput(page).fill('zzz:foo');
+
+		await expect(interpretedSearchCheckbox(page)).not.toBeChecked();
+		await expect(searchDropdown(page).locator('.card-grid-item')).toHaveCount(0);
+		await expect(searchDropdown(page)).not.toContainText(/Unknown keyword|Failed to load/i);
 	});
 });
