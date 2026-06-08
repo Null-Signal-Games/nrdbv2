@@ -1,4 +1,4 @@
-import type { Card } from './types';
+import type { Card } from '../types';
 
 export const normalize = (str: string) => {
 	return str

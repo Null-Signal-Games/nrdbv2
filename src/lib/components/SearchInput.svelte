@@ -6,9 +6,8 @@
     import { localizeHref } from "$lib/paraglide/runtime";
     import { onMount } from "svelte";
     import Icon from "./Icon.svelte";
-    import { sql } from "$lib/sqlite";
-    import type { Card, UnifiedCardRow } from "$lib/types";
-    import { adaptCard } from "$lib/adapter";
+    import type { Card } from "$lib/api.types";
+    import { searchCards } from "$lib/search";
 
     let search_input: HTMLInputElement | null = null;
     let is_open = $state(false);
@@ -16,19 +15,10 @@
     let filtered_cards = $state<Card[]>([]);
     let search_request_id = 0;
 
-    const to_search_key = (value: string) => {
-        return value
-            .trim()
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/\p{Diacritic}/gu, "")
-            .replace(/[^a-z0-9]/g, "");
-    };
-
     $effect(() => {
-        const search_key = to_search_key($search_query);
+        const query = $search_query.trim();
 
-        if (!is_open || !$db_ready || !search_key) {
+        if (!is_open || !$db_ready || !query) {
             filtered_cards = [];
             return;
         }
@@ -37,14 +27,18 @@
 
         (async () => {
             try {
-                const cards =
-                    await sql`SELECT * FROM unified_cards WHERE stripped_title LIKE ${`%${search_key}%`} ORDER BY CASE WHEN stripped_title LIKE ${`${search_key}%`} THEN 0 ELSE 1 END, title ASC LIMIT 5`;
+                const { cards, error } = await searchCards(query);
 
                 if (request_id !== search_request_id) {
                     return;
                 }
 
-                filtered_cards = (cards as UnifiedCardRow[]).map(adaptCard);
+                if (error) {
+                    filtered_cards = [];
+                    return;
+                }
+
+                filtered_cards = cards;
             } catch (error) {
                 if (request_id !== search_request_id) {
                     return;
