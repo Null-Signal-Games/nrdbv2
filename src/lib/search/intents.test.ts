@@ -79,6 +79,34 @@ describe('normalizeInput', () => {
 		const input = 'f:shaper t:hardware';
 		expect(normalizeInput(input)).toBe(input);
 	});
+
+	it('is idempotent on >= output', () => {
+		expect(normalizeInput('strength >= 3')).toBe('strength >= 3');
+	});
+
+	it('is idempotent on <= output', () => {
+		expect(normalizeInput('cost <= 2')).toBe('cost <= 2');
+	});
+
+	it('is idempotent on > output', () => {
+		expect(normalizeInput('strength > 5')).toBe('strength > 5');
+	});
+
+	it('is idempotent on < output', () => {
+		expect(normalizeInput('cost < 2')).toBe('cost < 2');
+	});
+
+	it('is idempotent on >=N output', () => {
+		expect(normalizeInput('>=2 strength')).toBe('>=2 strength');
+	});
+
+	it('is idempotent on <=N output', () => {
+		expect(normalizeInput('<=3 cost')).toBe('<=3 cost');
+	});
+
+	it('is idempotent on non_X output', () => {
+		expect(normalizeInput('non_shaper')).toBe('non_shaper');
+	});
 });
 
 // ===== Phase 2: extractNumericIntents =====

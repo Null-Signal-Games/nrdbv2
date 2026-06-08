@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock the DB layer so prepareSearch's vocab queries are controllable.
+// Mock the DB layer so the vocabulary-loading queries in initSearchVocab are controllable.
 const { sqlMock } = vi.hoisted(() => ({ sqlMock: vi.fn() }));
 vi.mock('$lib/sqlite', () => ({ sql: sqlMock }));
 
