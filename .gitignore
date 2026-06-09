@@ -27,7 +27,6 @@ vite.config.ts.timestamp-*
 *storybook.log
 storybook-static
 
-# Ignore input and output files for the local vs. api search tests.
+# Ignore output files for the local vs. api search tests.
 scripts/api-req-cache/*.json.txt
 scripts/search-comparison-results.json
-scripts/search-query-requests.txt
