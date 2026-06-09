@@ -5,7 +5,10 @@ import Database from 'better-sqlite3';
 import commandLineArgs from 'command-line-args';
 import { createHash } from 'crypto';
 import { deepStrictEqual } from 'assert';
-import { CardSearchQueryBuilder, PrintingSearchQueryBuilder } from '../src/lib/search_grammar_and_builder.js';
+import {
+	CardSearchQueryBuilder,
+	PrintingSearchQueryBuilder
+} from '../src/lib/search_grammar_and_builder.js';
 import { adaptCard, adaptPrinting } from '../src/lib/adapter.js';
 import type { Card, Printing } from '../src/lib/api.types.js';
 import type { UnifiedCardRow, UnifiedPrintingRow } from '../src/lib/sqlite.types.js';
@@ -14,9 +17,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Flags for the script.
 interface CommandLineOptions {
-	'limit': number;
+	limit: number;
 	'api-prefix': string;
-	'parallel': number;
+	parallel: number;
 	'num-parallel-requests'?: number;
 }
 
@@ -113,8 +116,6 @@ async function fetchCached(url: string): Promise<CachedResponse> {
 	return cachedData;
 }
 
-
-
 function categorizeError(errStr: string): string {
 	const s = errStr.trim();
 	if (s.startsWith('Unknown keyword')) {
@@ -192,10 +193,8 @@ function queryAndAdaptLocal(item: PreparedItem, db: Database.Database): (Card | 
 		return p;
 	});
 	const rows = db.prepare(item.query).all(...mappedParams);
-	return rows.map(row =>
-		item.isCards
-			? adaptCard(row as UnifiedCardRow)
-			: adaptPrinting(row as UnifiedPrintingRow)
+	return rows.map((row) =>
+		item.isCards ? adaptCard(row as UnifiedCardRow) : adaptPrinting(row as UnifiedPrintingRow)
 	);
 }
 
@@ -239,10 +238,7 @@ function writeJsonResultsFile(outputData: OutputData) {
 	}
 }
 
-function buildSqliteQuery(
-	item: SearchRequestItem,
-	parseFailures: ParseFailure[]
-): PreparedItem {
+function buildSqliteQuery(item: SearchRequestItem, parseFailures: ParseFailure[]): PreparedItem {
 	let query = '';
 	let params: string[] = [];
 	let buildError: string | null = null;
@@ -316,7 +312,10 @@ async function main() {
 
 	const limit = options.limit;
 	const apiPrefix = options['api-prefix'];
-	const parallel = options['num-parallel-requests'] !== undefined ? options['num-parallel-requests'] : options.parallel;
+	const parallel =
+		options['num-parallel-requests'] !== undefined
+			? options['num-parallel-requests']
+			: options.parallel;
 
 	if (!Number.isInteger(limit) || limit <= 0) {
 		console.error(`Error: --limit must be a positive integer (received ${limit})`);
@@ -324,11 +323,15 @@ async function main() {
 	}
 
 	if (!Number.isInteger(parallel) || parallel <= 0) {
-		console.error(`Error: parallel concurrency count must be a positive integer (received ${parallel})`);
+		console.error(
+			`Error: parallel concurrency count must be a positive integer (received ${parallel})`
+		);
 		process.exit(1);
 	}
 
-	console.log(`Starting comparison with limit = ${limit}, api-prefix = ${apiPrefix}, parallel-requests = ${parallel}...`);
+	console.log(
+		`Starting comparison with limit = ${limit}, api-prefix = ${apiPrefix}, parallel-requests = ${parallel}...`
+	);
 
 	// Open SQLite database
 	const dbPath = path.resolve(__dirname, '../test-data/netrunnerdb.sqlite3');
@@ -352,10 +355,11 @@ async function main() {
 		process.exit(1);
 	}
 
-	const rawLines = fs.readFileSync(txtPath, 'utf-8')
+	const rawLines = fs
+		.readFileSync(txtPath, 'utf-8')
 		.split('\n')
-		.map(line => line.trim())
-		.filter(line => line.length > 0);
+		.map((line) => line.trim())
+		.filter((line) => line.length > 0);
 
 	// Build a unique set of search filters to test, URLs and types.
 	const deduplicated = new Map<string, SearchRequestItem>();
@@ -394,7 +398,7 @@ async function main() {
 
 	// Build SQLite queries synchronously before invoking any DB or API queries.
 	console.log(`Building SQLite queries for all items...`);
-	const preparedItems = itemsToTest.map(item => buildSqliteQuery(item, parseFailures));
+	const preparedItems = itemsToTest.map((item) => buildSqliteQuery(item, parseFailures));
 
 	let nextIndex = 0;
 	let completedCount = 0;
@@ -407,7 +411,11 @@ async function main() {
 			const item = preparedItems[index];
 
 			// Build API URL
-			const apiUrl = new URL(item.isCards ? `${apiPrefix}/api/v3/public/cards` : `${apiPrefix}/api/v3/public/printings`);
+			const apiUrl = new URL(
+				item.isCards
+					? `${apiPrefix}/api/v3/public/cards`
+					: `${apiPrefix}/api/v3/public/printings`
+			);
 			apiUrl.searchParams.set('filter[search]', item.search);
 			apiUrl.searchParams.set('page[size]', '3000');
 
@@ -415,7 +423,9 @@ async function main() {
 				await checkApiForLocallyFailed(item, apiUrl, index, comparisonResults, counters);
 				completedCount++;
 				if (completedCount % 100 === 0 || completedCount === preparedItems.length) {
-					console.log(`Running comparisons: ${completedCount}/${preparedItems.length}...`);
+					console.log(
+						`Running comparisons: ${completedCount}/${preparedItems.length}...`
+					);
 				}
 				continue;
 			}
@@ -428,7 +438,10 @@ async function main() {
 
 			if (localSettled.status === 'rejected') {
 				counters.totalFailed++;
-				const message = localSettled.reason instanceof Error ? localSettled.reason.message : String(localSettled.reason);
+				const message =
+					localSettled.reason instanceof Error
+						? localSettled.reason.message
+						: String(localSettled.reason);
 				comparisonResults[index] = {
 					filter: item.search,
 					type: item.isCards ? 'cards' : 'printings',
@@ -437,14 +450,19 @@ async function main() {
 				};
 				completedCount++;
 				if (completedCount % 100 === 0 || completedCount === preparedItems.length) {
-					console.log(`Running comparisons: ${completedCount}/${preparedItems.length}...`);
+					console.log(
+						`Running comparisons: ${completedCount}/${preparedItems.length}...`
+					);
 				}
 				continue;
 			}
 
 			if (apiSettled.status === 'rejected') {
 				counters.totalFailed++;
-				const message = apiSettled.reason instanceof Error ? apiSettled.reason.message : String(apiSettled.reason);
+				const message =
+					apiSettled.reason instanceof Error
+						? apiSettled.reason.message
+						: String(apiSettled.reason);
 				comparisonResults[index] = {
 					filter: item.search,
 					type: item.isCards ? 'cards' : 'printings',
@@ -453,7 +471,9 @@ async function main() {
 				};
 				completedCount++;
 				if (completedCount % 100 === 0 || completedCount === preparedItems.length) {
-					console.log(`Running comparisons: ${completedCount}/${preparedItems.length}...`);
+					console.log(
+						`Running comparisons: ${completedCount}/${preparedItems.length}...`
+					);
 				}
 				continue;
 			}
@@ -501,18 +521,24 @@ async function main() {
 	}
 
 	console.log(`Starting comparisons with concurrency of ${parallel}...`);
-	const workers = Array.from({ length: Math.min(parallel, preparedItems.length) }, () => worker());
+	const workers = Array.from({ length: Math.min(parallel, preparedItems.length) }, () =>
+		worker()
+	);
 	await Promise.all(workers);
 
 	let totalBothFailed = 0;
-	comparisonResults.forEach(r => {
+	comparisonResults.forEach((r) => {
 		if (r && r.status === 'failure:both') {
 			totalBothFailed++;
 		}
 	});
 
-	console.log(`\nComparison complete: ${counters.totalPassed} passed, ${counters.totalFailed} failed, ${totalBothFailed} both failed.`);
-	console.log(`API caching stats: ${cacheHits + cacheMisses} total requests, ${cacheHits} cache hits, ${cacheMisses} cache misses (issued).`);
+	console.log(
+		`\nComparison complete: ${counters.totalPassed} passed, ${counters.totalFailed} failed, ${totalBothFailed} both failed.`
+	);
+	console.log(
+		`API caching stats: ${cacheHits + cacheMisses} total requests, ${cacheHits} cache hits, ${cacheMisses} cache misses (issued).`
+	);
 
 	const groupedErrors = groupAndPrintErrors(parseFailures);
 
@@ -530,7 +556,11 @@ async function main() {
 			apiCacheMisses: cacheMisses
 		},
 		groupedParseFailures: groupedErrors,
-		parseFailures: parseFailures.map(f => ({ filter: f.filter, category: f.category, error: f.error })),
+		parseFailures: parseFailures.map((f) => ({
+			filter: f.filter,
+			category: f.category,
+			error: f.error
+		})),
 		comparisonResults
 	};
 
@@ -540,8 +570,7 @@ async function main() {
 	process.exit(0);
 }
 
-main().catch(err => {
+main().catch((err) => {
 	console.error('Fatal error during execution:', err);
 	process.exit(1);
 });
-
