@@ -220,6 +220,29 @@ export interface Comment {
 	updated_at: string;
 }
 
+export interface Decklist {
+	id: string;
+	type: 'decklists';
+	attributes: {
+		name: string;
+		created_at: string;
+		updated_at: string;
+		user_id: string;
+		faction_id: string;
+		side_id: string;
+		identity_card_id: string;
+		card_slots: Record<string, number>;
+		influence_spent: number;
+		influence_limit: number;
+		num_cards: number;
+		user_rating: number;
+		description: string;
+		taboo_list_id: string | null;
+	};
+	relationships: Relationships;
+	links: Links;
+}
+
 export interface Cycle {
 	id: string;
 	type: 'card_cycles';
