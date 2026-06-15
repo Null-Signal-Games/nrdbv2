@@ -86,6 +86,7 @@
                           "upgrade",
                           "runner_identity",
                           "corp_identity",
+                          "ice",
                       ].includes(type),
               ),
     );
