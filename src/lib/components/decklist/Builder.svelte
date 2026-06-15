@@ -59,6 +59,7 @@
     let filtered_cards = $derived<TCard[]>(
         cards.filter(
             (card: TCard) =>
+                card.attributes.side_id === side &&
                 card.attributes.card_type_id !== `${side}_identity`,
         ),
     );
