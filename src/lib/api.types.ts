@@ -2,8 +2,8 @@
 
 import type { CardTypeIds } from './types';
 
-// The JSON::API response types common between all entity types.
-export interface ApiResponse<T> {
+// JSON::API response types to handle collection and single-resource responses.
+export interface CollectionResponse<T> {
 	data: T[];
 	links: {
 		self: string;
@@ -16,6 +16,13 @@ export interface ApiResponse<T> {
 				count: number;
 			};
 		};
+	};
+}
+
+export interface SingleResponse<T> {
+	data: T;
+	links: {
+		self: string;
 	};
 }
 
@@ -76,6 +83,7 @@ export interface Relationships {
 // have equivalent ${type}Row types in sqlite.types.ts.
 export interface Card {
 	id: string;
+	type: 'cards';
 	attributes: {
 		stripped_title: string;
 		title: string;
