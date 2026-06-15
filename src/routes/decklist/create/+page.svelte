@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { PageServerData, PageData } from "../$types";
+    import type { PageServerData, PageData } from "./$types";
     import Container from "$lib/components/Container.svelte";
     import Header from "$lib/components/Header.svelte";
     import type { SidesIds, Faction, FactionIds, Card } from "$lib/types";
