@@ -211,10 +211,10 @@
             </div>
         </div>
 
-        <Printer decklist={data.decklist} cards={data.cards} />
-
         <pre>{JSON.stringify(data, null, 2)}</pre>
     </Container>
+
+    <Printer decklist={data.decklist} cards={data.cards} />
 {/if}
 
 <style>
