@@ -13,19 +13,28 @@
     let { data }: Props = $props();
 </script>
 
-<Header title={`Reviews: ${data.card.attributes.title}`} />
+{#if data.card}
+    <Header title={`Reviews: ${data.card.attributes.title}`} />
 
-<Container>
-    <div style="display: grid; gap: 1rem; grid-template-columns: 200px 1fr;">
-        <Meta card={data.card}>
-            <CardImage card={data.card} />
-        </Meta>
-        <ul>
-            {#each data.reviews as review (review.id)}
-                <li>
-                    <Review {review} />
-                </li>
-            {/each}
-        </ul>
-    </div>
-</Container>
+    <Container>
+        <div
+            style="display: grid; gap: 1rem; grid-template-columns: 200px 1fr;"
+        >
+            <Meta card={data.card}>
+                <CardImage card={data.card} />
+            </Meta>
+            <ul>
+                {#each data.reviews as review (review.id)}
+                    <li>
+                        <Review {review} />
+                    </li>
+                {/each}
+            </ul>
+        </div>
+    </Container>
+{:else}
+    <Header title="Reviews" />
+    <Container>
+        <p>No reviews for this card</p>
+    </Container>
+{/if}
