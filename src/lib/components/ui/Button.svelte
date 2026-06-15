@@ -64,6 +64,11 @@
         color: var(--text);
         text-decoration: none;
         border-radius: 0.25rem;
+        cursor: pointer;
+
+        &[disabled] {
+            cursor: not-allowed;
+        }
 
         &.button--sm {
             padding: 0.5rem 0.75rem;
