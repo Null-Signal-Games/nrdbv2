@@ -401,6 +401,9 @@
                     {/each}
                 </tbody>
             </table>
+            {#if results.length === 0}
+                <p class="builder__empty">No cards found</p>
+            {/if}
         {:else if active_tab === "Notes"}
             <div class="builder__notes">
                 <label>
