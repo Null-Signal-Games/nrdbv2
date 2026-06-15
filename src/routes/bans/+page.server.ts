@@ -1,6 +1,6 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
-import type { ApiResponse, Format, Printing, Restriction } from '$lib/types';
+import type { CollectionResponse, Format, Printing, Restriction } from '$lib/types';
 
 const FORMAT_IDS = ['startup', 'standard', 'eternal'];
 
@@ -55,7 +55,7 @@ export const load: PageServerLoad = async ({ cookies, fetch }) => {
 
 	// 1. Fetch all formats
 	const formatsRes = await fetch(`${NRDB_API_URL}/formats?page[size]=20`);
-	const formatsJson: ApiResponse<Format> = await formatsRes.json();
+	const formatsJson: CollectionResponse<Format> = await formatsRes.json();
 	const targetFormats = formatsJson.data.filter((f) => FORMAT_IDS.includes(f.id));
 
 	// 2. Fetch restrictions for each format in parallel
@@ -64,7 +64,7 @@ export const load: PageServerLoad = async ({ cookies, fetch }) => {
 			fetch(`${NRDB_API_URL}/restrictions?filter[format_id]=${f.id}&page[size]=100`)
 		)
 	);
-	const restrictionsJsons: ApiResponse<Restriction>[] = await Promise.all(
+	const restrictionsJsons: CollectionResponse<Restriction>[] = await Promise.all(
 		restrictionsResponses.map((r) => r.json())
 	);
 
@@ -86,7 +86,7 @@ export const load: PageServerLoad = async ({ cookies, fetch }) => {
 	const printingsRes = await fetch(
 		`${NRDB_API_URL}/printings?filter[card_id]=${cardIdsArray.join(',')}&filter[distinct_cards]=true&page[size]=2000`
 	);
-	const printingsJson: ApiResponse<Printing> = await printingsRes.json();
+	const printingsJson: CollectionResponse<Printing> = await printingsRes.json();
 
 	const cards = new Map<string, Printing>();
 	printingsJson.data.forEach((p) => {

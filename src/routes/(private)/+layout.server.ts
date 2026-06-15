@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { NRDB_PRIVATE_API_URL } from '$lib/constants';
-import type { ApiResponse, Decklist } from '$lib/types';
+import type { CollectionResponse, Decklist } from '$lib/types';
 
 export const load: LayoutServerLoad = async (event) => {
 	const session = await event.locals.auth();
@@ -30,7 +30,7 @@ export const load: LayoutServerLoad = async (event) => {
 		};
 	}
 
-	const decks = (await res.json()) as ApiResponse<Decklist[]>;
+	const decks = (await res.json()) as CollectionResponse<Decklist>;
 
 	return { decks: decks.data };
 };

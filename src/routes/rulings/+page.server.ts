@@ -1,5 +1,5 @@
 import { NRDB_API_URL } from '$lib/constants';
-import type { ApiResponse, Ruling } from '$lib/types';
+import type { CollectionResponse, Ruling } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -9,8 +9,8 @@ export const load: PageServerLoad = async () => {
 		rulings: new Promise(async (resolve, reject) => {
 			try {
 				const rulings = await fetch(`${NRDB_API_URL}/rulings?page[size]=50`)
-					.then((response) => response.json())
-					.then((response) => response.data as ApiResponse<Ruling>);
+					.then((response) => response.json() as Promise<CollectionResponse<Ruling>>)
+					.then((response) => response.data);
 
 				resolve(rulings);
 			} catch (error) {

@@ -1,6 +1,6 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
-import type { ApiResponse, Card, Decklist } from '$lib/types';
+import type { Card, CollectionResponse, Decklist, SingleResponse } from '$lib/types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	return {
@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			try {
 				const decklists_response = await fetch(
 					`${NRDB_API_URL}/decklists?page[size]=1`
-				).then((response) => response.json() as Promise<ApiResponse<Decklist>>);
+				).then((response) => response.json() as Promise<CollectionResponse<Decklist>>);
 
 				if (!decklists_response.data || decklists_response.data.length === 0) {
 					throw new Error('No decklists found');
@@ -21,9 +21,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 				const [identity_json, cards_json] = await Promise.all([
 					fetch(
 						`${NRDB_API_URL}/cards/${first_decklist.attributes.identity_card_id}`
-					).then((response) => response.json() as Promise<ApiResponse<Card>>),
+					).then((response) => response.json() as Promise<SingleResponse<Card>>),
 					fetch(`${NRDB_API_URL}/cards?filter[decklist_id]=${first_decklist.id}`).then(
-						(response) => response.json() as Promise<ApiResponse<Card>>
+						(response) => response.json() as Promise<CollectionResponse<Card>>
 					)
 				]);
 
@@ -47,7 +47,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		decklists: new Promise(async (resolve, reject) => {
 			try {
 				const response = await fetch(`${NRDB_API_URL}/decklists?page[size]=10`);
-				const json: ApiResponse<Decklist> = await response.json();
+				const json: CollectionResponse<Decklist> = await response.json();
 				resolve(json.data);
 			} catch (error) {
 				reject(error);
