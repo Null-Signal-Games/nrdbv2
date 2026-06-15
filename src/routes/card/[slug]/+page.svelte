@@ -100,7 +100,7 @@
                             <td>
                                 {card_sub_types[
                                     data.card.attributes
-                                        .card_subtype_ids as CardSubTypeIds
+                                        .card_subtype_ids[0] as CardSubTypeIds
                                 ]}
                             </td>
                         </tr>

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Decklist } from "$lib/types";
+    import type { Decklist, FactionIds } from "$lib/types";
     import Icon from "$lib/components/Icon.svelte";
     import { factions } from "$lib/i18n";
     import { format_date } from "$lib/utils";
@@ -19,7 +19,7 @@
             <span data-faction-theme={decklist.attributes.faction_id}>
                 <Icon name={decklist.attributes.faction_id} size="sm" />
             </span>
-            {factions[decklist.attributes.faction_id]}
+            {factions[decklist.attributes.faction_id as FactionIds]}
         </a>
         <a href={localizeHref(`/decklist/${decklist.id}`)}>
             {decklist.attributes.name}

@@ -17,6 +17,7 @@ export const createMockCard = (
 	overrides: Partial<Card['attributes']> = {}
 ): Card => ({
 	id,
+	type: 'cards',
 	attributes: {
 		stripped_title: title.toLowerCase().replace(/[^a-z0-9]/g, ''),
 		title,

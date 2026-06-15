@@ -5,7 +5,7 @@
 
     interface Props {
         card: Card | Printing;
-        type: "card" | Printing["type"];
+        type?: Card["type"] | Printing["type"];
         href?: string | null;
         loading?: "lazy" | "eager";
         class?: string;
@@ -16,7 +16,7 @@
 
     const {
         card,
-        type = card?.type ?? "card",
+        type = card?.type ?? "cards",
         // TODO: review/implement proper href routing for printings, currently does nothing (maybe use an achor of #printings instead?)
         href = `/card/${card && "type" in card && card.type === "printings" ? `${card.attributes.card_id}?printing=${card.id}` : card.id}`,
         loading = "lazy",
