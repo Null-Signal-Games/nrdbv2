@@ -1,5 +1,8 @@
 import type { Card } from './api.types';
 
+export * from './api.types';
+export * from './sqlite.types';
+
 export type SidesIds = 'corp' | 'runner';
 
 export type Publishers = 'null_signal_games' | 'fantasy_flight_games';
