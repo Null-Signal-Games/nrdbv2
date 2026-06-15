@@ -1,70 +1,59 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
-// import { error } from '@sveltejs/kit';
-import type { Decklist, FactionIds, Review } from '$lib/types';
+import { error } from '@sveltejs/kit';
+import type { CollectionResponse, Decklist, FactionIds, Review } from '$lib/types';
 import type { Actions } from './$types';
 
-export const load: PageServerLoad = async () => {
-	const username = 'plural'; // params.slug
+export const load: PageServerLoad = async ({ params, fetch }) => {
+	const username = params.slug;
 
-	// TODO: implement proper user profile data and decklist (public user scoped) fetching
-	// const user = fetch(`${NRDB_API_URL}/users/${params.slug}`)
-	//     .then((r) => r.json())
-	//     .then((r) => r.data),
+	const userResponse = await fetch(`${NRDB_API_URL}/users/${encodeURIComponent(username)}`).then(
+		(response) =>
+			response.json() as Promise<
+				CollectionResponse<{
+					id: string;
+					attributes: {
+						username: string;
+						side_id: string | null;
+						faction_id: string | null;
+						reputation: number;
+						created_at: string;
+						donation: number | boolean;
+						always_be_running_url: string | null;
+					};
+				}>
+			>
+	);
 
-	// TODO: handle user not found
-	// if (!user) {
-	//     throw error(302, 'User not found');
-	// }
+	const apiUser = userResponse.data[0];
+	if (!apiUser) {
+		throw error(404, 'User not found');
+	}
+
+	const user = {
+		name: apiUser.attributes.username,
+		faction: (apiUser.attributes.faction_id ?? 'neutral_corp') as FactionIds,
+		reputation: apiUser.attributes.reputation,
+		creation: apiUser.attributes.created_at,
+		donation: Boolean(apiUser.attributes.donation),
+		always_be_running_url: apiUser.attributes.always_be_running_url
+	};
+
+	// TODO: Get current user session data and check if the current user is following the profile user
+	const meta = {
+		is_following: false
+	};
 
 	return {
-		// Mock data
-		user: {
-			name: 'Plural',
-			faction: 'shaper' as FactionIds,
-			reputation: 218,
-			creation: '2016-03-20T10:10:00.000Z',
-			donation: true,
-			always_be_running_url: 'https://alwaysberunning.net/profile/20581'
-		},
-		// TODO: Get current user session data and check if the current user is following the profile user
-		meta: {
-			is_following: true
-		},
-		decks: new Promise((resolve, reject) => {
-			try {
-				const decks = fetch(
-					`${NRDB_API_URL}/decklists?filter[user_id]=${username}&page[size]=500`
-				)
-					.then((r) => r.json())
-					.then((r) => r.data as Decklist[]);
-				resolve(decks);
-			} catch (error) {
-				reject(error);
-			}
-		}),
-		reviews: new Promise((resolve, reject) => {
-			// TODO: implement proper reviews fetching (as far as I can tell, you cannot query by username/user_id on the public API)
-
-			// try {
-			//     const reviews = fetch(`${NRDB_API_URL}/reviews?filter[user_id]=${username}`)
-			//         .then((r) => r.json())
-			//         .then((r) => r.data as Review[])
-			//     resolve(reviews);
-			// } catch (error) {
-			//     reject(error);
-			// }
-
-			// Mock
-			try {
-				const reviews = fetch(`${NRDB_API_URL}/reviews/01`)
-					.then((r) => r.json())
-					.then((r) => r.data as Review[]);
-				resolve(reviews);
-			} catch (error) {
-				reject(error);
-			}
-		})
+		user,
+		meta,
+		decks: fetch(`${NRDB_API_URL}/decklists?filter[user_id]=${username}&page[size]=500`)
+			.then((response) => response.json() as Promise<CollectionResponse<Decklist>>)
+			.then((r) => r.data),
+		// TODO: implement proper reviews fetching (the public API does not support
+		// filtering reviews by user, so this is intentionally left as an empty list
+		// until either the API grows a filter or we hit an authenticated endpoint).
+		reviews: Promise.resolve([] as Review[])
 	};
 };
 
