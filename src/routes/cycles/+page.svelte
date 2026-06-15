@@ -6,6 +6,7 @@
     import { format_date } from "$lib/utils";
     import { localizeHref } from "$lib/paraglide/runtime";
     import Container from "$lib/components/Container.svelte";
+    import type { Publishers } from "$lib/types";
 
     interface Props {
         data: PageServerData & PageData;
@@ -46,7 +47,7 @@
                                 name={cycle.attributes.released_by}
                                 size="sm"
                             />
-                            {cycle.attributes.released_by}
+                            {m[cycle.attributes.released_by as Publishers]()}
                         </label>
                     </td>
                     <td>Standard</td>
