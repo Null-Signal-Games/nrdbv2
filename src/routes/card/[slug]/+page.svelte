@@ -98,10 +98,14 @@
                         <tr>
                             <td>Subtypes</td>
                             <td>
-                                {card_sub_types[
-                                    data.card.attributes
-                                        .card_subtype_ids as CardSubTypeIds
-                                ]}
+                                {data.card.attributes.card_subtype_ids
+                                    .map(
+                                        (subtype) =>
+                                            card_sub_types[
+                                                subtype as CardSubTypeIds
+                                            ],
+                                    )
+                                    .join(", ")}
                             </td>
                         </tr>
                     {/if}
