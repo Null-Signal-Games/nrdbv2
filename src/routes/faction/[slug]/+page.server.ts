@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ fetch, params, cookies }) => {
 		const [faction, cards] = await Promise.all([
 			fetch(`${NRDB_API_URL}/factions/${params.slug}`)
 				.then((response) => response.json())
-				.then((response) => response.data as Faction[]),
+				.then((response) => response.data as Faction),
 			fetch(`${NRDB_API_URL}/cards?filter[faction_id]=${params.slug}&page[size]=1000`)
 				.then((response) => response.json())
 				.then((response) => response.data as Card[])

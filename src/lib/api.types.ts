@@ -76,6 +76,7 @@ export interface Relationships {
 // have equivalent ${type}Row types in sqlite.types.ts.
 export interface Card {
 	id: string;
+	type: 'cards';
 	attributes: {
 		stripped_title: string;
 		title: string;

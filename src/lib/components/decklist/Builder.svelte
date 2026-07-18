@@ -503,7 +503,7 @@
         flex-wrap: wrap;
     }
 
-    .builder__tabs button {
+    /* .builder__tabs button {
         border: 1px solid var(--border);
         opacity: 0.5;
         background: transparent;
@@ -513,7 +513,7 @@
     .builder__tabs button.active {
         opacity: 1;
         border-color: var(--text);
-    }
+    } */
 
     .builder__chips {
         display: flex;
@@ -521,7 +521,7 @@
         gap: 0.5rem;
     }
 
-    .builder__chips button {
+    /* .builder__chips button {
         display: inline-flex;
         align-items: center;
         gap: 0.375rem;
@@ -535,7 +535,7 @@
         background: var(--text);
         color: var(--foreground);
         opacity: 1;
-    }
+    } */
 
     .builder__quantity {
         display: inline-grid;
