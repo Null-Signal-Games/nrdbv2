@@ -2,5 +2,16 @@
 	"editor.codeActionsOnSave": {
 		"source.fixAll.oxc": "always"
 	},
-	"oxc.typeAware": true
+	"oxc.typeAware": true,
+	"oxc.enable.oxfmt": true,
+	"editor.formatOnSave": true,
+	"[javascript]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[svelte]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	}
 }

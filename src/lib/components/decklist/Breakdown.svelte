@@ -45,11 +45,14 @@
 </div>
 
 <style>
-	/* Temporary styles */
 	.decklist-breakdown {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 1rem;
+		columns: 2;
+		column-gap: 2rem;
+	}
+
+	.decklist-breakdown > div {
+		break-inside: avoid;
+		margin-bottom: 1.5rem;
 	}
 
 	.decklist-breakdown header {
@@ -57,10 +60,32 @@
 		gap: 0.5rem;
 		grid-template-columns: auto 1fr;
 		align-items: center;
+		margin-bottom: 0.5rem;
 	}
 
 	.decklist-breakdown ul {
+		list-style: none;
 		padding: unset;
 		margin: unset;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.decklist-breakdown li a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		text-decoration: none;
+	}
+
+	.decklist-breakdown li a:hover {
+		text-decoration: underline;
+	}
+
+	@media (max-width: 480px) {
+		.decklist-breakdown {
+			columns: 1;
+		}
 	}
 </style>
