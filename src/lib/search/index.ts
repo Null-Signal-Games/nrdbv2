@@ -6,13 +6,21 @@ import { adaptCard } from '$lib/adapter';
 import type { Card } from '$lib/api.types';
 import type { UnifiedCardRow } from '$lib/sqlite.types';
 
-// Card search runs in four steps: interpret -> translate -> run -> adapt.
+export type SearchMode = 'literal' | 'interpreted';
+
+export interface SearchCardsOptions {
+	limit?: number;
+	mode?: SearchMode;
+}
+
+// Card search runs in four steps: optionally interpret -> translate -> run -> adapt.
 export async function searchCards(
 	input: string,
-	limit = 5
+	options: SearchCardsOptions = {}
 ): Promise<{ cards: Card[]; error: Error | null }> {
-	// 1. interpret: natural-language words -> NRDB search expression
-	const expression = interpretSearch(input);
+	const { limit = 5, mode = 'literal' } = options;
+	// 1. expression: literal NRDB syntax or natural-language words -> NRDB search expression
+	const expression = mode === 'interpreted' ? interpretSearch(input) : input;
 	// 2. translate: expression -> SQL
 	const { sql: text, params, error } = translateToQuery(expression, limit);
 	if (error || !text) {
