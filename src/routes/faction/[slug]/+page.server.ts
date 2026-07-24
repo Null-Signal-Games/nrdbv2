@@ -1,15 +1,23 @@
 import { NRDB_API_URL } from '$lib/constants';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import type { CollectionResponse, SidesIds, Faction, FactionIds, Card, Decklist } from '$lib/types';
+import type {
+	Card,
+	CollectionResponse,
+	Decklist,
+	Faction,
+	FactionIds,
+	SidesIds,
+	SingleResponse
+} from '$lib/types';
 import { cache_guard } from '$lib/server/guard';
 
 export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
 	const cold_data = await cache_guard(cookies, async () => {
 		const [faction, cards] = await Promise.all([
 			fetch(`${NRDB_API_URL}/factions/${params.slug}`)
-				.then((response) => response.json() as Promise<CollectionResponse<Faction>>)
-				.then((response) => response.data[0]),
+				.then((response) => response.json() as Promise<SingleResponse<Faction>>)
+				.then((response) => response.data),
 			fetch(`${NRDB_API_URL}/cards?filter[faction_id]=${params.slug}&page[size]=1000`)
 				.then((response) => response.json() as Promise<CollectionResponse<Card>>)
 				.then((response) => response.data)

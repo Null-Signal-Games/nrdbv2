@@ -542,7 +542,7 @@ export const fullFields: FullFieldData[] = [
 	{
 		type: 'string',
 		sql: { c: 'unified_cards.stripped_text', p: 'unified_printings.stripped_text' },
-		keywords: ['stripped_text', 'x'],
+		keywords: ['stripped_text', 'x', 'text'],
 		documentation: 'The text of a card, stripped of all formatting symbols and marks.'
 	},
 	{
@@ -877,7 +877,7 @@ function compileLiteral(
 				}
 				where_values.push(format_id);
 				where_values.push(format_id);
-				const filter = force_latest ? 'ORDER BY date_start DESC LIMIT 1' : 'AND active';
+				const filter = force_latest ? 'ORDER BY date_start DESC LIMIT 1' : 'AND active = 1';
 				const table = context.field.sql.split('.')[0];
 				return (
 					`EXISTS (SELECT 1 FROM json_each(${table}.snapshot_ids) WHERE value = (SELECT id FROM snapshots WHERE format_id = ? ${filter})) ` +

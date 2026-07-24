@@ -163,6 +163,13 @@ describe('Search Grammar and Builder', () => {
 		expect(builder.left_joins).toEqual([]);
 	});
 
+	test('CardSearchQueryBuilder - text alias', () => {
+		const builder = new CardSearchQueryBuilder('text:trash');
+		expect(builder.parse_error).toBe(null);
+		expect(builder.where).toBe('lower(unified_cards.stripped_text) LIKE ?');
+		expect(builder.where_values).toEqual(['%trash%']);
+	});
+
 	test('CardSearchQueryBuilder - multiple terms', () => {
 		const builder = new CardSearchQueryBuilder('x:trash cost:3');
 		expect(builder.parse_error).toBe(null);
@@ -374,8 +381,8 @@ describe('Search Grammar and Builder', () => {
 	test('CardSearchQueryBuilder - standard format', () => {
 		const builder = new CardSearchQueryBuilder('format:standard');
 		expect(builder.where.trim()).toBe(
-			'EXISTS (SELECT 1 FROM json_each(unified_cards.snapshot_ids) WHERE value = (SELECT id FROM snapshots WHERE format_id = ? AND active)) ' +
-				'AND NOT EXISTS (SELECT 1 FROM json_each(unified_cards.restrictions_banned) WHERE value = (SELECT restriction_id FROM snapshots WHERE format_id = ? AND active))'
+			'EXISTS (SELECT 1 FROM json_each(unified_cards.snapshot_ids) WHERE value = (SELECT id FROM snapshots WHERE format_id = ? AND active = 1)) ' +
+				'AND NOT EXISTS (SELECT 1 FROM json_each(unified_cards.restrictions_banned) WHERE value = (SELECT restriction_id FROM snapshots WHERE format_id = ? AND active = 1))'
 		);
 		expect(builder.where_values).toEqual(['standard', 'standard']);
 	});

@@ -74,20 +74,10 @@
             padding: 0.5rem 0.75rem;
         }
 
-        /*&.button--primary {
-
-        }*/
-
-        &.button--secondary {
-        }
-
         &.button--ghost {
             border-color: var(--border);
             opacity: 0.5;
             background: transparent;
-        }
-
-        &.button--danger {
         }
     }
 </style>

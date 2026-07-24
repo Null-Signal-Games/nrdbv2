@@ -7,10 +7,10 @@
     const display_factions: FactionIds[] = [
         "anarch",
         "criminal",
+        "shaper",
         "haas_bioroid",
         "jinteki",
         "nbn",
-        "shaper",
         "weyland_consortium",
     ];
 </script>
@@ -29,11 +29,13 @@
 </div>
 
 <style>
-    /* Temporary styles */
     .factions {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 0.5rem;
+        margin-block: 2rem;
     }
 
     .factions__item {

@@ -1,6 +1,6 @@
 // Types for NRDB API results.
 
-import type { CardTypeIds } from './types';
+import type { CardTypeIds, FactionIds } from './shared.types';
 
 // JSON::API response types to handle collection and single-resource responses.
 export interface CollectionResponse<T> {
@@ -164,6 +164,11 @@ export interface Card {
 	links: Links;
 }
 
+export interface CardGroup {
+	type: CardTypeIds;
+	data: Card[];
+}
+
 export interface CardPool {
 	id: string;
 	type: 'card_pools';
@@ -224,20 +229,19 @@ export interface Decklist {
 	id: string;
 	type: 'decklists';
 	attributes: {
+		user_id: string;
+		follows_basic_deckbuilding_rules: boolean;
+		identity_card_id: string;
 		name: string;
+		notes: string;
+		tags: string[] | null;
+		side_id: 'corp' | 'runner';
 		created_at: string;
 		updated_at: string;
-		user_id: string;
-		faction_id: string;
-		side_id: string;
-		identity_card_id: string;
+		faction_id: FactionIds;
 		card_slots: Record<string, number>;
-		influence_spent: number;
-		influence_limit: number;
 		num_cards: number;
-		user_rating: number;
-		description: string;
-		taboo_list_id: string | null;
+		influence_spent: number;
 	};
 	relationships: Relationships;
 	links: Links;

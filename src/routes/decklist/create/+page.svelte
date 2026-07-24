@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { PageServerData, PageData } from "./$types";
+    import type { PageData } from "./$types";
     import Container from "$lib/components/Container.svelte";
     import Header from "$lib/components/Header.svelte";
     import type { SidesIds, Faction, FactionIds, Card } from "$lib/types";
@@ -11,7 +11,7 @@
     import Meta from "$lib/components/card/Meta.svelte";
 
     interface Props {
-        data: PageServerData & PageData;
+        data: PageData;
     }
 
     let { data }: Props = $props();
