@@ -6,6 +6,17 @@ export default mergeConfig(
 	defineConfig({
 		test: {
 			expect: { requireAssertions: true },
+			coverage: {
+				provider: 'v8',
+				reporter: ['text', 'html', 'lcov'],
+				reportsDirectory: './coverage',
+				include: ['src/**/*.{ts,js,svelte}'],
+				exclude: [
+					'src/**/*.{test,spec}.{ts,js}',
+					'src/**/*.stories.{ts,js,svelte}',
+					'src/**/*.d.ts'
+				]
+			},
 			projects: [
 				{
 					extends: './vite.config.ts',
