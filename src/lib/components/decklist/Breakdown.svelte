@@ -16,10 +16,12 @@
 
 	const groups = $derived(group_cards_by_type(cards));
 	const count = $derived(card_quantity(decklist, groups));
+	const identity = $derived(cards.find((card) => card.id === decklist.attributes.identity_card_id));
 </script>
 
 <div class="decklist-breakdown">
 	{#each groups as group (group.type)}
+	{#if group.type !== 'corp_identity' && group.type !== 'runner_identity'}
 		<div>
 			<header>
 				<Icon name={group.type} />
@@ -31,16 +33,19 @@
 						<li>
 							<a href={localizeHref(`/card/${card.id}`)} use:tooltip={card}>
 								{decklist.attributes.card_slots[card.id]}&times; {card.attributes.title}
-								<Influence 
-									count={card.attributes.influence_cost} 
-									theme={card.attributes.faction_id as FactionIds} 
-								/>
+								{#if card.attributes.faction_id !== identity!.attributes.faction_id}
+									<Influence 
+										count={card.attributes.influence_cost} 
+										theme={card.attributes.faction_id as FactionIds} 
+									/>
+								{/if}
 							</a>
 						</li>
 					{/each}
 				</ul>
 			</article>
 		</div>
+	{/if}
 	{/each}
 </div>
 
