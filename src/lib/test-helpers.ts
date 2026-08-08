@@ -22,7 +22,7 @@ export const createMockCard = (
 		title,
 		card_type_id: 'agenda',
 		side_id: 'corp',
-		faction_id: 'neutral-corp',
+		faction_id: 'neutral_corp',
 		cost: '0',
 		advancement_requirement: null,
 		agenda_points: null,

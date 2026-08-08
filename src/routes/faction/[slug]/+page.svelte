@@ -9,7 +9,8 @@
     import DecklistItem from "$lib/components/decklist/Item.svelte";
     import { tooltip } from "$lib/actions";
     import Button from "$lib/components/ui/Button.svelte";
-    import type { Card, Decklist } from "$lib/types";
+    import type { Card, Decklist, FactionIds, SidesIds } from "$lib/types";
+    import { createHref } from "$lib/decklist_params";
 
     interface Props {
         data: PageData & {
@@ -33,7 +34,10 @@
 
     <Button
         href={localizeHref(
-            `/decklist/create?side=${data.faction.attributes.side_id}&faction=${data.faction.id}`,
+            createHref({
+                side: data.faction.attributes.side_id as SidesIds,
+                factions: [data.faction.id as FactionIds],
+            }),
         )}
         class="button"
     >
@@ -54,8 +58,14 @@
                     <!-- TODO(i18n): use/create a locale -->
                     <!-- TODO(auth): Add user auth logic, although this will likely be handled on the given route, depending if the user is already authenticated -->
                     <!-- svelte-ignore a11y_invalid_attribute -->
-                    <Button href={`/decklist/create?identity=${identity.id}`}
-                        >Create deck with this identity</Button
+                    <Button
+                        href={localizeHref(
+                            createHref({
+                                side: data.faction.attributes
+                                    .side_id as SidesIds,
+                                identity: identity.id,
+                            }),
+                        )}>Create deck with this identity</Button
                     >
 
                     <!-- TODO(i18n): use/create a locale -->

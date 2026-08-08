@@ -16,6 +16,8 @@ export const factions: Record<FactionIds, string> = {
 	neutral_runner: m.neutral_runner()
 };
 
+export const faction_name = (faction_id: FactionIds): string => factions[faction_id];
+
 export const card_types: Record<CardTypeIds, string> = {
 	agenda: m.agenda(),
 	asset: m.asset(),

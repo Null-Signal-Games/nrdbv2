@@ -11,6 +11,7 @@
     import { card_types, card_sub_types, factions } from "$lib/i18n";
     import Influence from "$lib/components/Influence.svelte";
     import { localizeHref } from "$lib/paraglide/runtime";
+    import { createHref } from "$lib/decklist_params";
     import { getHighResImage } from "$lib/utils";
     import FormatText from "$lib/components/FormatText.svelte";
     import Container from "$lib/components/Container.svelte";
@@ -213,7 +214,7 @@
                 <p>
                     <Button
                         href={localizeHref(
-                            `/decklist/create?identity=${data.card.id}`,
+                            createHref({ identity: data.card.id }),
                         )}
                     >
                         Create deck with this identity

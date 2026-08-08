@@ -89,7 +89,7 @@ export interface Card {
 		title: string;
 		card_type_id: CardTypeIds;
 		side_id: string;
-		faction_id: string;
+		faction_id: FactionIds;
 		cost: string;
 		advancement_requirement: null;
 		agenda_points: null;
