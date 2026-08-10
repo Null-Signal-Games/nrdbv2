@@ -7,6 +7,7 @@ import type { Card, Faction, FactionIds, SidesIds } from './types';
 export interface DecklistCatalog {
 	cards: Card[];
 	factions: Faction[];
+	// TODO: too cycle-focused, should be an explicit CardPool instead
 	format_cycles: FormatCycles;
 }
 

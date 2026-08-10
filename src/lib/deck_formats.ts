@@ -4,10 +4,13 @@ export type DeckFormat = 'core' | 'startup' | 'standard' | 'eternal';
 
 export const DECK_FORMATS: DeckFormat[] = ['core', 'startup', 'standard', 'eternal'];
 
+// TODO: remove this once NSG Core is a proper format in the v2 JSON and the API
 const CORE_CYCLE_IDS = ['system_gateway', 'elevation'];
 
 export type FormatCycles = Record<string, string[]>;
 
+// TODO: operate on a CardPool explicitly instead of cycles (a card pool doesn't
+// have to be made up of only cycles). Also formatPool is a weird name
 export const cardInFormatPool = (
 	card: Card,
 	format: DeckFormat,
