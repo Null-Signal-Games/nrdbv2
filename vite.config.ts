@@ -4,6 +4,10 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+	server: {
+		host: true,
+		strictPort: true
+	},
 	plugins: [
 		paraglideVitePlugin({
 			project: './project.inlang',
