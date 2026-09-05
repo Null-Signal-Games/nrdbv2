@@ -74,7 +74,7 @@
                     >
                         <Icon
                             name={card.attributes.faction_id}
-                            size="sm"
+                            size="inline"
                             theme={card.attributes.faction_id}
                         />
                         {factions[card.attributes.faction_id]}
@@ -87,7 +87,7 @@
                         )}
                         class="table-cell"
                     >
-                        <Icon name={card.attributes.card_type_id} size="sm" />
+                        <Icon name={card.attributes.card_type_id} size="inline" />
                         {card_types[card.attributes.card_type_id]}
                     </a>
                 </td>
@@ -103,7 +103,7 @@
                 <td>
                     {#if card.attributes.cost}
                         <span class="table-cell">
-                            <Icon name="credit" size="sm" />
+                            <Icon name="credit" size="inline" />
                             {card.attributes.cost}
                         </span>
                     {:else}
@@ -114,7 +114,7 @@
                     {#if card.attributes.trash_cost}
                         <span class="table-cell">
                             {card.attributes.trash_cost}
-                            <Icon name="trash" size="sm" />
+                            <Icon name="trash" size="inline" />
                         </span>
                     {:else}
                         <span class="table-cell--not-applicable"></span>
@@ -124,7 +124,7 @@
                     {#if card.attributes.strength}
                         <span class="table-cell">
                             {card.attributes.strength}
-                            <Icon name="strength" size="sm" />
+                            <Icon name="strength" size="inline" />
                         </span>
                     {:else}
                         <span class="table-cell--not-applicable"></span>
