@@ -1,346 +1,343 @@
 @layer theme, base;
 
 @layer theme {
-    :root {
-        color-scheme: light dark;
+	:root {
+		color-scheme: light dark;
 
-        &[data-theme='light'] {
-            color-scheme: light;
-        }
+		&[data-theme='light'] {
+			color-scheme: light;
+		}
 
-        &[data-theme='dark'] {
-            color-scheme: dark;
-        }
+		&[data-theme='dark'] {
+			color-scheme: dark;
+		}
 
-        --container: 1280px;
-        --card-radius: 4.55% / 3.5%;
+		--container: 1280px;
+		--card-radius: 4.55% / 3.5%;
 
-        --font-sans: 'Atkinson Hyperlegible Next',
-        system-ui,
-        sans-serif;
+		--font-sans: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
 
-        --font-size-sm: 0.875rem;
-        --font-size-base: 1rem;
-        --font-size-lg: 1.125rem;
-        --font-size-xl: 1.25rem;
-        --font-size-2xl: 1.5rem;
-        --font-size-3xl: 2rem;
+		--font-size-sm: 0.875rem;
+		--font-size-base: 1rem;
+		--font-size-lg: 1.125rem;
+		--font-size-xl: 1.25rem;
+		--font-size-2xl: 1.5rem;
+		--font-size-3xl: 2rem;
 
-        --font-weight-normal: 400;
-        --font-weight-medium: 500;
-        --font-weight-semibold: 600;
-        --font-weight-bold: 700;
+		--font-weight-normal: 400;
+		--font-weight-medium: 500;
+		--font-weight-semibold: 600;
+		--font-weight-bold: 700;
 
-        --leading-tight: 1.15;
-        --leading-body: 1.5;
+		--leading-tight: 1.15;
+		--leading-body: 1.5;
 
-        --tracking-caps: 0.05em;
+		--tracking-caps: 0.05em;
 
-        --background: light-dark(#f4f4f6, #101010);
-        --foreground: light-dark(#ffffff, #141414);
-        --text: light-dark(#000000, #ffffff);
-        --text-muted: light-dark(#555555, #a0a0a0);
-        --border: light-dark(#e0e0e0, #222222);
+		--background: light-dark(#f4f4f6, #101010);
+		--foreground: light-dark(#ffffff, #141414);
+		--text: light-dark(#000000, #ffffff);
+		--text-muted: light-dark(#555555, #a0a0a0);
+		--border: light-dark(#e0e0e0, #222222);
 
-        /* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
-        --adam: light-dark(#a89c33, #a89c33);
-        --anarch: light-dark(#e26b35, #e26b35);
-        --apex: light-dark(#000, #fff);
-        --criminal: light-dark(#194c9b, #194c9b);
-        --neutral_corp: light-dark(#5e5e5e, #5e5e5e);
-        --neutral_runner: light-dark(#919191, #919191);
-        --sunny_lebeau: light-dark(#939598, #939598);
-        --haas_bioroid: light-dark(#794d94, #794d94);
-        --jinteki: light-dark(#ba3339, #ba3339);
-        --nbn: light-dark(darkorange, #ffde00);
-        --shaper: light-dark(#4cb148, #4cb148);
-        --weyland_consortium: light-dark(#516751, #516751);
+		/* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
+		--adam: light-dark(#a89c33, #a89c33);
+		--anarch: light-dark(#e26b35, #e26b35);
+		--apex: light-dark(#000, #fff);
+		--criminal: light-dark(#194c9b, #194c9b);
+		--neutral_corp: light-dark(#5e5e5e, #5e5e5e);
+		--neutral_runner: light-dark(#919191, #919191);
+		--sunny_lebeau: light-dark(#939598, #939598);
+		--haas_bioroid: light-dark(#794d94, #794d94);
+		--jinteki: light-dark(#ba3339, #ba3339);
+		--nbn: light-dark(darkorange, #ffde00);
+		--shaper: light-dark(#4cb148, #4cb148);
+		--weyland_consortium: light-dark(#516751, #516751);
 
-        --adam-contrast: #000000;
-        --anarch-contrast: #000000;
-        --apex-contrast: light-dark(#ffffff, #000000);
-        --criminal-contrast: #ffffff;
-        --neutral_corp-contrast: #ffffff;
-        --neutral_runner-contrast: #000000;
-        --sunny_lebeau-contrast: #000000;
-        --haas_bioroid-contrast: #ffffff;
-        --jinteki-contrast: #ffffff;
-        --nbn-contrast: #000000;
-        --shaper-contrast: #000000;
-        --weyland_consortium-contrast: #ffffff;
+		--adam-contrast: #000000;
+		--anarch-contrast: #000000;
+		--apex-contrast: light-dark(#ffffff, #000000);
+		--criminal-contrast: #ffffff;
+		--neutral_corp-contrast: #ffffff;
+		--neutral_runner-contrast: #000000;
+		--sunny_lebeau-contrast: #000000;
+		--haas_bioroid-contrast: #ffffff;
+		--jinteki-contrast: #ffffff;
+		--nbn-contrast: #000000;
+		--shaper-contrast: #000000;
+		--weyland_consortium-contrast: #ffffff;
 
-        /* States, namely for badges (and likely others */
-        --verified: #698146;
+		/* States, namely for badges (and likely others */
+		--verified: #698146;
 
-        /* Animations & transitions */
-        --animate-base: 120ms;
-        --animate-slow: calc(1.5 * var(--animate-base));
+		/* Animations & transitions */
+		--animate-base: 120ms;
+		--animate-slow: calc(1.5 * var(--animate-base));
 
-        /* Accessibility */
-        --backdrop-transparency: 0.75;
-    }
+		/* Accessibility */
+		--backdrop-transparency: 0.75;
+	}
 
-    @media (prefers-contrast: more) {
-        :root {
-            --background: light-dark(#CFCFCF, #000000);
-            --foreground: light-dark(#FFFFFF, #222222);
-            --border: light-dark(#A6A6A6, #7F7F7F);
-        }
-    }
+	@media (prefers-contrast: more) {
+		:root {
+			--background: light-dark(#cfcfcf, #000000);
+			--foreground: light-dark(#ffffff, #222222);
+			--border: light-dark(#a6a6a6, #7f7f7f);
+		}
+	}
 
-    @media (prefers-reduced-motion: reduce) {
-        :root {
-            --animate-base: 0ms;
-            /* --animate-slow skipped, as it's calculated based on --animate-base */
-        }
+	@media (prefers-reduced-motion: reduce) {
+		:root {
+			--animate-base: 0ms;
+			/* --animate-slow skipped, as it's calculated based on --animate-base */
+		}
 
-        ::view-transition-group(*),
-        ::view-transition-old(*),
-        ::view-transition-new(*) {
-            animation: none !important;
-        }
-    }
+		::view-transition-group(*),
+		::view-transition-old(*),
+		::view-transition-new(*) {
+			animation: none !important;
+		}
+	}
 
-    @media (prefers-reduced-transparency: reduce) {
-        :root {
-            --backdrop-transparency: 0.9;
-        }
-    }
+	@media (prefers-reduced-transparency: reduce) {
+		:root {
+			--backdrop-transparency: 0.9;
+		}
+	}
 
-    @media print and (color) {
-        :root {
-            color-scheme: light;
-            --background: transparent;
-        }
+	@media print and (color) {
+		:root {
+			color-scheme: light;
+			--background: transparent;
+		}
 
-        * {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
+		* {
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
+		}
 
-        html,
-        body {
-            background-color: transparent !important;
-        }
-    }
+		html,
+		body {
+			background-color: transparent !important;
+		}
+	}
 
-    body {
-        font-family: var(--font-sans);
-        font-size: var(--font-size-base);
-        line-height: var(--leading-body);
-        background-color: var(--background);
-        color: var(--text);
-        margin: unset;
-    }
+	body {
+		font-family: var(--font-sans);
+		font-size: var(--font-size-base);
+		line-height: var(--leading-body);
+		background-color: var(--background);
+		color: var(--text);
+		margin: unset;
+	}
 }
 
 @layer base {
-    /* [data-faction-theme] {
+	/* [data-faction-theme] {
         color: attr(data-faction-theme type(<color>));
     } */
 
-    @media (prefers-contrast: more) {
-        a {
-            text-decoration: underline;
-        }
+	@media (prefers-contrast: more) {
+		a {
+			text-decoration: underline;
+		}
 
-        .table-cell--not-applicable::after {
-            content: 'N/A';
-            opacity: 1;
-        }
-    }
+		.table-cell--not-applicable::after {
+			content: 'N/A';
+			opacity: 1;
+		}
+	}
 
-    .container {
-        max-width: var(--container, 1280px);
-        margin-inline: auto;
-        padding-inline: 2.5vw;
-    }
+	.container {
+		max-width: var(--container, 1280px);
+		margin-inline: auto;
+		padding-inline: 2.5vw;
+	}
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        margin: unset;
-        line-height: var(--leading-tight);
-        text-wrap: balance;
-    }
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		margin: unset;
+		line-height: var(--leading-tight);
+		text-wrap: balance;
+	}
 
-    h1 {
-        font-size: var(--font-size-3xl);
-        font-weight: var(--font-weight-bold);
-    }
+	h1 {
+		font-size: var(--font-size-3xl);
+		font-weight: var(--font-weight-bold);
+	}
 
-    h2 {
-        font-size: var(--font-size-2xl);
-        font-weight: var(--font-weight-bold);
-    }
+	h2 {
+		font-size: var(--font-size-2xl);
+		font-weight: var(--font-weight-bold);
+	}
 
-    h3 {
-        font-size: var(--font-size-xl);
-        font-weight: var(--font-weight-semibold);
-    }
+	h3 {
+		font-size: var(--font-size-xl);
+		font-weight: var(--font-weight-semibold);
+	}
 
-    h4 {
-        font-size: var(--font-size-lg);
-        font-weight: var(--font-weight-semibold);
-    }
+	h4 {
+		font-size: var(--font-size-lg);
+		font-weight: var(--font-weight-semibold);
+	}
 
-    h5 {
-        font-size: var(--font-size-base);
-        font-weight: var(--font-weight-semibold);
-    }
+	h5 {
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-semibold);
+	}
 
-    h6 {
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-semibold);
-    }
+	h6 {
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-semibold);
+	}
 
-    small {
-        font-size: var(--font-size-sm);
-    }
+	small {
+		font-size: var(--font-size-sm);
+	}
 
-    p {
-        text-wrap: pretty;
-    }
+	p {
+		text-wrap: pretty;
+	}
 
-    a {
-        color: inherit;
-    }
+	a {
+		color: inherit;
+	}
 
-    [data-fill='theme'] {
-        color: var(--theme, currentColor);
-        fill: var(--theme, currentColor);
-    }
+	[data-fill='theme'] {
+		color: var(--theme, currentColor);
+		fill: var(--theme, currentColor);
+	}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
 
-    table th {
-        text-align: left;
-    }
+	table th {
+		text-align: left;
+	}
 
-    table tr:nth-child(2n) {
-        background: var(--foreground);
+	table tr:nth-child(2n) {
+		background: var(--foreground);
 
-        & td {
-            border-top: 1px solid var(--border);
-        }
-    }
+		& td {
+			border-top: 1px solid var(--border);
+		}
+	}
 
-    table th,
-    table td {
-        padding: 0.5rem 1rem;
-    }
+	table th,
+	table td {
+		padding: 0.5rem 1rem;
+	}
 
-    table td {
-        height: 2rem;
-    }
+	table td {
+		height: 2rem;
+	}
 
-    table a {
-        text-decoration: none;
-    }
+	table a {
+		text-decoration: none;
+	}
 
-    .table-cell {
-        display: inline-flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 0.5rem;
-    }
+	.table-cell {
+		display: inline-flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+	}
 
-    .table-cell--not-applicable::after {
-        content: '—';
-        opacity: 0.25;
-    }
+	.table-cell--not-applicable::after {
+		content: '—';
+		opacity: 0.25;
+	}
 
-    /* Temporary styles */
-    pre {
-        max-width: 600px;
-    }
+	/* Temporary styles */
+	pre {
+		max-width: 600px;
+	}
 
-    @media print {
-        body :not(body > div > main, .printer):not(.printer > *) {
-            display: none;
-        }
+	@media print {
+		body :not(body > div > main, .printer):not(.printer > *) {
+			display: none;
+		}
 
-        @page {
-            margin-top: 5mm;
-            margin-bottom: 5mm;
-            margin-left: 5mm;
-            margin-right: 5mm;
-        }
+		@page {
+			margin-top: 5mm;
+			margin-bottom: 5mm;
+			margin-left: 5mm;
+			margin-right: 5mm;
+		}
 
-        .printer {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5mm;
-        }
-    }
+		.printer {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 5mm;
+		}
+	}
 
-    @media print and (orientation: landscape) {
-        .printer {
-            grid-template-columns: repeat(4, 1fr);
-        }
-    }
+	@media print and (orientation: landscape) {
+		.printer {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
 
-    @media not print {
-        .printer {
-            display: none;
-            visibility: hidden;
-        }
-    }
+	@media not print {
+		.printer {
+			display: none;
+			visibility: hidden;
+		}
+	}
 
-    .printer>div {
-        text-align: center;
-        background-size: cover;
-        border-radius: 2.5mm;
-        justify-content: center;
-        align-items: center;
-        width: 63mm;
-        height: 88mm;
-        font-size: var(--font-size-3xl);
-        display: flex;
-        position: relative;
-        overflow: hidden;
-    }
+	.printer > div {
+		text-align: center;
+		background-size: cover;
+		border-radius: 2.5mm;
+		justify-content: center;
+		align-items: center;
+		width: 63mm;
+		height: 88mm;
+		font-size: var(--font-size-3xl);
+		display: flex;
+		position: relative;
+		overflow: hidden;
+	}
 
-    .printer>div::after {
-        width: 100%;
-        height: 100%;
-        inset: 0;
-        content: "";
-        background-image: var(--image);
-        background-size: cover;
+	.printer > div::after {
+		width: 100%;
+		height: 100%;
+		inset: 0;
+		content: '';
+		background-image: var(--image);
+		background-size: cover;
+	}
 
-    }
+	.group-header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
 
-    .group-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+	.root:has(header[data-id='page-header'] + article) > article {
+		margin-block: 3rem;
+	}
 
-    .root:has(header[data-id='page-header'] + article)>article {
-        margin-block: 3rem;
-    }
+	@media (prefers-contrast: more) {
+		.watermark {
+			display: none;
+			visibility: hidden;
+		}
+	}
 
-    @media (prefers-contrast: more) {
-        .watermark {
-            display: none;
-            visibility: hidden;
-        }
-    }
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
 
-    @keyframes fade-in {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
+		to {
+			opacity: 1;
+		}
+	}
 }
