@@ -224,10 +224,11 @@
         inset: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, var(--backdrop-transparency));
         backdrop-filter: blur(4px);
         z-index: 20;
         pointer-events: none;
+        animation: fade-in var(--animate-slow) ease-in-out forwards;
     }
 
     .search-input-container {
