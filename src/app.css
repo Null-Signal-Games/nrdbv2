@@ -1,264 +1,274 @@
 @layer theme, base;
 
 @layer theme {
-	:root {
-		color-scheme: light dark;
+    :root {
+        color-scheme: light dark;
 
-		&[data-theme='light'] {
-			color-scheme: light;
-		}
+        &[data-theme='light'] {
+            color-scheme: light;
+        }
 
-		&[data-theme='dark'] {
-			color-scheme: dark;
-		}
+        &[data-theme='dark'] {
+            color-scheme: dark;
+        }
 
-		--container: 1280px;
-		--card-radius: 4.55% / 3.5%;
+        --container: 1280px;
+        --card-radius: 4.55% / 3.5%;
 
-		--font-sans: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+        --font-sans: 'Atkinson Hyperlegible Next',
+        system-ui,
+        sans-serif;
 
-		--font-size-sm: 0.875rem;
-		--font-size-base: 1rem;
-		--font-size-lg: 1.125rem;
-		--font-size-xl: 1.25rem;
-		--font-size-2xl: 1.5rem;
-		--font-size-3xl: 2rem;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.25rem;
+        --font-size-2xl: 1.5rem;
+        --font-size-3xl: 2rem;
 
-		--font-weight-normal: 400;
-		--font-weight-medium: 500;
-		--font-weight-semibold: 600;
-		--font-weight-bold: 700;
+        --font-weight-normal: 400;
+        --font-weight-medium: 500;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
 
-		--leading-tight: 1.15;
-		--leading-body: 1.5;
+        --leading-tight: 1.15;
+        --leading-body: 1.5;
 
-		--tracking-caps: 0.05em;
+        --tracking-caps: 0.05em;
 
-		--background: light-dark(#f4f4f6, #101010);
-		--foreground: light-dark(#ffffff, #141414);
-		--text: light-dark(#000000, #ffffff);
-		--text-muted: light-dark(#555555, #a0a0a0);
-		--border: light-dark(#e0e0e0, #222222);
+        --background: light-dark(#f4f4f6, #101010);
+        --foreground: light-dark(#ffffff, #141414);
+        --text: light-dark(#000000, #ffffff);
+        --text-muted: light-dark(#555555, #a0a0a0);
+        --border: light-dark(#e0e0e0, #222222);
 
-		/* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
-		--adam: light-dark(#a89c33, #a89c33);
-		--anarch: light-dark(#e26b35, #e26b35);
-		--apex: light-dark(#000, #fff);
-		--criminal: light-dark(#194c9b, #194c9b);
-		--neutral_corp: light-dark(#5e5e5e, #5e5e5e);
-		--neutral_runner: light-dark(#919191, #919191);
-		--sunny_lebeau: light-dark(#939598, #939598);
-		--haas_bioroid: light-dark(#794d94, #794d94);
-		--jinteki: light-dark(#ba3339, #ba3339);
-		--nbn: light-dark(darkorange, #ffde00);
-		--shaper: light-dark(#4cb148, #4cb148);
-		--weyland_consortium: light-dark(#516751, #516751);
+        /* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
+        --adam: light-dark(#a89c33, #a89c33);
+        --anarch: light-dark(#e26b35, #e26b35);
+        --apex: light-dark(#000, #fff);
+        --criminal: light-dark(#194c9b, #194c9b);
+        --neutral_corp: light-dark(#5e5e5e, #5e5e5e);
+        --neutral_runner: light-dark(#919191, #919191);
+        --sunny_lebeau: light-dark(#939598, #939598);
+        --haas_bioroid: light-dark(#794d94, #794d94);
+        --jinteki: light-dark(#ba3339, #ba3339);
+        --nbn: light-dark(darkorange, #ffde00);
+        --shaper: light-dark(#4cb148, #4cb148);
+        --weyland_consortium: light-dark(#516751, #516751);
 
-		--adam-contrast: #000000;
-		--anarch-contrast: #000000;
-		--apex-contrast: light-dark(#ffffff, #000000);
-		--criminal-contrast: #ffffff;
-		--neutral_corp-contrast: #ffffff;
-		--neutral_runner-contrast: #000000;
-		--sunny_lebeau-contrast: #000000;
-		--haas_bioroid-contrast: #ffffff;
-		--jinteki-contrast: #ffffff;
-		--nbn-contrast: #000000;
-		--shaper-contrast: #000000;
-		--weyland_consortium-contrast: #ffffff;
+        --adam-contrast: #000000;
+        --anarch-contrast: #000000;
+        --apex-contrast: light-dark(#ffffff, #000000);
+        --criminal-contrast: #ffffff;
+        --neutral_corp-contrast: #ffffff;
+        --neutral_runner-contrast: #000000;
+        --sunny_lebeau-contrast: #000000;
+        --haas_bioroid-contrast: #ffffff;
+        --jinteki-contrast: #ffffff;
+        --nbn-contrast: #000000;
+        --shaper-contrast: #000000;
+        --weyland_consortium-contrast: #ffffff;
 
-		/* States, namely for badges (and likely others */
-		--verified: #698146;
-	}
+        /* States, namely for badges (and likely others */
+        --verified: #698146;
+    }
 
-	body {
-		font-family: var(--font-sans);
-		font-size: var(--font-size-base);
-		line-height: var(--leading-body);
-		background-color: var(--background);
-		color: var(--text);
-		margin: unset;
-	}
+    body {
+        font-family: var(--font-sans);
+        font-size: var(--font-size-base);
+        line-height: var(--leading-body);
+        background-color: var(--background);
+        color: var(--text);
+        margin: unset;
+    }
 }
 
 @layer base {
-	/* [data-faction-theme] {
+    /* [data-faction-theme] {
         color: attr(data-faction-theme type(<color>));
     } */
 
-	@media (prefers-reduced-motion) {
-		::view-transition-group(*),
-		::view-transition-old(*),
-		::view-transition-new(*) {
-			animation: none !important;
-		}
-	}
+    @media (prefers-reduced-motion) {
 
-	@media (prefers-contrast: more) {
-		a {
-			text-decoration: underline;
-		}
+        ::view-transition-group(*),
+        ::view-transition-old(*),
+        ::view-transition-new(*) {
+            animation: none !important;
+        }
+    }
 
-		.table-cell--not-applicable::after {
-			content: 'N/A';
-			opacity: 1;
-		}
-	}
+    @media (prefers-contrast: more) {
+        a {
+            text-decoration: underline;
+        }
 
-	.container {
-		max-width: var(--container, 1280px);
-		margin-inline: auto;
-		padding-inline: 2.5vw;
-	}
+        .table-cell--not-applicable::after {
+            content: 'N/A';
+            opacity: 1;
+        }
+    }
 
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		margin: unset;
-		line-height: var(--leading-tight);
-		text-wrap: balance;
-	}
+    .container {
+        max-width: var(--container, 1280px);
+        margin-inline: auto;
+        padding-inline: 2.5vw;
+    }
 
-	h1 {
-		font-size: var(--font-size-3xl);
-		font-weight: var(--font-weight-bold);
-	}
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin: unset;
+        line-height: var(--leading-tight);
+        text-wrap: balance;
+    }
 
-	h2 {
-		font-size: var(--font-size-2xl);
-		font-weight: var(--font-weight-bold);
-	}
+    h1 {
+        font-size: var(--font-size-3xl);
+        font-weight: var(--font-weight-bold);
+    }
 
-	h3 {
-		font-size: var(--font-size-xl);
-		font-weight: var(--font-weight-semibold);
-	}
+    h2 {
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+    }
 
-	h4 {
-		font-size: var(--font-size-lg);
-		font-weight: var(--font-weight-semibold);
-	}
+    h3 {
+        font-size: var(--font-size-xl);
+        font-weight: var(--font-weight-semibold);
+    }
 
-	h5 {
-		font-size: var(--font-size-base);
-		font-weight: var(--font-weight-semibold);
-	}
+    h4 {
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-semibold);
+    }
 
-	h6 {
-		font-size: var(--font-size-sm);
-		font-weight: var(--font-weight-semibold);
-	}
+    h5 {
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
+    }
 
-	small {
-		font-size: var(--font-size-sm);
-	}
+    h6 {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-semibold);
+    }
 
-	p {
-		text-wrap: pretty;
-	}
+    small {
+        font-size: var(--font-size-sm);
+    }
 
-	a {
-		color: inherit;
-	}
+    p {
+        text-wrap: pretty;
+    }
 
-	[data-fill='theme'] {
-		color: var(--theme, currentColor);
-		fill: var(--theme, currentColor);
-	}
+    a {
+        color: inherit;
+    }
 
-	table {
-		width: 100%;
-		border-collapse: collapse;
-	}
+    [data-fill='theme'] {
+        color: var(--theme, currentColor);
+        fill: var(--theme, currentColor);
+    }
 
-	table th {
-		text-align: left;
-	}
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-	table tr:nth-child(2n) {
-		background: var(--foreground);
+    table th {
+        text-align: left;
+    }
 
-		& td {
-			border-top: 1px solid var(--border);
-		}
-	}
+    table tr:nth-child(2n) {
+        background: var(--foreground);
 
-	table th,
-	table td {
-		padding: 0.5rem 1rem;
-	}
+        & td {
+            border-top: 1px solid var(--border);
+        }
+    }
 
-	table td {
-		height: 2rem;
-	}
+    table th,
+    table td {
+        padding: 0.5rem 1rem;
+    }
 
-	table a {
-		text-decoration: none;
-	}
+    table td {
+        height: 2rem;
+    }
 
-	.table-cell {
-		display: inline-flex;
-		flex-direction: row;
-		align-items: center;
-		gap: 0.5rem;
-	}
+    table a {
+        text-decoration: none;
+    }
 
-	.table-cell--not-applicable::after {
-		content: '—';
-		opacity: 0.25;
-	}
+    .table-cell {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-	/* Temporary styles */
-	pre {
-		max-width: 600px;
-	}
+    .table-cell--not-applicable::after {
+        content: '—';
+        opacity: 0.25;
+    }
 
-	@media print {
-		* {
-			print-color-adjust: exact;
-		}
+    /* Temporary styles */
+    pre {
+        max-width: 600px;
+    }
 
-		body :not(body > div > main, .printer):not(.printer > *) {
-			display: none;
-		}
+    @media print {
+        * {
+            print-color-adjust: exact;
+        }
 
-		.printer {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
-			gap: 10.5mm;
-		}
-	}
+        body :not(body > div > main, .printer):not(.printer > *) {
+            display: none;
+        }
 
-	@media not print {
-		.printer {
-			display: none;
-			visibility: hidden;
-		}
-	}
+        .printer {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10.5mm;
+        }
+    }
 
-	.printer > div {
-		text-align: center;
-		color: #fff;
-		background-size: cover;
-		border-radius: 2.5mm;
-		justify-content: center;
-		align-items: center;
-		width: 63mm;
-		height: 88mm;
-		font-size: var(--font-size-3xl);
-		display: flex;
-	}
+    @media not print {
+        .printer {
+            display: none;
+            visibility: hidden;
+        }
+    }
 
-	.group-header {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
+    .printer>div {
+        text-align: center;
+        color: #fff;
+        background-size: cover;
+        border-radius: 2.5mm;
+        justify-content: center;
+        align-items: center;
+        width: 63mm;
+        height: 88mm;
+        font-size: var(--font-size-3xl);
+        display: flex;
+    }
 
-	.root:has(header[data-id='page-header'] + article) > article {
-		margin-block: 3rem;
-	}
+    .group-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .root:has(header[data-id='page-header'] + article)>article {
+        margin-block: 3rem;
+    }
+
+    @media (prefers-contrast: more) {
+        .watermark {
+            display: none;
+            visibility: hidden;
+        }
+    }
 }
