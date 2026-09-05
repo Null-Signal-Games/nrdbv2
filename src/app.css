@@ -82,9 +82,9 @@
 
     @media (prefers-contrast: more) {
         :root {
-            --background: light-dark(#CFCFCF, #000000);
-            --foreground: light-dark(#FFFFFF, #222222);
-            --border: light-dark(#A6A6A6, #7F7F7F);
+            --background: light-dark(#cfcfcf, #000000);
+            --foreground: light-dark(#ffffff, #222222);
+            --border: light-dark(#a6a6a6, #7f7f7f);
         }
     }
 
@@ -311,6 +311,16 @@
         .watermark {
             display: none;
             visibility: hidden;
+        }
+    }
+
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
         }
     }
 }
