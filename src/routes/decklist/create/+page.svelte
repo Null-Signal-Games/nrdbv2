@@ -65,11 +65,8 @@
 <Container>
     {#if identity && faction}
         <DecklistBuilder
-            side={selected.side}
-            {faction}
             identity={identity.id}
-            factions={data.factions ?? []}
-            cards={data.side_cards ?? []}
+            side_cards={data.side_cards ?? []}
         />
     {:else}
         <IdentityPicker {catalog} {selected} />
