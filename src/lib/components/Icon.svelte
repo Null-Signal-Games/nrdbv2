@@ -4,7 +4,7 @@
 	interface Props {
 		// TODO(types): refactor `string` to specific icon names later
 		name: FactionIds | CardTypeIds | string;
-		size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'fill' | 'none';
+		size?: 'inline' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'fill' | 'none';
 		class?: string;
 		label?: string;
 		theme?: FactionIds;
@@ -115,6 +115,10 @@
 		width: var(--icon-size);
 		height: var(--icon-size);
 	}
+
+    .icon--inline {
+        --icon-size: 1.25ch;
+    }
 
 	.icon--xs {
 		--icon-size: 0.75rem;
