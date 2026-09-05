@@ -71,6 +71,57 @@
 
         /* States, namely for badges (and likely others */
         --verified: #698146;
+
+        /* Animations & transitions */
+        --animate-base: 120ms;
+        --animate-slow: calc(1.5 * var(--animate-base));
+
+        /* Accessibility */
+        --backdrop-transparency: 0.75;
+    }
+
+    @media (prefers-contrast: more) {
+        :root {
+            --background: light-dark(#CFCFCF, #000000);
+            --foreground: light-dark(#FFFFFF, #222222);
+            --border: light-dark(#A6A6A6, #7F7F7F);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        :root {
+            --animate-base: 0ms;
+            /* --animate-slow skipped, as it's calculated based on --animate-base */
+        }
+
+        ::view-transition-group(*),
+        ::view-transition-old(*),
+        ::view-transition-new(*) {
+            animation: none !important;
+        }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+        :root {
+            --backdrop-transparency: 0.9;
+        }
+    }
+
+    @media print and (color) {
+        :root {
+            color-scheme: light;
+            --background: transparent;
+        }
+
+        * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        html,
+        body {
+            background-color: transparent !important;
+        }
     }
 
     body {
@@ -87,15 +138,6 @@
     /* [data-faction-theme] {
         color: attr(data-faction-theme type(<color>));
     } */
-
-    @media (prefers-reduced-motion) {
-
-        ::view-transition-group(*),
-        ::view-transition-old(*),
-        ::view-transition-new(*) {
-            animation: none !important;
-        }
-    }
 
     @media (prefers-contrast: more) {
         a {
