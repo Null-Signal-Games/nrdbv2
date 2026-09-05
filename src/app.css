@@ -69,6 +69,57 @@
 
 		/* States, namely for badges (and likely others */
 		--verified: #698146;
+
+		/* Animations & transitions */
+		--animate-base: 120ms;
+		--animate-slow: calc(1.5 * var(--animate-base));
+
+		/* Accessibility */
+		--backdrop-transparency: 0.75;
+	}
+
+	@media (prefers-contrast: more) {
+		:root {
+			--background: light-dark(#cfcfcf, #000000);
+			--foreground: light-dark(#ffffff, #222222);
+			--border: light-dark(#a6a6a6, #7f7f7f);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		:root {
+			--animate-base: 0ms;
+			/* --animate-slow skipped, as it's calculated based on --animate-base */
+		}
+
+		::view-transition-group(*),
+		::view-transition-old(*),
+		::view-transition-new(*) {
+			animation: none !important;
+		}
+	}
+
+	@media (prefers-reduced-transparency: reduce) {
+		:root {
+			--backdrop-transparency: 0.9;
+		}
+	}
+
+	@media print and (color) {
+		:root {
+			color-scheme: light;
+			--background: transparent;
+		}
+
+		* {
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
+		}
+
+		html,
+		body {
+			background-color: transparent !important;
+		}
 	}
 
 	body {
@@ -85,14 +136,6 @@
 	/* [data-faction-theme] {
         color: attr(data-faction-theme type(<color>));
     } */
-
-	@media (prefers-reduced-motion) {
-		::view-transition-group(*),
-		::view-transition-old(*),
-		::view-transition-new(*) {
-			animation: none !important;
-		}
-	}
 
 	@media (prefers-contrast: more) {
 		a {
@@ -217,18 +260,27 @@
 	}
 
 	@media print {
-		* {
-			print-color-adjust: exact;
-		}
-
 		body :not(body > div > main, .printer):not(.printer > *) {
 			display: none;
+		}
+
+		@page {
+			margin-top: 5mm;
+			margin-bottom: 5mm;
+			margin-left: 5mm;
+			margin-right: 5mm;
 		}
 
 		.printer {
 			display: grid;
 			grid-template-columns: repeat(3, 1fr);
-			gap: 10.5mm;
+			gap: 5mm;
+		}
+	}
+
+	@media print and (orientation: landscape) {
+		.printer {
+			grid-template-columns: repeat(4, 1fr);
 		}
 	}
 
@@ -241,7 +293,6 @@
 
 	.printer > div {
 		text-align: center;
-		color: #fff;
 		background-size: cover;
 		border-radius: 2.5mm;
 		justify-content: center;
@@ -250,6 +301,17 @@
 		height: 88mm;
 		font-size: var(--font-size-3xl);
 		display: flex;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.printer > div::after {
+		width: 100%;
+		height: 100%;
+		inset: 0;
+		content: '';
+		background-image: var(--image);
+		background-size: cover;
 	}
 
 	.group-header {
@@ -260,5 +322,22 @@
 
 	.root:has(header[data-id='page-header'] + article) > article {
 		margin-block: 3rem;
+	}
+
+	@media (prefers-contrast: more) {
+		.watermark {
+			display: none;
+			visibility: hidden;
+		}
+	}
+
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+
+		to {
+			opacity: 1;
+		}
 	}
 }
