@@ -150,8 +150,8 @@
 
                 {#each grouped_cards as group (group.type)}
                     <div class="group">
-                        <div>
-                            <Icon name={group.type} />
+                        <div class="icon-text">
+                            <Icon name={group.type} size="md" />
                             <h4>
                                 {card_types[group.type]} ({count[group.type]})
                             </h4>
