@@ -4,7 +4,7 @@
 	z-index: 100;
 	background-color: rgba(0, 0, 0, var(--backdrop-transparency));
 	backdrop-filter: blur(4px);
-	animation: fade-in var(--animate-slow) ease-in-out forwards;
+	animation: fade-in var(--transition);
 }
 
 .card-modal {
@@ -24,22 +24,21 @@
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	color: var(--text);
-	animation: modal var(--animate-base) ease-in-out forwards;
+	animation: modal var(--transition);
 }
 
 @keyframes modal {
 	from {
-		translate: -50% -45%;
 		scale: 0.95;
 	}
 
 	to {
-		translate: -50% -50%;
 		scale: 1;
 	}
 }
 
 @media (prefers-reduced-motion: reduce) {
+
 	.card-modal__overlay,
 	.card-modal {
 		animation: unset;
@@ -167,7 +166,7 @@
 	margin: 0;
 }
 
-.card-modal__text > .formatted-text + .card-modal__flavor {
+.card-modal__text>.formatted-text+.card-modal__flavor {
 	margin-block-start: 0.625rem;
 }
 

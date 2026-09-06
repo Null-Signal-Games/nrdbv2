@@ -15,7 +15,9 @@
 		--container: 1280px;
 		--card-radius: 4.55% / 3.5%;
 
-		--font-sans: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+		--font-sans: 'Atkinson Hyperlegible Next',
+		system-ui,
+		sans-serif;
 
 		--font-size-sm: 0.875rem;
 		--font-size-base: 1rem;
@@ -71,8 +73,7 @@
 		--verified: #698146;
 
 		/* Animations & transitions */
-		--animate-base: 120ms;
-		--animate-slow: calc(1.5 * var(--animate-base));
+		--transition: .1s;
 
 		/* Accessibility */
 		--backdrop-transparency: 0.75;
@@ -88,8 +89,7 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		:root {
-			--animate-base: 0ms;
-			/* --animate-slow skipped, as it's calculated based on --animate-base */
+			--transition: 0ms;
 		}
 
 		::view-transition-group(*),
@@ -291,7 +291,7 @@
 		}
 	}
 
-	.printer > div {
+	.printer>div {
 		text-align: center;
 		background-size: cover;
 		border-radius: 2.5mm;
@@ -305,7 +305,7 @@
 		overflow: hidden;
 	}
 
-	.printer > div::after {
+	.printer>div::after {
 		width: 100%;
 		height: 100%;
 		inset: 0;
@@ -320,7 +320,7 @@
 		gap: 0.5rem;
 	}
 
-	.root:has(header[data-id='page-header'] + article) > article {
+	.root:has(header[data-id='page-header'] + article)>article {
 		margin-block: 3rem;
 	}
 
