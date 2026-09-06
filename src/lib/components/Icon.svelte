@@ -10,7 +10,7 @@
 		theme?: FactionIds;
 	}
 
-	let { name, size = 'lg', class: class_list = '', label = name, theme }: Props = $props();
+	let { name, size = 'md', class: class_list = '', label = name, theme }: Props = $props();
 
 	const icons: Record<Props['name'], string> = {
 		adam: 'faction-adam',
@@ -117,7 +117,7 @@
 	}
 
     .icon--inline {
-        --icon-size: 1.25ch;
+        --icon-size: 1.5ch;
     }
 
 	.icon--xs {
