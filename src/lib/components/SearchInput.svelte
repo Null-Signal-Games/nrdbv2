@@ -249,12 +249,9 @@
     }
 
     .search-input-container input {
+        padding: 0.75rem;
         width: 100%;
-        padding: 0.5rem;
         padding-left: 2.5rem;
-        border: 1px solid #ccc;
-        font-size: var(--font-size-base);
-        line-height: var(--leading-body);
     }
 
     .search-dropdown {

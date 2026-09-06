@@ -169,6 +169,18 @@
 		fill: var(--theme, currentColor);
 	}
 
+	input,
+	select,
+	textarea {
+		padding: 0.375rem 0.625rem;
+		font: inherit;
+		font-size: var(--font-size-sm);
+		color: var(--text);
+		background: transparent;
+		border: 1px solid var(--border);
+		border-radius: 0.25rem;
+	}
+
 	table {
 		width: 100%;
 		border-collapse: collapse;
@@ -261,11 +273,21 @@
 	.root:has(header[data-id='page-header'] + article) > article {
 		margin-block: 3rem;
 	}
+}
 
+@layer utilities {
 	.icon-text {
 		display: flex;
 		flex-direction: row;
 		gap: 0.75ch;
 		align-items: center;
+	}
+
+	.truncate {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		-webkit-line-clamp: 1;
+		line-clamp: 1;
 	}
 }
