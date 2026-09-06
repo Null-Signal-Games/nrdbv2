@@ -5,6 +5,9 @@
 	"oxc.typeAware": true,
 	"oxc.enable.oxfmt": true,
 	"editor.formatOnSave": true,
+	"editor.useTabStops": true,
+	"editor.insertSpaces": false,
+	"editor.tabSize": 4,
 	"[javascript]": {
 		"editor.defaultFormatter": "oxc.oxc-vscode"
 	},
