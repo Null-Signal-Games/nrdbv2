@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		)
 	];
 
-	const sets = await fetch(`${NRDB_API_URL}/card_sets?filter[card_cycle_id]=${_sets.join(',')}`);
+	const sets = await fetch(`${NRDB_API_URL}/card_sets?filter[id]=${_sets.join(',')}`);
 	const sets_data = await sets.json();
 
 	return {
