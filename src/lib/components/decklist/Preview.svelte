@@ -18,7 +18,6 @@
     <span class="preview-card__faction">
         <Icon
             name={decklist.attributes.faction_id}
-            size="md"
             theme={decklist.attributes.faction_id}
         />
     </span>

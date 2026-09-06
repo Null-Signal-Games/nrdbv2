@@ -121,7 +121,6 @@
                     <h3 class="picker__group-title">
                         <Icon
                             name={group.faction_id}
-                            size="md"
                             theme={group.faction_id}
                         />
                         {group.name}
@@ -165,7 +164,7 @@
         margin-block-end: 2rem;
     }
 
-    .picker__filter {
+    /* .picker__filter {
         min-height: 2rem;
         width: 16rem;
         padding: 0.375rem 0.625rem;
@@ -175,7 +174,7 @@
         background: transparent;
         border: 1px solid var(--border);
         border-radius: 0.25rem;
-    }
+    } */
 
     .picker__status {
         color: var(--text-muted);

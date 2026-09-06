@@ -88,12 +88,12 @@
                         {result.attributes.title}
                     </a>
                 </td>
-                <td>
+                <td class="icon-text">
                     <Icon
                         name={result.attributes.card_type_id}
-                        size="sm"
+                        size="inline"
                     />
-                    {card_types[result.attributes.card_type_id]}
+                    <span class="truncate">{card_types[result.attributes.card_type_id]}</span>
                 </td>
                 <td>
                     {#if result.attributes.influence_cost !== null && result.attributes.influence_cost > 0}
@@ -103,20 +103,20 @@
                         />
                     {/if}
                 </td>
-                <td>
-                    <Icon name={result.attributes.faction_id} size="sm" />
+                <td class="icon-text">
+                    <Icon name={result.attributes.faction_id} size="inline" />
                     {i18n_factions[result.attributes.faction_id]}
                 </td>
-                <td>
+                <td class="icon-text">
                     {#if result.attributes.cost !== null}
-                        <Icon name="credit" size="sm" />
+                        <Icon name="credit" size="inline" />
                         {result.attributes.cost}
                     {:else if result.attributes.memory_cost !== null}
-                        <Icon name="mu" size="sm" />
+                        <Icon name="mu" size="inline" />
                         {result.attributes.memory_cost}
                     {:else if result.attributes.trash_cost !== null}
                         {result.attributes.trash_cost}
-                        <Icon name="trash" size="sm" />
+                        <Icon name="trash" size="inline" />
                     {/if}
                 </td>
             </tr>

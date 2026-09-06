@@ -178,7 +178,7 @@
                                 onclick={() =>
                                     on_toggle_faction_change(faction_option)}
                             >
-                                <Icon name={faction_option} size="sm" />
+                                <Icon name={faction_option} size="inline" />
                                 {i18n_factions[faction_option]}
                             </Button>
                         {/each}
@@ -196,7 +196,7 @@
                                 onclick={() =>
                                     on_toggle_type_change(type)}
                             >
-                                <Icon name={type} size="sm" />
+                                <Icon name={type} size="inline" />
                                 {card_types[type]}
                             </Button>
                         {/each}

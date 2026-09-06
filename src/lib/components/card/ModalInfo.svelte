@@ -69,7 +69,7 @@
 			<span class="card-modal__title-stat card-modal__stat" aria-hidden="true">
 				{stats.title.value}
 				{#if stats.title.icon}
-					<Icon name={stats.title.icon} size="md" />
+					<Icon name={stats.title.icon} />
 				{/if}
 			</span>
 			<span class="visually-hidden">{stats.title.announcement}</span>
@@ -102,7 +102,7 @@
 
 	<div class="card-modal__footer">
 		<span class="card-modal__faction">
-			<Icon name={attributes.faction_id} size="md" theme={attributes.faction_id} />
+			<Icon name={attributes.faction_id} theme={attributes.faction_id} />
 			{#if attributes.influence_cost}
 				<Influence count={attributes.influence_cost} total={true} theme={attributes.faction_id} />
 			{/if}
