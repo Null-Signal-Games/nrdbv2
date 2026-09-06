@@ -64,19 +64,18 @@ export const NAVIGATION = [
 	}
 ];
 
-export const CARD_TYPES: CardTypeIds[] = [
-	'agenda',
-	'asset',
-	'corp_identity',
-	'event',
-	'hardware',
-	'ice',
-	'operation',
-	'program',
-	'resource',
-	'runner_identity',
-	'upgrade'
-];
+export const CORP_CARD_TYPES: CardTypeIds[] = ['agenda', 'asset', 'ice', 'operation', 'upgrade'];
+
+export const RUNNER_CARD_TYPES: CardTypeIds[] = ['event', 'hardware', 'program', 'resource'];
+
+export const CARD_TYPES = (
+	[
+		...CORP_CARD_TYPES,
+		...RUNNER_CARD_TYPES,
+		'corp_identity',
+		'runner_identity'
+	] satisfies CardTypeIds[]
+).sort();
 
 export const FORMATS: Formats[] = [
 	'eternal',
