@@ -15,6 +15,9 @@
         size?: "sm" | "md";
         icon_only?: boolean;
         option?: Snippet<[ToggleOption<T>]>;
+        /** Render as an accessible tablist, instead of toggle buttons */
+        as_tabs?: boolean;
+        id_prefix?: string;
     }
 
     interface SingleProps extends BaseProps {
@@ -39,7 +42,11 @@
         size = "md",
         icon_only = false,
         option,
+        as_tabs = false,
+        id_prefix,
     } = $derived(props);
+
+    let group_element: HTMLDivElement | undefined = $state();
 
     const is_on = (value: T): boolean =>
         props.multiple ? props.selection.includes(value) : props.selected === value;
@@ -56,9 +63,39 @@
                 : [...props.selection, value],
         );
     };
+
+    // Arrow key navigation for `as_tabs` mode
+    const on_tab_keydown = (event: KeyboardEvent) => {
+        if (!as_tabs) return;
+        event.preventDefault();
+
+        const values = options.map((entry) => entry.value);
+        const current = props.multiple ? (props.selection[0] ?? null) : props.selected;
+        const index = current === null ? -1 : values.indexOf(current);
+
+        let next: number;
+        switch (event.key) {
+            case "ArrowRight":
+                next = (index + 1) % values.length;
+                break;
+            case "ArrowLeft":
+                next = (index - 1 + values.length) % values.length;
+                break;
+            default:
+                return;
+        }
+
+        activate(values[next]);
+        group_element?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
+    };
 </script>
 
-<div class="toggle-group" role="group" aria-label={label}>
+<div
+    class="toggle-group"
+    role={as_tabs ? "tablist" : "group"}
+    aria-label={label}
+    bind:this={group_element}
+>
     {#each options as {value, label, color} (value)}
         <button
             type="button"
@@ -69,10 +106,18 @@
             style={color
                 ? `--color: ${color}`
                 : undefined}
-            aria-pressed={is_on(value)}
+            role={as_tabs ? "tab" : undefined}
+            id={as_tabs && id_prefix ? `${id_prefix}-tab-${value}` : undefined}
+            aria-pressed={as_tabs ? undefined : is_on(value)}
+            aria-selected={as_tabs ? is_on(value) : undefined}
+            aria-controls={as_tabs && id_prefix
+                ? `${id_prefix}-panel-${value}`
+                : undefined}
+            tabindex={as_tabs ? (is_on(value) ? 0 : -1) : undefined}
             title={icon_only ? label : undefined}
             aria-label={icon_only ? label : undefined}
             onclick={() => activate(value)}
+            onkeydown={as_tabs ? on_tab_keydown : undefined}
         >
             {#if option}
                 {@render option({value, label, color})}
