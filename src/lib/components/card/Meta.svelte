@@ -18,22 +18,25 @@
 
 <div class="meta">
     {@render children?.()}
-    <div class="meta__content">
-        {#if title}
-            <p class="meta__title">
-                {#if quantity}&times;{quantity}{/if}
-                {card.attributes.title}
-            </p>
-        {/if}
-        {#if quantity}
-            <Influence
-                count={quantity}
-                total={true}
-                theme={card.attributes.faction_id}
-            />
-        {/if}
-        {@render content?.()}
-    </div>
+
+    {#if title || quantity || content}
+        <div class="meta__content">
+            {#if title}
+                <p class="meta__title">
+                    {#if quantity}&times;{quantity}{/if}
+                    {card.attributes.title}
+                </p>
+            {/if}
+            {#if quantity}
+                <Influence
+                    count={quantity}
+                    total={true}
+                    theme={card.attributes.faction_id}
+                />
+            {/if}
+            {@render content?.()}
+        </div>
+    {/if}
 </div>
 
 <style>
