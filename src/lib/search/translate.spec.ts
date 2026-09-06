@@ -76,3 +76,27 @@ describe('translateToQuery (interpreted text -> SQL)', () => {
 		expect(result.error?.message).toContain('zzz');
 	});
 });
+
+describe('translateToQuery constraints', () => {
+	const sideConstraint = { clause: 'unified_cards.side_id = ?', params: ['runner'] };
+
+	it('ANDs the constraint onto the expression, expression parameters first', () => {
+		const result = translateToQuery(interpretSearch('corroder'), {
+			constraint: sideConstraint
+		});
+		expect(result.error).toBeNull();
+		expect(result.sql).toBe(
+			expectedSql(
+				'(lower(unified_cards.stripped_title) LIKE ?) AND (unified_cards.side_id = ?)'
+			)
+		);
+		expect(result.params).toEqual(['%corroder%', 'runner']);
+	});
+
+	it('selects a limited constrained result set when the query is blank', () => {
+		const result = translateToQuery('', { constraint: sideConstraint, limit: 101 });
+		expect(result.error).toBeNull();
+		expect(result.sql).toBe(`${expectedSql('unified_cards.side_id = ?')} LIMIT ?`);
+		expect(result.params).toEqual(['runner', 101]);
+	});
+});

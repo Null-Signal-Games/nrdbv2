@@ -12,6 +12,7 @@
         RUNNER_CARD_TYPES,
     } from "$lib/constants";
     import { group_cards_by_type } from "$lib/utils";
+    import { searchCards } from "$lib/search";
     import Icon from "$lib/components/Icon.svelte";
     import CardImage from "../card/CardImage.svelte";
     import Button from "../ui/Button.svelte";
@@ -73,26 +74,30 @@
         ),
     );
 
-    let search_results = $derived.by<TCard[]>(() => {
+    let search_results = $state<TCard[]>([]);
+
+    let search_request = 0;
+
+    $effect(() => {
         const query = search_query.trim();
 
-        return side_cards.filter((card: TCard) => {
-            const title_match =
-                query.length === 0 ||
-                card.attributes.title
-                    .toLowerCase()
-                    .includes(query.toLowerCase()) ||
-                card.id.toLowerCase().includes(query.toLowerCase());
+        if (query.length === 0) {
+            search_results = side_cards;
+            return;
+        }
 
-            const faction_match =
-                faction_filters.length === 0 ||
-                faction_filters.includes(card.attributes.faction_id);
+        const request = ++search_request;
 
-            const type_match =
-                type_filters.length === 0 ||
-                type_filters.includes(card.attributes.card_type_id);
-
-            return title_match && faction_match && type_match;
+        searchCards(query, {
+            mode: "interpreted",
+            constraint: {
+                clause: "unified_cards.side_id = ?",
+                params: [side],
+            },
+        }).then(({ cards, error }) => {
+            if (error === null && request === search_request) {
+                search_results = cards;
+            }
         });
     });
 

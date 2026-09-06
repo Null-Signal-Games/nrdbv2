@@ -11,6 +11,8 @@ export type SearchMode = 'literal' | 'interpreted';
 export interface SearchCardsOptions {
 	limit?: number;
 	mode?: SearchMode;
+	// Extra filter clause ANDed with the expression, e.g. a side filter.
+	constraint?: { clause: string; params: readonly unknown[] };
 }
 
 // Card search runs in four steps: optionally interpret -> translate -> run -> adapt.
