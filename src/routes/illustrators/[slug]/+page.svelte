@@ -37,5 +37,7 @@
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         gap: 1rem;
+        padding-inline: unset;
+        list-style: none;
     }
 </style>
