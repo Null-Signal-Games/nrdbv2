@@ -11,10 +11,7 @@
 		readonly cardSlots: CardSlots;
 	}
 
-	const createCardSlots = (
-		groups: readonly (readonly Card[])[],
-		identity: Card
-	): CardSlots => {
+	const createCardSlots = (groups: readonly (readonly Card[])[], identity: Card): CardSlots => {
 		const cardSlots: Record<string, number> = { [identity.id]: 1 };
 
 		for (const cards of groups) {

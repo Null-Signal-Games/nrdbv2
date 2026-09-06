@@ -116,9 +116,9 @@
 		height: var(--icon-size);
 	}
 
-    .icon--inline {
-        --icon-size: 1.5ch;
-    }
+	.icon--inline {
+		--icon-size: 1.5ch;
+	}
 
 	.icon--xs {
 		--icon-size: 0.75rem;

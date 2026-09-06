@@ -1,32 +1,32 @@
 <script lang="ts">
-    import { reset_opfs_data } from "$lib/sqlite";
-    import { page } from "$app/state";
+	import { reset_opfs_data } from '$lib/sqlite';
+	import { page } from '$app/state';
 </script>
 
 <div class="debug">
-    <button onclick={reset_opfs_data}>Clear OPFS</button>
-    <details>
-        <summary>Session Data</summary>
-        <pre>{JSON.stringify(page.data.session, null, 2)}</pre>
-    </details>
+	<button onclick={reset_opfs_data}>Clear OPFS</button>
+	<details>
+		<summary>Session Data</summary>
+		<pre>{JSON.stringify(page.data.session, null, 2)}</pre>
+	</details>
 </div>
 
 <style>
-    .debug {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        display: flex;
-        flex-direction: row;
-        gap: 0.5rem;
-        z-index: 1000;
-    }
+	.debug {
+		position: fixed;
+		bottom: 2rem;
+		right: 2rem;
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
+		z-index: 1000;
+	}
 
-    .debug :where(button, details) {
-        padding: 0.5rem 0.75rem;
-        background: var(--text);
-        color: var(--foreground);
-        border: unset;
-        border-radius: 0.25rem;
-    }
+	.debug :where(button, details) {
+		padding: 0.5rem 0.75rem;
+		background: var(--text);
+		color: var(--foreground);
+		border: unset;
+		border-radius: 0.25rem;
+	}
 </style>

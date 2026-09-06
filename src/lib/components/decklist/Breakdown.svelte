@@ -16,36 +16,39 @@
 
 	const groups = $derived(group_cards_by_type(cards));
 	const count = $derived(card_quantity(decklist, groups));
-	const identity = $derived(cards.find((card) => card.id === decklist.attributes.identity_card_id));
+	const identity = $derived(
+		cards.find((card) => card.id === decklist.attributes.identity_card_id)
+	);
 </script>
 
 <div class="decklist-breakdown">
 	{#each groups as group (group.type)}
-	{#if group.type !== 'corp_identity' && group.type !== 'runner_identity'}
-		<div>
-			<header>
-				<Icon name={group.type} />
-				<h4>{card_types[group.type]} ({count[group.type]})</h4>
-			</header>
-			<article>
-				<ul>
-					{#each group.data as card (card.id)}
-						<li>
-							<a href={localizeHref(`/card/${card.id}`)} use:tooltip={card}>
-								{decklist.attributes.card_slots[card.id]}&times; {card.attributes.title}
-								{#if card.attributes.faction_id !== identity!.attributes.faction_id && card.attributes.influence_cost !== null}
-									<Influence 
-										count={card.attributes.influence_cost} 
-										theme={card.attributes.faction_id}
-									/>
-								{/if}
-							</a>
-						</li>
-					{/each}
-				</ul>
-			</article>
-		</div>
-	{/if}
+		{#if group.type !== 'corp_identity' && group.type !== 'runner_identity'}
+			<div>
+				<header>
+					<Icon name={group.type} />
+					<h4>{card_types[group.type]} ({count[group.type]})</h4>
+				</header>
+				<article>
+					<ul>
+						{#each group.data as card (card.id)}
+							<li>
+								<a href={localizeHref(`/card/${card.id}`)} use:tooltip={card}>
+									{decklist.attributes.card_slots[card.id]}&times; {card
+										.attributes.title}
+									{#if card.attributes.faction_id !== identity!.attributes.faction_id && card.attributes.influence_cost !== null}
+										<Influence
+											count={card.attributes.influence_cost}
+											theme={card.attributes.faction_id}
+										/>
+									{/if}
+								</a>
+							</li>
+						{/each}
+					</ul>
+				</article>
+			</div>
+		{/if}
 	{/each}
 </div>
 

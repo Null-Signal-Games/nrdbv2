@@ -12,7 +12,11 @@
 	let { count, text = false, total = false, theme }: Props = $props();
 </script>
 
-<span class="influence" style={theme ? `--color: var(--${theme})` : ''} aria-label={text ? `${count} influence` : undefined}>
+<span
+	class="influence"
+	style={theme ? `--color: var(--${theme})` : ''}
+	aria-label={text ? `${count} influence` : undefined}
+>
 	{#if text}
 		<span>
 			{count}
@@ -29,7 +33,7 @@
 			<span class="influence__pips__empty">
 				<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 				{#each Array(5 - count) as max, index (index)}
-                    &#9679;
+					&#9679;
 				{/each}
 			</span>
 		{/if}
@@ -58,16 +62,16 @@
 		opacity: 0.15;
 	}
 
-    @media (prefers-contrast: more) {
-        .influence__pips__filled {
-            color: var(--text);
-        }
+	@media (prefers-contrast: more) {
+		.influence__pips__filled {
+			color: var(--text);
+		}
 
-        .influence__pips__empty {
-            display: none;
-            visibility: hidden;
-        }
-    }
+		.influence__pips__empty {
+			display: none;
+			visibility: hidden;
+		}
+	}
 
 	@media (prefers-contrast: more) {
 		.influence__pips__filled {

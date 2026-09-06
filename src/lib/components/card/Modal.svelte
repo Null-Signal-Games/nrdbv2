@@ -67,12 +67,13 @@
 			</div>
 
 			<div class="card-modal__actions">
-				<Button color="secondary" href={localizeHref(`/decklists/search?cards[]=${card.id}`)}>
+				<Button
+					color="secondary"
+					href={localizeHref(`/decklists/search?cards[]=${card.id}`)}
+				>
 					Decklists with this card
 				</Button>
-				<Button href={localizeHref(`/card/${card.id}`)}>
-					View full card page
-				</Button>
+				<Button href={localizeHref(`/card/${card.id}`)}>View full card page</Button>
 			</div>
 		</Dialog.Content>
 	</Dialog.Portal>

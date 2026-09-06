@@ -1,295 +1,283 @@
 <script lang="ts">
-    import { search_query, db_ready } from "$lib/store";
-    import CardImage from "$lib/components/card/CardImage.svelte";
-    import DecklistSuggestions from "$lib/components/DecklistSuggestions.svelte";
-    import { afterNavigate, goto } from "$app/navigation";
-    import { localizeHref } from "$lib/paraglide/runtime";
-    import { onMount } from "svelte";
-    import Icon from "./Icon.svelte";
-    import type { Card } from "$lib/api.types";
-    import { searchCards, type SearchMode } from "$lib/search";
-    import { SEARCH_PREVIEW_LIMIT } from "$lib/constants";
+	import { search_query, db_ready } from '$lib/store';
+	import CardImage from '$lib/components/card/CardImage.svelte';
+	import DecklistSuggestions from '$lib/components/DecklistSuggestions.svelte';
+	import { afterNavigate, goto } from '$app/navigation';
+	import { localizeHref } from '$lib/paraglide/runtime';
+	import { onMount } from 'svelte';
+	import Icon from './Icon.svelte';
+	import type { Card } from '$lib/api.types';
+	import { searchCards, type SearchMode } from '$lib/search';
+	import { SEARCH_PREVIEW_LIMIT } from '$lib/constants';
 
-    let search_input: HTMLInputElement | null = null;
-    let is_open = $state(false);
-    let dropdown_element = $state<HTMLDivElement | null>(null);
-    let filtered_cards = $state<Card[]>([]);
-    let search_request_id = 0;
-    let search_mode = $state<SearchMode>("literal");
-    let pointer_started_in_dropdown = false;
+	let search_input: HTMLInputElement | null = null;
+	let is_open = $state(false);
+	let dropdown_element = $state<HTMLDivElement | null>(null);
+	let filtered_cards = $state<Card[]>([]);
+	let search_request_id = 0;
+	let search_mode = $state<SearchMode>('literal');
+	let pointer_started_in_dropdown = false;
 
-    function keep_open_for_dropdown_pointer() {
-        pointer_started_in_dropdown = true;
-        window.setTimeout(() => {
-            pointer_started_in_dropdown = false;
-        });
-    }
+	function keep_open_for_dropdown_pointer() {
+		pointer_started_in_dropdown = true;
+		window.setTimeout(() => {
+			pointer_started_in_dropdown = false;
+		});
+	}
 
-    $effect(() => {
-        const query = $search_query.trim();
+	$effect(() => {
+		const query = $search_query.trim();
 
-        if (!is_open || !$db_ready || !query) {
-            filtered_cards = [];
-            return;
-        }
+		if (!is_open || !$db_ready || !query) {
+			filtered_cards = [];
+			return;
+		}
 
-        const mode = search_mode;
-        const request_id = ++search_request_id;
+		const mode = search_mode;
+		const request_id = ++search_request_id;
 
-        (async () => {
-            try {
-                const { cards, error } = await searchCards(query, {
-                    limit: SEARCH_PREVIEW_LIMIT,
-                    mode,
-                });
+		(async () => {
+			try {
+				const { cards, error } = await searchCards(query, {
+					limit: SEARCH_PREVIEW_LIMIT,
+					mode
+				});
 
-                if (request_id !== search_request_id) {
-                    return;
-                }
+				if (request_id !== search_request_id) {
+					return;
+				}
 
-                if (error) {
-                    filtered_cards = [];
-                    return;
-                }
+				if (error) {
+					filtered_cards = [];
+					return;
+				}
 
-                filtered_cards = cards;
-            } catch (error) {
-                if (request_id !== search_request_id) {
-                    return;
-                }
+				filtered_cards = cards;
+			} catch (error) {
+				if (request_id !== search_request_id) {
+					return;
+				}
 
-                console.error("Failed to load search results:", error);
-                filtered_cards = [];
-            }
-        })();
-    });
+				console.error('Failed to load search results:', error);
+				filtered_cards = [];
+			}
+		})();
+	});
 
-    // Close the dropdown on navigation, to prevent it from sticking around when navigating via search results
-    afterNavigate(() => {
-        is_open = false;
-    });
+	// Close the dropdown on navigation, to prevent it from sticking around when navigating via search results
+	afterNavigate(() => {
+		is_open = false;
+	});
 
-    const results_href = (query: string) =>
-        localizeHref(`/search?q=${encodeURIComponent(query)}`);
+	const results_href = (query: string) => localizeHref(`/search?q=${encodeURIComponent(query)}`);
 
-    const submit = (event: SubmitEvent) => {
-        event.preventDefault();
+	const submit = (event: SubmitEvent) => {
+		event.preventDefault();
 
-        const query = $search_query.trim();
+		const query = $search_query.trim();
 
-        if (!query) {
-            return;
-        }
+		if (!query) {
+			return;
+		}
 
-        is_open = false;
-        search_input?.blur();
-        goto(results_href(query));
-    };
+		is_open = false;
+		search_input?.blur();
+		goto(results_href(query));
+	};
 
-    onMount(() => {
-        const on_key_down = (e: KeyboardEvent) => {
-            const ua = (
-                navigator as unknown as {
-                    userAgentData?: { platform?: string };
-                }
-            ).userAgentData;
+	onMount(() => {
+		const on_key_down = (e: KeyboardEvent) => {
+			const ua = (
+				navigator as unknown as {
+					userAgentData?: { platform?: string };
+				}
+			).userAgentData;
 
-            const platform =
-                typeof ua?.platform === "string"
-                    ? ua.platform
-                    : navigator.userAgent;
-            const mac =
-                typeof platform === "string" &&
-                platform.toLowerCase().includes("mac");
+			const platform = typeof ua?.platform === 'string' ? ua.platform : navigator.userAgent;
+			const mac = typeof platform === 'string' && platform.toLowerCase().includes('mac');
 
-            const is_find =
-                (mac ? e.metaKey : e.ctrlKey) && e.key.toLowerCase() === "k";
+			const is_find = (mac ? e.metaKey : e.ctrlKey) && e.key.toLowerCase() === 'k';
 
-            if (is_find) {
-                if (document.activeElement === search_input) return;
-                e.preventDefault();
-                search_input?.focus();
-                is_open = true;
-                return;
-            }
+			if (is_find) {
+				if (document.activeElement === search_input) return;
+				e.preventDefault();
+				search_input?.focus();
+				is_open = true;
+				return;
+			}
 
-            if (e.key === "Escape" || e.key === "Esc") {
-                if (!is_open) return;
-                const active = document.activeElement as Node | null;
-                const focus_inside =
-                    (dropdown_element && active
-                        ? dropdown_element.contains(active)
-                        : false) || document.activeElement === search_input;
-                if (focus_inside) {
-                    e.preventDefault();
-                    is_open = false;
-                    search_input?.blur();
-                }
-            }
-        };
+			if (e.key === 'Escape' || e.key === 'Esc') {
+				if (!is_open) return;
+				const active = document.activeElement as Node | null;
+				const focus_inside =
+					(dropdown_element && active ? dropdown_element.contains(active) : false) ||
+					document.activeElement === search_input;
+				if (focus_inside) {
+					e.preventDefault();
+					is_open = false;
+					search_input?.blur();
+				}
+			}
+		};
 
-        window.addEventListener("keydown", on_key_down);
-        return () => window.removeEventListener("keydown", on_key_down);
-    });
+		window.addEventListener('keydown', on_key_down);
+		return () => window.removeEventListener('keydown', on_key_down);
+	});
 </script>
 
 <div class="search-input-root">
-    <form
-        class="search-input-container"
-        role="search"
-        method="GET"
-        action={localizeHref("/search")}
-        onsubmit={submit}
-    >
-        <Icon name="subroutine" size="md" class="search-icon" />
-        <input
-            bind:this={search_input}
-            type="text"
-            name="q"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck={false}
-            placeholder="Search"
-            bind:value={$search_query}
-            onfocus={() => (is_open = true)}
-            onblur={(e) => {
-                const next = (e as FocusEvent).relatedTarget as Node | null;
-                if (pointer_started_in_dropdown) {
-                    pointer_started_in_dropdown = false;
-                    return;
-                }
+	<form
+		class="search-input-container"
+		role="search"
+		method="GET"
+		action={localizeHref('/search')}
+		onsubmit={submit}
+	>
+		<Icon name="subroutine" size="md" class="search-icon" />
+		<input
+			bind:this={search_input}
+			type="text"
+			name="q"
+			autocomplete="off"
+			autocorrect="off"
+			autocapitalize="off"
+			spellcheck={false}
+			placeholder="Search"
+			bind:value={$search_query}
+			onfocus={() => (is_open = true)}
+			onblur={(e) => {
+				const next = (e as FocusEvent).relatedTarget as Node | null;
+				if (pointer_started_in_dropdown) {
+					pointer_started_in_dropdown = false;
+					return;
+				}
 
-                const focus_inside =
-                    dropdown_element && next
-                        ? dropdown_element.contains(next)
-                        : false;
-                if (!focus_inside) {
-                    is_open = false;
-                }
-            }}
-        />
-    </form>
-    {#if is_open && $search_query.length > 0}
-        <div
-            class="search-dropdown"
-            bind:this={dropdown_element}
-            onpointerdown={keep_open_for_dropdown_pointer}
-        >
-            <label class="search-mode-toggle">
-                <input
-                    type="checkbox"
-                    checked={search_mode === "interpreted"}
-                    onchange={(event) => {
-                        search_mode = event.currentTarget.checked
-                            ? "interpreted"
-                            : "literal";
-                    }}
-                />
-                Interpreted
-            </label>
-            <h2>Cards</h2>
-            <div class="card-grid">
-                {#each filtered_cards as card (card.id)}
-                    <div class="card-grid-item">
-                        <CardImage
-                            {card}
-                            loading="lazy"
-                            boxShadow={false}
-                            hasTransition={true}
-                            href={localizeHref(`/card/${card.id}`)}
-                        />
-                    </div>
-                {/each}
-            </div>
-            {#if filtered_cards.length > 0}
-                <a class="search-all" href={results_href($search_query.trim())}>
-                    View all results
-                </a>
-            {/if}
-            <DecklistSuggestions firstCard={filtered_cards[0]} />
-        </div>
-    {/if}
+				const focus_inside =
+					dropdown_element && next ? dropdown_element.contains(next) : false;
+				if (!focus_inside) {
+					is_open = false;
+				}
+			}}
+		/>
+	</form>
+	{#if is_open && $search_query.length > 0}
+		<div
+			class="search-dropdown"
+			bind:this={dropdown_element}
+			onpointerdown={keep_open_for_dropdown_pointer}
+		>
+			<label class="search-mode-toggle">
+				<input
+					type="checkbox"
+					checked={search_mode === 'interpreted'}
+					onchange={(event) => {
+						search_mode = event.currentTarget.checked ? 'interpreted' : 'literal';
+					}}
+				/>
+				Interpreted
+			</label>
+			<h2>Cards</h2>
+			<div class="card-grid">
+				{#each filtered_cards as card (card.id)}
+					<div class="card-grid-item">
+						<CardImage
+							{card}
+							loading="lazy"
+							boxShadow={false}
+							hasTransition={true}
+							href={localizeHref(`/card/${card.id}`)}
+						/>
+					</div>
+				{/each}
+			</div>
+			{#if filtered_cards.length > 0}
+				<a class="search-all" href={results_href($search_query.trim())}>
+					View all results
+				</a>
+			{/if}
+			<DecklistSuggestions firstCard={filtered_cards[0]} />
+		</div>
+	{/if}
 </div>
 
 <style>
-    .search-input-root {
-        position: relative;
-        width: 100%;
-    }
+	.search-input-root {
+		position: relative;
+		width: 100%;
+	}
 
-    .search-input-root:has(.search-dropdown)::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, var(--backdrop-transparency));
-        backdrop-filter: blur(4px);
-        z-index: 20;
-        pointer-events: none;
-        animation: fade-in var(--animate-slow) ease-in-out forwards;
-    }
+	.search-input-root:has(.search-dropdown)::after {
+		content: '';
+		position: fixed;
+		inset: 0;
+		width: 100vw;
+		height: 100vh;
+		background-color: rgba(0, 0, 0, var(--backdrop-transparency));
+		backdrop-filter: blur(4px);
+		z-index: 20;
+		pointer-events: none;
+		animation: fade-in var(--animate-slow) ease-in-out forwards;
+	}
 
-    .search-input-container {
-        display: flex;
-        flex-direction: row;
-        gap: 1rem;
-        margin: unset;
-        position: relative;
-        z-index: 30;
-    }
+	.search-input-container {
+		display: flex;
+		flex-direction: row;
+		gap: 1rem;
+		margin: unset;
+		position: relative;
+		z-index: 30;
+	}
 
-    .search-input-container :global(.search-icon) {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        left: 0.75rem;
-        pointer-events: none;
-    }
+	.search-input-container :global(.search-icon) {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		left: 0.75rem;
+		pointer-events: none;
+	}
 
-    .search-input-container input {
-        padding: 0.75rem;
-        width: 100%;
-        padding-left: 2.5rem;
-    }
+	.search-input-container input {
+		padding: 0.75rem;
+		width: 100%;
+		padding-left: 2.5rem;
+	}
 
-    .search-dropdown {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        z-index: 30;
-        background-color: var(--foreground);
-        border: 1px solid var(--border);
-        padding: 1.5rem;
-        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-        max-height: 75dvh;
-        overflow-x: auto;
-    }
+	.search-dropdown {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		z-index: 30;
+		background-color: var(--foreground);
+		border: 1px solid var(--border);
+		padding: 1.5rem;
+		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+		max-height: 75dvh;
+		overflow-x: auto;
+	}
 
-    .search-mode-toggle {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
+	.search-mode-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
 
-    .card-grid {
-        padding: 0.5rem;
-        display: flex;
-        gap: 1rem;
-        overflow-x: scroll;
-    }
+	.card-grid {
+		padding: 0.5rem;
+		display: flex;
+		gap: 1rem;
+		overflow-x: scroll;
+	}
 
-    .card-grid-item {
-        max-width: 200px;
-        display: block;
-        flex: 0 0 auto;
-    }
+	.card-grid-item {
+		max-width: 200px;
+		display: block;
+		flex: 0 0 auto;
+	}
 
-    .search-all {
-        display: inline-block;
-        padding: 0.5rem;
-    }
+	.search-all {
+		display: inline-block;
+		padding: 0.5rem;
+	}
 </style>
