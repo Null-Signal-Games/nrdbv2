@@ -61,6 +61,13 @@ describe('identitiesByFaction', () => {
 
 		expect(identitiesByFaction(empty, 'runner', 'standard').size).toBe(0);
 	});
+
+	it('returns every identity regardless of pool for the all format', () => {
+		const groups = identitiesByFaction(catalog, 'runner', 'all');
+
+		expect(groups.get('anarch')?.map((card) => card.id)).toContain(ESA.id);
+		expect(groups.has('apex')).toBe(true);
+	});
 });
 
 // Deliberately not in canonical faction order, and Topan before Esâ.

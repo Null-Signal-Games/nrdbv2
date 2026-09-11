@@ -67,6 +67,8 @@
         <DecklistBuilder
             identity={identity.id}
             side_cards={data.side_cards ?? []}
+            format={selected.format}
+            on_select_format={decklistNav.selectFormat}
         />
     {:else}
         <IdentityPicker {catalog} {selected} />

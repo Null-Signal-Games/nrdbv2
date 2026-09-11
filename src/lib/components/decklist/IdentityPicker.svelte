@@ -11,6 +11,7 @@
         groupIdentitiesByFaction,
     } from "$lib/identities";
     import { m } from "$lib/paraglide/messages.js";
+    import { formats } from "$lib/i18n";
     import Icon from "$lib/components/Icon.svelte";
     import CardImage from "$lib/components/card/CardImage.svelte";
     import ToggleGroup, {
@@ -35,17 +36,10 @@
         { value: "runner", label: m.runner() },
     ];
 
-    const formatLabels: Record<DeckFormat, string> = {
-        core: "Core",
-        startup: m.startup(),
-        standard: m.standard(),
-        eternal: m.eternal(),
-    };
-
     const formatToggles: ToggleOption<DeckFormat>[] = DECK_FORMATS.map(
         (formatOption) => ({
             value: formatOption,
-            label: formatLabels[formatOption],
+            label: formats[formatOption],
         }),
     );
 

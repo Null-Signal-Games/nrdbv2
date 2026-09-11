@@ -6,4 +6,8 @@ describe('isDeckFormat', () => {
 		expect(isDeckFormat('snapshot')).toBe(false);
 		expect(isDeckFormat('ram')).toBe(false);
 	});
+
+	it('accepts the all-cards picker option', () => {
+		expect(isDeckFormat('all')).toBe(true);
+	});
 });

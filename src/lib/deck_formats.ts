@@ -1,4 +1,4 @@
-export const DECK_FORMATS = ['core', 'startup', 'standard', 'eternal'] as const;
+export const DECK_FORMATS = ['core', 'startup', 'standard', 'eternal', 'all'] as const;
 export type DeckFormat = (typeof DECK_FORMATS)[number];
 
 export type ActiveCardPoolIds = Partial<Record<DeckFormat, string>>;

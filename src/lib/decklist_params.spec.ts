@@ -67,9 +67,20 @@ describe('readParams', () => {
 		expect(result.format).toBe('eternal');
 	});
 
+	it('reads the all format', () => {
+		expect(parse('side=runner&format=all').format).toBe('all');
+	});
+
 	it('drops factions the current format has no identities for', () => {
 		expect(parse('side=runner&format=eternal&faction=apex').factions).toEqual(['apex']);
 		expect(parse('side=runner&format=standard&faction=apex').factions).toEqual([]);
+	});
+
+	it('keeps every faction for the all format', () => {
+		expect(parse('side=runner&format=all&faction=apex,anarch').factions).toEqual([
+			'apex',
+			'anarch'
+		]);
 	});
 
 	it('drops factions belonging to the other side', () => {

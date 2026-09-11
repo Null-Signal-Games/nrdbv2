@@ -24,11 +24,11 @@ export const identitiesByFaction = (
 	const identityType = `${side}_identity`;
 	const byFaction = new Map<FactionIds, Card[]>();
 	const activeCardPoolId = catalog.active_card_pool_ids[format];
-	if (!activeCardPoolId) return byFaction;
+	if (format !== 'all' && !activeCardPoolId) return byFaction;
 
 	for (const card of catalog.cards) {
 		if (card.attributes.card_type_id !== identityType) continue;
-		if (!card.attributes.card_pool_ids.includes(activeCardPoolId)) continue;
+		if (activeCardPoolId && !card.attributes.card_pool_ids.includes(activeCardPoolId)) continue;
 
 		const group = byFaction.get(card.attributes.faction_id) ?? [];
 		byFaction.set(card.attributes.faction_id, [...group, card]);

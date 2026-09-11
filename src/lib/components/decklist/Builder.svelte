@@ -6,11 +6,12 @@
         Card as TCard,
         CardGroup,
     } from "$lib/types";
-    import { card_types, factions as i18n_factions } from "$lib/i18n";
+    import { card_types, formats as i18n_formats, factions as i18n_factions } from "$lib/i18n";
     import {
         CORP_CARD_TYPES,
         RUNNER_CARD_TYPES,
     } from "$lib/constants";
+    import { DECK_FORMATS, type DeckFormat } from "$lib/deck_formats";
     import { group_cards_by_type } from "$lib/utils";
     import { searchCards } from "$lib/search";
     import {
@@ -18,9 +19,11 @@
         collectActiveFilters,
         toggleFilterInQuery,
     } from "$lib/search/interpret";
+    import { m } from "$lib/paraglide/messages.js";
     import Icon from "$lib/components/Icon.svelte";
     import CardImage from "../card/CardImage.svelte";
     import Button from "../ui/Button.svelte";
+    import ToggleGroup, { type ToggleOption } from "../ui/ToggleGroup.svelte";
     import DeckBuilderSearchResults from "./DeckBuilderSearchResults.svelte";
     import Grid from "./Grid.svelte";
     import type { CardSlots } from "./grid";
@@ -28,9 +31,11 @@
     interface Props {
         identity: TCard["id"];
         side_cards: TCard[];
+        format: DeckFormat;
+        on_select_format: (format: DeckFormat) => void;
     }
 
-    let { identity, side_cards }: Props = $props();
+    let { identity, side_cards, format, on_select_format }: Props = $props();
 
     let search_query = $state("");
     let active_tab = $state<
@@ -76,6 +81,15 @@
         side === "corp" ? CORP_CARD_TYPES : RUNNER_CARD_TYPES,
     );
 
+    const format_toggles: ToggleOption<DeckFormat>[] = DECK_FORMATS.map(
+        (format_option) => ({
+            value: format_option,
+            label: i18n_formats[format_option],
+        }),
+    );
+
+    const format_clause = $derived(format === "all" ? "" : `format:${format}`);
+
     let grouped_cards = $derived<CardGroup[]>(
         group_cards_by_type(side_cards),
     );
@@ -93,7 +107,9 @@
     let search_request = 0;
 
     $effect(() => {
-        const query = interpreted_query.expression;
+        const query = [interpreted_query.expression, format_clause]
+            .filter(Boolean)
+            .join(" ");
 
         if (query.length === 0) {
             search_results = side_cards;
@@ -181,6 +197,14 @@
                 type="search"
                 placeholder="Find a card or filter the list"
                 bind:value={search_query}
+            />
+
+            <ToggleGroup
+                options={format_toggles}
+                label={m.format()}
+                size="sm"
+                selected={format}
+                onselect={on_select_format}
             />
 
             <div class="builder__filters">
