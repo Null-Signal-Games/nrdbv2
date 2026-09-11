@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Modal from '$lib/components/card/Modal.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { card_types } from '$lib/i18n';
 	import type { Card, CardGroup } from '$lib/types';
+	import { openCardModal } from '$lib/store';
 	import GridStack from './GridStack.svelte';
 	import { buildDeckGridModel, type CardSlots } from './grid';
 
@@ -14,7 +14,6 @@
 	let { groups, cardSlots }: Props = $props();
 
 	const model = $derived(buildDeckGridModel({ groups, cardSlots }));
-	let selectedCard: Card | null = $state(null);
 
 	const accessibleName = (card: Card, copies: number): string =>
 		`${card.attributes.title}, ${copies} ${copies === 1 ? 'copy' : 'copies'}`;
@@ -36,7 +35,7 @@
 							class="deck-grid__card"
 							aria-haspopup="dialog"
 							aria-label={accessibleName(item.card, item.copies)}
-							onclick={() => (selectedCard = item.card)}
+							onclick={() => openCardModal(item.card)}
 						>
 							<GridStack card={item.card} copies={item.copies} />
 						</button>
@@ -46,10 +45,6 @@
 		</section>
 	{/each}
 </div>
-
-{#if selectedCard}
-	<Modal card={selectedCard} open onOpenChange={() => (selectedCard = null)} />
-{/if}
 
 <style>
 	.deck-grid {

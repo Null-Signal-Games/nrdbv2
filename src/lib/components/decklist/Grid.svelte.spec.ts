@@ -1,8 +1,10 @@
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CARNIVORE, SURE_GAMBLE } from '$lib/cards.fixture';
 import { ZAHYA } from '$lib/identities.fixture';
+import { cardModal } from '$lib/store';
+import CardModalHarness from '$lib/test/CardModalHarness.svelte';
 import type { CardGroup } from '$lib/types';
 import Grid from './Grid.svelte';
 
@@ -19,12 +21,16 @@ const cardSlots = {
 };
 
 describe('Decklist Grid', () => {
+	beforeEach(() => {
+		cardModal.set(null);
+	});
+
 	afterEach(() => {
 		vi.useRealTimers();
 	});
 
 	it('renders every copy as an image without links or visible metadata', async () => {
-		await render(Grid, { groups, cardSlots });
+		await render(Grid, { groups, cardSlots }, { wrapper: CardModalHarness });
 
 		const eventCard = page.getByRole('button', { name: 'Sure Gamble, 3 copies' });
 		const hardwareCard = page.getByRole('button', { name: 'Carnivore, 2 copies' });
@@ -37,7 +43,7 @@ describe('Decklist Grid', () => {
 	});
 
 	it('opens by click, closes from the dialog, and restores focus', async () => {
-		await render(Grid, { groups, cardSlots });
+		await render(Grid, { groups, cardSlots }, { wrapper: CardModalHarness });
 
 		const cardButton = page.getByRole('button', { name: 'Sure Gamble, 3 copies' });
 		await userEvent.click(cardButton);
@@ -52,7 +58,7 @@ describe('Decklist Grid', () => {
 
 	it('opens with Enter and Space and closes with Escape', async () => {
 		vi.useFakeTimers();
-		await render(Grid, { groups, cardSlots });
+		await render(Grid, { groups, cardSlots }, { wrapper: CardModalHarness });
 
 		const cardButton = page.getByRole('button', { name: 'Carnivore, 2 copies' });
 		cardButton.element().focus();

@@ -9,6 +9,7 @@
     import { dev } from "$app/environment";
     import Debug from "$lib/components/Debug.svelte";
     import Tooltip from "$lib/components/Tooltip.svelte";
+    import CardModalHost from "$lib/components/card/CardModalHost.svelte";
     import {
         sql,
         overwriteDatabaseFile,
@@ -129,3 +130,5 @@
 <Footer />
 
 <Tooltip />
+
+<CardModalHost />
