@@ -8,9 +8,10 @@
     import Icon from "./Icon.svelte";
     import type { Card } from "$lib/api.types";
     import { searchCards, type SearchMode } from "$lib/search";
+    import GhostText from "$lib/components/GhostText.svelte";
     import { SEARCH_PREVIEW_LIMIT } from "$lib/constants";
 
-    let search_input: HTMLInputElement | null = null;
+    let input_element = $state<HTMLInputElement | null>(null);
     let is_open = $state(false);
     let dropdown_element = $state<HTMLDivElement | null>(null);
     let filtered_cards = $state<Card[]>([]);
@@ -82,7 +83,7 @@
         }
 
         is_open = false;
-        search_input?.blur();
+        input_element?.blur();
         goto(results_href(query));
     };
 
@@ -106,9 +107,9 @@
                 (mac ? e.metaKey : e.ctrlKey) && e.key.toLowerCase() === "k";
 
             if (is_find) {
-                if (document.activeElement === search_input) return;
+                if (input_element === document.activeElement) return;
                 e.preventDefault();
-                search_input?.focus();
+                input_element?.focus();
                 is_open = true;
                 return;
             }
@@ -119,11 +120,11 @@
                 const focus_inside =
                     (dropdown_element && active
                         ? dropdown_element.contains(active)
-                        : false) || document.activeElement === search_input;
+                        : false) || active === input_element;
                 if (focus_inside) {
                     e.preventDefault();
                     is_open = false;
-                    search_input?.blur();
+                    input_element?.blur();
                 }
             }
         };
@@ -142,19 +143,12 @@
         onsubmit={submit}
     >
         <Icon name="subroutine" size="md" class="search-icon" />
-        <input
-            bind:this={search_input}
-            type="text"
-            name="q"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck={false}
-            placeholder="Search"
+        <GhostText
             bind:value={$search_query}
-            onfocus={() => (is_open = true)}
-            onblur={(e) => {
-                const next = (e as FocusEvent).relatedTarget as Node | null;
+            bind:inputElement={input_element}
+            onFocus={() => (is_open = true)}
+            onBlur={(e) => {
+                const next = e.relatedTarget as Node | null;
                 if (pointer_started_in_dropdown) {
                     pointer_started_in_dropdown = false;
                     return;
@@ -244,16 +238,8 @@
         top: 50%;
         transform: translateY(-50%);
         left: 0.75rem;
+        z-index: 1;
         pointer-events: none;
-    }
-
-    .search-input-container input {
-        width: 100%;
-        padding: 0.5rem;
-        padding-left: 2.5rem;
-        border: 1px solid #ccc;
-        font-size: var(--font-size-base);
-        line-height: var(--leading-body);
     }
 
     .search-dropdown {
