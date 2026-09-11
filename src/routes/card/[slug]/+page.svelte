@@ -4,7 +4,6 @@
     import Meta from "$lib/components/Meta.svelte";
     import CardMeta from "$lib/components/card/Meta.svelte";
     import CardImage from "$lib/components/card/CardImage.svelte";
-    import type { CardSubTypeIds } from "$lib/types";
     import Review from "$lib/components/review/Item.svelte";
     import Header from "$lib/components/Header.svelte";
     import Icon from "$lib/components/Icon.svelte";
@@ -97,12 +96,7 @@
                             <td>Subtypes</td>
                             <td>
                                 {data.card.attributes.card_subtype_ids
-                                    .map(
-                                        (subtype) =>
-                                            card_sub_types[
-                                                subtype as CardSubTypeIds
-                                            ],
-                                    )
+                                    .map((subtype) => card_sub_types[subtype])
                                     .join(", ")}
                             </td>
                         </tr>
