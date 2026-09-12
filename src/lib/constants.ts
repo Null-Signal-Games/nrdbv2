@@ -99,6 +99,20 @@ export const CORP_CARD_TYPES: CardTypeIds[] = ['agenda', 'asset', 'ice', 'operat
 
 export const RUNNER_CARD_TYPES: CardTypeIds[] = ['event', 'hardware', 'program', 'resource'];
 
+export const CARD_TYPE_ORDER = {
+	runner_identity: 0,
+	corp_identity: 1,
+	event: 2,
+	hardware: 3,
+	program: 4,
+	resource: 5,
+	agenda: 6,
+	asset: 7,
+	operation: 8,
+	upgrade: 9,
+	ice: 10
+} satisfies Record<CardTypeIds, number>;
+
 export const CARD_TYPES = (
 	[
 		...CORP_CARD_TYPES,
