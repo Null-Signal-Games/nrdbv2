@@ -45,7 +45,7 @@
 	const stats = $derived(getCardModalStats(attributes));
 </script>
 
-<span class="card-modal__watermark" aria-hidden="true">
+<span class="card-modal__watermark watermark" aria-hidden="true">
 	<Icon name={attributes.faction_id} size="none" class="card-modal__watermark-icon" />
 </span>
 

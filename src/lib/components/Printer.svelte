@@ -34,10 +34,7 @@
             <!-- TODO(legal): these printings might include FFG art, which we probably can't allow to be printed, we need to add some logic, at some step to ensure we're using NSG art -->
             <div
                 class="printer__card"
-                style="background-image: url({getHighResImage(
-                    card,
-                    'xlarge',
-                )});"
+                style="--image: url({getHighResImage(card, "xlarge")}); background-image: var(--image)"
             ></div>
         {/each}
     {/each}

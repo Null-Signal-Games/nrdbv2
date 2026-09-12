@@ -2,8 +2,9 @@
 	position: fixed;
 	inset: 0;
 	z-index: 100;
-	background-color: rgba(0, 0, 0, 0.6);
+	background-color: rgba(0, 0, 0, var(--backdrop-transparency));
 	backdrop-filter: blur(4px);
+	animation: fade-in var(--transition);
 }
 
 .card-modal {
@@ -23,6 +24,24 @@
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	color: var(--text);
+	animation: modal var(--transition);
+}
+
+@keyframes modal {
+	from {
+		scale: 0.95;
+	}
+
+	to {
+		scale: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.card-modal__overlay,
+	.card-modal {
+		animation: unset;
+	}
 }
 
 .card-modal__actions {

@@ -59,7 +59,7 @@
     onfocus={() => (hover = true)}
     onblur={() => (hover = false)}
 >
-    <span class="tile__watermark" aria-hidden="true">
+    <span class="tile__watermark watermark" aria-hidden="true">
         <Icon name={faction_id} size="none" label="" theme={faction_id} />
     </span>
 
