@@ -2,7 +2,7 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { corp_grid_cards, runner_grid_cards } from '$lib/cards.fixture';
 	import Grid from '$lib/components/decklist/Grid.svelte';
-	import type { CardSlots } from '$lib/components/decklist/grid';
+	import type { CardSlots } from '$lib/components/decklist/card_slots';
 	import { PRECISION_DESIGN, ZAHYA } from '$lib/identities.fixture';
 	import type { Card, CardGroup } from '$lib/types';
 

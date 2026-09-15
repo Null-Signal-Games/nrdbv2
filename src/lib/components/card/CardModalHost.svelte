@@ -10,5 +10,10 @@
 </script>
 
 {#if $cardModal}
-	<Modal card={$cardModal.card} open onOpenChange={() => closeCardModal()} />
+	<Modal
+		card={$cardModal.card}
+		open
+		onOpenChange={() => closeCardModal()}
+		actions={$cardModal.actions}
+	/>
 {/if}

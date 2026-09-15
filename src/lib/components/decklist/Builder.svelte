@@ -10,14 +10,17 @@
 		collectActiveFilters,
 		toggleFilterInQuery
 	} from '$lib/search/interpret';
+	import { onDestroy } from 'svelte';
 	import { m } from '$lib/paraglide/messages.js';
+	import { closeCardModal, openCardModal } from '$lib/store';
 	import Icon from '$lib/components/Icon.svelte';
 	import CardImage from '../card/CardImage.svelte';
 	import Button from '../ui/Button.svelte';
 	import ToggleGroup, { type ToggleOption } from '../ui/ToggleGroup.svelte';
 	import DeckBuilderSearchResults from './DeckBuilderSearchResults.svelte';
+	import CardQuantity from './CardQuantity.svelte';
 	import Grid from './Grid.svelte';
-	import type { CardSlots } from './grid';
+	import { setCardSlot, type CardSlots } from './card_slots';
 
 	interface Props {
 		identity: TCard['id'];
@@ -116,7 +119,24 @@
 			id: card_type_id
 		});
 	};
+
+	const set_card_quantity = (card: TCard, quantity: number) => {
+		deck = setCardSlot(deck, card, quantity);
+		closeCardModal();
+	};
+
+	const open_card_modal = (card: TCard) => openCardModal(card, { actions: card_actions });
+
+	onDestroy(closeCardModal);
 </script>
+
+{#snippet card_actions(card: TCard)}
+	<CardQuantity
+		{card}
+		quantity={deck[card.id] ?? 0}
+		onselect={(quantity) => set_card_quantity(card, quantity)}
+	/>
+{/snippet}
 
 <div class="builder">
 	<div class="builder__summary">
@@ -209,7 +229,11 @@
 				</section>
 			</div>
 
-			<DeckBuilderSearchResults cards={search_results} bind:deck />
+			<DeckBuilderSearchResults
+				cards={search_results}
+				bind:deck
+				on_open_card={open_card_modal}
+			/>
 			{#if search_results.length === 0}
 				<p class="builder__empty">No cards found</p>
 			{/if}

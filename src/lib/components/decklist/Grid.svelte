@@ -4,7 +4,8 @@
 	import type { Card, CardGroup } from '$lib/types';
 	import { openCardModal } from '$lib/store';
 	import GridStack from './GridStack.svelte';
-	import { buildDeckGridModel, type CardSlots } from './grid';
+	import { buildDeckGridModel } from './grid';
+	import type { CardSlots } from './card_slots';
 
 	interface Props {
 		readonly groups: readonly CardGroup[];

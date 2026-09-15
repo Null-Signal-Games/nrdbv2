@@ -1,19 +1,18 @@
 <script lang="ts">
 	import type { Card } from '$lib/types';
-	import type { CardSlots } from './grid';
+	import type { CardSlots } from './card_slots';
 	import { card_types, factions as i18n_factions } from '$lib/i18n';
 	import Icon from '$lib/components/Icon.svelte';
 	import Influence from '$lib/components/Influence.svelte';
-	import { tooltip } from '$lib/actions';
-	import { localizeHref } from '$lib/paraglide/runtime';
 	import Button from '../ui/Button.svelte';
 
 	interface Props {
 		readonly cards: readonly Card[];
 		readonly deck: CardSlots;
+		readonly on_open_card: (card: Card) => void;
 	}
 
-	let { cards, deck = $bindable() }: Props = $props();
+	let { cards, deck = $bindable(), on_open_card }: Props = $props();
 
 	const get_quantity = (card: Card): number => deck[card.id] ?? 0;
 
@@ -73,9 +72,14 @@
 					</span>
 				</td>
 				<td>
-					<a href={localizeHref(`/card/${result.id}`)} use:tooltip={result}>
+					<button
+						type="button"
+						class="builder__card-title"
+						aria-haspopup="dialog"
+						onclick={() => on_open_card(result)}
+					>
 						{result.attributes.title}
-					</a>
+					</button>
 				</td>
 				<td class="icon-text">
 					<Icon name={result.attributes.card_type_id} size="inline" />
@@ -121,5 +125,15 @@
 	.builder__quantity input {
 		width: 100%;
 		text-align: center;
+	}
+
+	.builder__card-title {
+		padding: 0;
+		font: inherit;
+		color: inherit;
+		text-align: start;
+		background: transparent;
+		border: 0;
+		cursor: pointer;
 	}
 </style>

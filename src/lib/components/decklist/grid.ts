@@ -1,6 +1,5 @@
-import type { Card, CardGroup, CardTypeIds, Decklist } from '$lib/types';
-
-export type CardSlots = Readonly<Decklist['attributes']['card_slots']>;
+import type { Card, CardGroup, CardTypeIds } from '$lib/types';
+import type { CardSlots } from './card_slots';
 
 type DeckGridCardType = Exclude<CardTypeIds, 'corp_identity' | 'runner_identity'>;
 

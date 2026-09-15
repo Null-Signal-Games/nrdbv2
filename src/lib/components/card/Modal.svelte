@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { type Snippet } from 'svelte';
 	import { Dialog } from 'bits-ui';
 	import XIcon from '@lucide/svelte/icons/x';
 	import type { Card, Printing } from '$lib/types';
@@ -13,9 +14,10 @@
 		card: Card;
 		open: boolean;
 		onOpenChange: (open: boolean) => void;
+		actions?: Snippet<[Card]>;
 	}
 
-	let { card, open, onOpenChange }: Props = $props();
+	let { card, open, onOpenChange, actions }: Props = $props();
 	let hydrated_printing = $state.raw<Printing | null>(null);
 
 	$effect(() => {
@@ -67,6 +69,9 @@
 			</div>
 
 			<div class="card-modal__actions">
+				{#if actions}
+					{@render actions(card)}
+				{/if}
 				<Button
 					color="secondary"
 					href={localizeHref(`/decklists/search?cards[]=${card.id}`)}
