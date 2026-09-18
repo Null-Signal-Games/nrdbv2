@@ -29,7 +29,7 @@
 	interface MultipleProps extends BaseProps {
 		multiple: true;
 		selection: T[];
-		ontoggle: (values: T[]) => void;
+		ontoggle: (values: T[], value: T) => void;
 	}
 
 	type Props = SingleProps | MultipleProps;
@@ -57,11 +57,11 @@
 			return;
 		}
 
-		props.ontoggle(
-			props.selection.includes(value)
-				? props.selection.filter((entry) => entry !== value)
-				: [...props.selection, value]
-		);
+		const next = props.selection.includes(value)
+			? props.selection.filter((entry) => entry !== value)
+			: [...props.selection, value];
+
+		props.ontoggle(next, value);
 	};
 
 	// Arrow key navigation for `as_tabs` mode

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { SidesIds, FactionIds, CardTypeIds, Card as TCard, CardGroup } from '$lib/types';
-	import { card_types, formats as i18n_formats, factions as i18n_factions } from '$lib/i18n';
+	import { card_types, faction_name, formats as i18n_formats } from '$lib/i18n';
 	import { CORP_CARD_TYPES, RUNNER_CARD_TYPES } from '$lib/constants';
-	import { DECK_FORMATS, type DeckFormat } from '$lib/deck_formats';
+	import { DECK_FORMATS, type ActiveCardPoolIds, type DeckFormat } from '$lib/deck_formats';
+	import { collectFactionsInActiveCardPool } from '$lib/identities';
 	import { group_cards_by_type } from '$lib/utils';
 	import { searchCards } from '$lib/search';
 	import {
@@ -25,11 +26,12 @@
 	interface Props {
 		identity: TCard['id'];
 		side_cards: TCard[];
+		active_card_pool_ids: ActiveCardPoolIds;
 		format: DeckFormat;
 		on_select_format: (format: DeckFormat) => void;
 	}
 
-	let { identity, side_cards, format, on_select_format }: Props = $props();
+	let { identity, side_cards, active_card_pool_ids, format, on_select_format }: Props = $props();
 
 	let search_query = $state('');
 	let active_tab = $state<'Build' | 'Notes' | 'Check' | 'History' | 'Collection' | 'Settings'>(
@@ -55,14 +57,21 @@
 		active_filters.flatMap((filter) => (filter.kind === 'cardType' ? [filter.id] : []))
 	);
 
-	let faction_options = $derived<FactionIds[]>(
-		[...new Set(side_cards.map((card) => card.attributes.faction_id))].sort((a, b) =>
-			i18n_factions[a].localeCompare(i18n_factions[b])
+	let faction_toggles = $derived<ToggleOption<FactionIds>[]>(
+		collectFactionsInActiveCardPool(side_cards, format, active_card_pool_ids).map(
+			(faction_id) => ({
+				value: faction_id,
+				label: faction_name(faction_id),
+				color: `var(--${faction_id})`
+			})
 		)
 	);
 
-	let type_options = $derived<CardTypeIds[]>(
-		side === 'corp' ? CORP_CARD_TYPES : RUNNER_CARD_TYPES
+	let type_toggles = $derived<ToggleOption<CardTypeIds>[]>(
+		(side === 'corp' ? CORP_CARD_TYPES : RUNNER_CARD_TYPES).map((card_type_id) => ({
+			value: card_type_id,
+			label: card_types[card_type_id]
+		}))
 	);
 
 	const format_toggles: ToggleOption<DeckFormat>[] = DECK_FORMATS.map((format_option) => ({
@@ -110,10 +119,7 @@
 	});
 
 	const on_toggle_faction_change = (faction_id: FactionIds) => {
-		search_query = toggleFilterInQuery(interpreted_query, {
-			kind: 'faction',
-			id: faction_id
-		});
+		search_query = toggleFilterInQuery(interpreted_query, { kind: 'faction', id: faction_id });
 	};
 
 	const on_toggle_type_change = (card_type_id: CardTypeIds) => {
@@ -225,39 +231,33 @@
 			/>
 
 			<div class="builder__filters">
-				<section>
-					<h3>Filter by faction</h3>
-					<div class="builder__chips">
-						{#each faction_options as faction_option (faction_option)}
-							<Button
-								color={faction_filters.includes(faction_option)
-									? 'primary'
-									: 'ghost'}
-								aria-pressed={faction_filters.includes(faction_option)}
-								onclick={() => on_toggle_faction_change(faction_option)}
-							>
-								<Icon name={faction_option} size="sm" />
-								{i18n_factions[faction_option]}
-							</Button>
-						{/each}
-					</div>
-				</section>
+				<ToggleGroup
+					options={faction_toggles}
+					label="Filter by faction"
+					size="sm"
+					icon_only
+					multiple
+					selection={faction_filters}
+					ontoggle={(_selection, faction_id) => on_toggle_faction_change(faction_id)}
+				>
+					{#snippet option(faction_option)}
+						<Icon name={faction_option.value} size="sm" label="" />
+					{/snippet}
+				</ToggleGroup>
 
-				<section>
-					<h3>Filter by type</h3>
-					<div class="builder__chips">
-						{#each type_options as type (type)}
-							<Button
-								color={type_filters.includes(type) ? 'primary' : 'ghost'}
-								aria-pressed={type_filters.includes(type)}
-								onclick={() => on_toggle_type_change(type)}
-							>
-								<Icon name={type} size="sm" />
-								{card_types[type]}
-							</Button>
-						{/each}
-					</div>
-				</section>
+				<ToggleGroup
+					options={type_toggles}
+					label="Filter by type"
+					size="sm"
+					icon_only
+					multiple
+					selection={type_filters}
+					ontoggle={(_selection, card_type_id) => on_toggle_type_change(card_type_id)}
+				>
+					{#snippet option(type_option)}
+						<Icon name={type_option.value} size="sm" label="" />
+					{/snippet}
+				</ToggleGroup>
 			</div>
 
 			<DeckBuilderSearchResults
@@ -326,9 +326,9 @@
 	}
 
 	.builder__filters {
-		display: grid;
+		display: flex;
+		flex-wrap: wrap;
 		gap: 1rem;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.builder__tabs {
@@ -347,28 +347,6 @@
     .builder__tabs button.active {
         opacity: 1;
         border-color: var(--text);
-    } */
-
-	.builder__chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
-
-	/* .builder__chips button {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        padding: 0.375rem 0.5rem;
-        border: 1px solid var(--border);
-        background: transparent;
-        opacity: 0.5;
-    }
-
-    .builder__chips button.active {
-        background: var(--text);
-        color: var(--foreground);
-        opacity: 1;
     } */
 
 	.builder__notes {
@@ -392,10 +370,6 @@
 
 	@media (width <= 1024px) {
 		.builder {
-			grid-template-columns: 1fr;
-		}
-
-		.builder__filters {
 			grid-template-columns: 1fr;
 		}
 	}

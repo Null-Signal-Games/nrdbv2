@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+	collectFactionsInActiveCardPool,
 	filterFactionGroups,
 	groupIdentitiesByFaction,
 	identitiesByFaction,
@@ -67,6 +68,40 @@ describe('identitiesByFaction', () => {
 
 		expect(groups.get('anarch')?.map((card) => card.id)).toContain(ESA.id);
 		expect(groups.has('apex')).toBe(true);
+	});
+});
+
+describe('collectFactionsInActiveCardPool', () => {
+	it('collects factions with a card in the active pool, in canonical order', () => {
+		const factions = collectFactionsInActiveCardPool(
+			[TAO, ESA, ZAHYA, APEX, SHRED],
+			'standard',
+			catalog.active_card_pool_ids
+		);
+
+		expect(factions).toEqual(['anarch', 'criminal', 'shaper']);
+	});
+
+	it('keeps a faction with only one card in the pool', () => {
+		const factions = collectFactionsInActiveCardPool(
+			[SHRED],
+			'standard',
+			catalog.active_card_pool_ids
+		);
+
+		expect(factions).toEqual(['anarch']);
+	});
+
+	it('ignores pool membership for the all format', () => {
+		const factions = collectFactionsInActiveCardPool([APEX, ESA], 'all', {
+			eternal: 'eternal'
+		});
+
+		expect(factions).toEqual(['anarch', 'apex']);
+	});
+
+	it('returns nothing when the pool data is missing', () => {
+		expect(collectFactionsInActiveCardPool([ESA, TAO], 'standard', {})).toEqual([]);
 	});
 });
 

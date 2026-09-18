@@ -58,6 +58,7 @@
 		<DecklistBuilder
 			identity={identity.id}
 			side_cards={data.side_cards ?? []}
+			active_card_pool_ids={catalog.active_card_pool_ids}
 			format={selected.format}
 			on_select_format={decklistNav.selectFormat}
 		/>

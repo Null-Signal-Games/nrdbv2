@@ -16,6 +16,35 @@ export interface FactionGroup {
 	cards: Card[];
 }
 
+const factionOrder = new Map(FACTIONS.map((factionId, index) => [factionId, index]));
+
+const rank = (factionId: FactionIds): number =>
+	factionOrder.get(factionId) ?? Number.MAX_SAFE_INTEGER;
+
+const isInActiveCardPool = (
+	card: Card,
+	format: DeckFormat,
+	active_card_pool_ids: ActiveCardPoolIds
+): boolean => {
+	const card_pool_id = active_card_pool_ids[format];
+	if (card_pool_id === undefined) return format === 'all';
+
+	return card.attributes.card_pool_ids.includes(card_pool_id);
+};
+
+export const collectFactionsInActiveCardPool = (
+	cards: Card[],
+	format: DeckFormat,
+	active_card_pool_ids: ActiveCardPoolIds
+): FactionIds[] =>
+	[
+		...new Set(
+			cards
+				.filter((card) => isInActiveCardPool(card, format, active_card_pool_ids))
+				.map((card) => card.attributes.faction_id)
+		)
+	].sort((left, right) => rank(left) - rank(right));
+
 export const identitiesByFaction = (
 	catalog: DecklistCatalog,
 	side: SidesIds,
@@ -23,12 +52,10 @@ export const identitiesByFaction = (
 ): Map<FactionIds, Card[]> => {
 	const identityType = `${side}_identity`;
 	const byFaction = new Map<FactionIds, Card[]>();
-	const activeCardPoolId = catalog.active_card_pool_ids[format];
-	if (format !== 'all' && !activeCardPoolId) return byFaction;
 
 	for (const card of catalog.cards) {
 		if (card.attributes.card_type_id !== identityType) continue;
-		if (activeCardPoolId && !card.attributes.card_pool_ids.includes(activeCardPoolId)) continue;
+		if (!isInActiveCardPool(card, format, catalog.active_card_pool_ids)) continue;
 
 		const group = byFaction.get(card.attributes.faction_id) ?? [];
 		byFaction.set(card.attributes.faction_id, [...group, card]);
@@ -36,11 +63,6 @@ export const identitiesByFaction = (
 
 	return byFaction;
 };
-
-const factionOrder = new Map(FACTIONS.map((factionId, index) => [factionId, index]));
-
-const rank = (factionId: FactionIds): number =>
-	factionOrder.get(factionId) ?? Number.MAX_SAFE_INTEGER;
 
 export const groupIdentitiesByFaction = (
 	catalog: DecklistCatalog,
