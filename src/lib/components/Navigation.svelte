@@ -1,63 +1,46 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
-	import { locales, getLocale, setLocale, localizeHref } from '$lib/paraglide/runtime.js';
+	import { localizeHref } from '$lib/paraglide/runtime.js';
 	import SearchInput from '$lib/components/SearchInput.svelte';
-	import { theme as current_theme } from '$lib/store';
+	import Logo from '$lib/components/Logo.svelte';
 	import { signIn } from '@auth/sveltekit/client';
 	import { page } from '$app/state';
-	import { APP_NAME } from '$lib/constants';
-	import { NAVIGATION } from '$lib/constants';
+	import { APP_NAME, PRIMARY_NAVIGATION } from '$lib/constants';
+	import { isCurrentPath } from '$lib/utils';
 	import Button from '$lib/components/ui/Button.svelte';
-
-	// TODO(theme): review, as currently we utilise `light-dark` in CSS, which us purely based on user preference
-	const set_theme = (theme: 'light' | 'dark') => {
-		$current_theme = theme;
-		localStorage.setItem('theme', theme);
-		document.documentElement.setAttribute('data-theme', theme);
-	};
 </script>
 
-<nav class="navigation">
-	<div class="navigation__upper container">
-		<a href={localizeHref('/')} class="navigation__logo">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148.2 143.72">
-				<polygon
-					fill="#ff0000"
-					points="99.28 99.28 68.46 99.28 68.46 88.71 88.71 88.71 88.71 10.57 10.57 10.57 10.57 88.71 38.71 88.71 38.71 99.28 0 99.28 0 0 99.28 0 99.28 99.28"
-				></polygon>
-				<polygon
-					fill="#0000ff"
-					points="148.2 143.72 48.92 143.72 48.92 44.44 79.39 44.44 79.39 54.48 59.5 54.48 59.5 133.15 137.63 133.15 137.63 54.48 109.5 54.48 109.5 44.44 148.2 44.44 148.2 143.72"
-				></polygon>
-			</svg>
-			{APP_NAME}
-		</a>
-		<div class="search-input-container">
+<header class="navigation">
+	<div class="container navigation__upper">
+		<div class="navigation__left">
+			<a href={localizeHref('/')} class="navigation__logo" aria-label={APP_NAME}>
+				<Logo />
+				<span class="navigation__wordmark">{APP_NAME}</span>
+			</a>
+
+			<nav class="navigation__lower" aria-label="Primary">
+				<ul class="navigation__nav-list">
+					{#each PRIMARY_NAVIGATION as item (item.url)}
+						<li>
+							<a
+								href={item.url}
+								aria-current={isCurrentPath(page.url.pathname, item.url)
+									? 'page'
+									: undefined}
+							>
+								{item.title}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			</nav>
+		</div>
+
+		<div class="navigation__search">
 			<SearchInput />
 		</div>
+
 		<div class="navigation__account">
-			<select
-				aria-label="Language"
-				onchange={(e: Event) =>
-					setLocale((e.target as HTMLSelectElement).value as (typeof locales)[number])}
-			>
-				{#each locales as locale (locale)}
-					<option value={locale} selected={locale === getLocale()}>{locale}</option>
-				{/each}
-			</select>
-
-			<select
-				aria-label="Theme"
-				onchange={(e: Event) =>
-					set_theme((e.target as HTMLSelectElement).value as 'light' | 'dark')}
-			>
-				{#each ['light', 'dark'] as theme, index (index)}
-					<option value={theme} selected={theme === $current_theme}>
-						{theme}
-					</option>
-				{/each}
-			</select>
-
 			<div>
 				{#if page.data.session}
 					{#if page.data.session.user?.image}
@@ -81,53 +64,66 @@
 			</div>
 		</div>
 	</div>
-	<div class="navigation__lower">
-		<div class="container">
-			<ul>
-				{#each NAVIGATION as item (item.url)}
-					<li>
-						<a href={localizeHref(item.url)}>{item.title}</a>
-					</li>
-				{/each}
-			</ul>
-		</div>
-	</div>
-</nav>
+</header>
 
 <style>
-	/* Temporary styles */
 	.navigation {
-		--nav-border: 1px solid var(--border);
-		border-bottom: var(--nav-border);
+		border-bottom: 1px solid var(--border);
 		background-color: var(--foreground);
 	}
 
 	.navigation__upper {
 		display: grid;
-		grid-template-columns: auto 1fr auto;
+		grid-template-columns: minmax(min-content, 1fr) minmax(0, 40rem) minmax(min-content, 1fr);
 		align-items: center;
 		gap: 1rem;
-		padding-block: 1rem;
+		padding-block: 0.75rem;
 	}
 
-	.navigation__lower {
-		border-top: var(--nav-border);
-		padding-block: 1.25rem;
+	.navigation__left {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
 	}
 
-	.navigation__lower ul {
+	.navigation__account {
+		justify-self: end;
+	}
+
+	.navigation__nav-list {
+		display: flex;
+		gap: 1.25rem;
 		margin: unset;
 		padding: unset;
 		list-style: none;
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-		gap: 2rem;
 	}
 
 	.navigation__lower a {
-		text-decoration: unset;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.25rem;
+		padding: 0.4375rem 0.0625rem 0.3125rem;
+		border-bottom: 2px solid transparent;
+		font-weight: var(--font-weight-medium);
+		color: var(--text-muted);
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.navigation__lower a:hover {
+		color: var(--text);
+		border-bottom-color: var(--border);
+	}
+
+	.navigation__lower a[aria-current='page'] {
+		color: var(--text);
+		border-bottom-color: var(--text);
+	}
+
+	.navigation__lower a:focus-visible {
+		outline: 2px solid var(--text);
+		outline-offset: 2px;
 	}
 
 	.navigation__logo {
@@ -136,17 +132,11 @@
 		align-items: center;
 		gap: 0.25rem;
 		text-decoration: none;
+		white-space: nowrap;
 	}
 
-	.navigation__logo svg {
+	.navigation__search {
 		width: 100%;
-		max-width: 1.5rem;
-	}
-
-	.navigation__account {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		gap: 1rem;
+		justify-self: center;
 	}
 </style>

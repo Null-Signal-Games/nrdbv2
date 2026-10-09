@@ -9,6 +9,12 @@ import type {
 
 import { NRDB_API_URL } from '$lib/constants';
 
+export const isCurrentPath = (pathname: string, url: string): boolean => {
+	const normalize = (path: string) => path.replace(/\/$/, '') || '/';
+
+	return normalize(pathname) === normalize(url);
+};
+
 export const fetch_published_databases = (): Promise<string | null> => {
 	return fetch(`${NRDB_API_URL}/published_databases`)
 		.then((dbResponse) => {
