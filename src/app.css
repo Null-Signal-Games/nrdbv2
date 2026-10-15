@@ -1,5 +1,17 @@
 @layer theme, base;
 
+@property --nbn-icon-detail {
+	syntax: '<color>';
+	inherits: true;
+	initial-value: #005474;
+}
+
+@property --nbn-icon-highlight {
+	syntax: '<color>';
+	inherits: true;
+	initial-value: #ffffff;
+}
+
 @layer theme {
 	:root {
 		color-scheme: light dark;
