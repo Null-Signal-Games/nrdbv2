@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { interpretSearch } from './interpret';
 import { translateToQuery } from './translate';
+import { CardSearchQueryBuilder } from '$lib/search_grammar_and_builder';
 import { populateSubtypeMap } from './vocabulary';
 import { SUBTYPE_FIXTURE } from './subtypes.fixture';
 
@@ -98,6 +99,41 @@ describe('translateToQuery constraints', () => {
 		expect(result.error).toBeNull();
 		expect(result.sql).toBe(`${expectedSql('unified_cards.side_id = ?')} LIMIT ?`);
 		expect(result.params).toEqual(['runner', 101]);
+	});
+});
+
+describe('translateToQuery format', () => {
+	const formatClause = (format: string) => new CardSearchQueryBuilder(`format:${format}`).where;
+
+	it('ANDs the format onto the whole expression, not just its last term', () => {
+		const result = translateToQuery('t:resource or t:hardware', { format: 'startup' });
+		expect(result.error).toBeNull();
+		expect(result.sql).toBe(
+			expectedSql(
+				'(lower(unified_cards.card_type_id) LIKE ? OR lower(unified_cards.card_type_id) LIKE ?) ' +
+					`AND (${formatClause('startup')})`
+			)
+		);
+		expect(result.params).toEqual(['%resource%', '%hardware%', 'startup', 'startup']);
+	});
+
+	it('filters by format alone when the query is blank', () => {
+		const result = translateToQuery('  ', { format: 'standard' });
+		expect(result.error).toBeNull();
+		expect(result.sql).toBe(expectedSql(formatClause('standard')));
+		expect(result.params).toEqual(['standard', 'standard']);
+	});
+
+	it('adds nothing for the all format', () => {
+		expect(translateToQuery('corroder', { format: 'all' })).toEqual(
+			translateToQuery('corroder')
+		);
+	});
+
+	it('orders parameters as expression, format, then side', () => {
+		const result = translateToQuery('corroder', { format: 'eternal', side: 'runner' });
+		expect(result.error).toBeNull();
+		expect(result.params).toEqual(['%corroder%', 'eternal', 'eternal', 'runner']);
 	});
 });
 

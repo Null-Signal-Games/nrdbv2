@@ -913,7 +913,6 @@ function compileLiteral(
 export class SearchQueryBuilder {
 	where: string = '';
 	where_values: string[] = [];
-	left_joins: string[] = [];
 	parse_error: Error | null = null;
 
 	constructor(query: string, fields: FieldData[]) {

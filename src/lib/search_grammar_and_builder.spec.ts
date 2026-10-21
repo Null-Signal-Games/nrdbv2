@@ -160,7 +160,6 @@ describe('Search Grammar and Builder', () => {
 		expect(builder.parse_error).toBe(null);
 		expect(builder.where).toBe('lower(unified_cards.stripped_text) LIKE ?');
 		expect(builder.where_values).toEqual(['%trash%']);
-		expect(builder.left_joins).toEqual([]);
 	});
 
 	test('CardSearchQueryBuilder - text alias', () => {
@@ -177,7 +176,6 @@ describe('Search Grammar and Builder', () => {
 			'lower(unified_cards.stripped_text) LIKE ? AND unified_cards.cost = ?'
 		);
 		expect(builder.where_values).toEqual(['%trash%', '3']);
-		expect(builder.left_joins).toEqual([]);
 	});
 
 	test('CardSearchQueryBuilder - numeric field not equal', () => {
@@ -404,7 +402,6 @@ describe('Search Grammar and Builder', () => {
 		expect(builder.parse_error).toBe(null);
 		expect(builder.where).toBe('lower(unified_printings.stripped_text) LIKE ?');
 		expect(builder.where_values).toEqual(['%trash%']);
-		expect(builder.left_joins).toEqual([]);
 	});
 
 	test('PrintingSearchQueryBuilder - multiple terms', () => {
@@ -414,7 +411,6 @@ describe('Search Grammar and Builder', () => {
 			'lower(unified_printings.stripped_text) LIKE ? AND unified_printings.cost = ?'
 		);
 		expect(builder.where_values).toEqual(['%trash%', '3']);
-		expect(builder.left_joins).toEqual([]);
 	});
 
 	test('PrintingSearchQueryBuilder - numeric field not equal', () => {

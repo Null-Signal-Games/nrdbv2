@@ -87,6 +87,14 @@ describe('searchCards', () => {
 
 		expect(translateToQueryMock).toHaveBeenCalledWith('corroder', { limit: 25 });
 	});
+
+	it('passes the format to the translator', async () => {
+		mockSuccessfulSearch();
+
+		await searchCards('corp', { format: 'startup' });
+
+		expect(translateToQueryMock).toHaveBeenCalledWith('corp', { format: 'startup' });
+	});
 });
 
 describe('prepareSearch', () => {

@@ -437,6 +437,26 @@ describe('Decklist Builder', () => {
 		expect(on_select_format).toHaveBeenCalledWith('startup');
 	});
 
+	it('re-runs the search when the format changes', async () => {
+		seedRows(RED_TEAM);
+
+		const { rerender } = await renderBuilder({
+			identity: ZAHYA.id,
+			side_cards: [ZAHYA, RED_TEAM]
+		});
+
+		await rerender({ format: 'startup' });
+
+		await vi.waitFor(() =>
+			expect(sqlMock).toHaveBeenCalledWith(
+				expect.stringContaining('format_id = ?'),
+				'startup',
+				'startup',
+				'runner'
+			)
+		);
+	});
+
 	it('uses toolbar arrow navigation without changing the selected format', async () => {
 		await renderBuilder({
 			identity: ZAHYA.id,

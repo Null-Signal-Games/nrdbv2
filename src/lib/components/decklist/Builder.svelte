@@ -77,8 +77,6 @@
 		}))
 	);
 
-	const format_clause = $derived(format === 'all' ? '' : `format:${format}`);
-
 	let grouped_cards = $derived<CardGroup[]>(group_cards_by_type(side_cards));
 
 	let card_slots = $derived<CardSlots>(deck);
@@ -90,14 +88,10 @@
 	let search_results = $state<TCard[]>([]);
 	let has_current_results = $state(true);
 
-	const full_query = $derived(
-		[interpreted_query.expression, format_clause].filter(Boolean).join(' ')
-	);
-
 	$effect(() => {
-		const query = full_query;
+		const expression = interpreted_query.expression;
 
-		if (query.length === 0) {
+		if (!expression.trim() && format === 'all') {
 			search_results = side_cards;
 			has_current_results = true;
 			return;
@@ -106,7 +100,10 @@
 		let cancelled = false;
 		has_current_results = false;
 
-		searchCards(query, { side }).then(({ cards, error }) => {
+		searchCards(expression, {
+			format,
+			side
+		}).then(({ cards, error }) => {
 			if (cancelled || error) return;
 			search_results = cards;
 			has_current_results = true;
