@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { APP_NAME, NAVIGATION_GROUPS } from '$lib/constants';
 	import Logo from '$lib/components/Logo.svelte';
+	import Factions from '$lib/components/Factions.svelte';
 	import { locales, getLocale, setLocale, localizeHref } from '$lib/paraglide/runtime.js';
 	import { theme as current_theme } from '$lib/store';
 	import { page } from '$app/state';
@@ -70,12 +71,16 @@
 				</div>
 			{/each}
 		</nav>
+
+		<div class="site-footer__factions">
+			<Factions />
+		</div>
 	</div>
 </footer>
 
 <style>
 	.site-footer {
-		padding-block: 3rem;
+		padding-block: 3rem 1.5rem;
 		border-top: 1px solid var(--border);
 		background-color: var(--foreground);
 	}
@@ -84,6 +89,12 @@
 		display: grid;
 		grid-template-columns: 2fr 1fr 1fr 1fr;
 		gap: 2rem;
+	}
+
+	.site-footer__factions {
+		grid-column: 1 / -1;
+		display: flex;
+		justify-content: center;
 	}
 
 	.site-footer__brand a {
