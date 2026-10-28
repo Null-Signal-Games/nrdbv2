@@ -385,6 +385,29 @@ describe('Decklist Builder', () => {
 			.toBeVisible();
 	});
 
+	it('hides the add button once a card reaches its deck limit', async () => {
+		const limited = createMockCard('limited_card', 'Limited Card', ['core'], {
+			deck_limit: 1
+		});
+		cardFor.set(limited.id, limited);
+		seedRows(limited);
+
+		await renderBuilder({
+			identity: ZAHYA,
+			side_cards: [ZAHYA, limited]
+		});
+
+		const limitedRow = page.getByRole('row', { name: /Limited Card/ });
+		await userEvent.click(limitedRow.getByRole('button', { name: '+' }));
+		await expect
+			.element(page.getByRole('button', { name: 'Limited Card, 1 copy' }))
+			.toBeVisible();
+		await expect.element(limitedRow.getByRole('button', { name: '+' })).not.toBeInTheDocument();
+
+		await userEvent.click(limitedRow.getByRole('button', { name: '-' }));
+		await expect.element(limitedRow.getByRole('button', { name: '+' })).toBeVisible();
+	});
+
 	it('scales the modal quantity buttons to the card deck limit', async () => {
 		const limited = createMockCard('limited_card', 'Limited Card', ['core'], {
 			deck_limit: 1
