@@ -180,7 +180,6 @@
 
 	const set_card_quantity = (card: TCard, quantity: number) => {
 		update_card_quantity(card, quantity);
-		search_query = '';
 		closeCardModal();
 	};
 
