@@ -75,8 +75,8 @@
 		upgrade: 'type-upgrade',
 		null_signal_games: 'faction-neutral',
 		nsg: 'faction-neutral',
-		fantasy_flight_games: 'fantasy-flight-games',
-		ffg: 'fantasy-flight-games',
+		fantasy_flight_games: 'faction-fantasy-flight-games',
+		ffg: 'faction-fantasy-flight-games',
 		corp_identity: 'type-identity',
 		runner_identity: 'type-identity',
 		certificate: 'certificate',
@@ -107,7 +107,7 @@
 {#if icons?.[name]}
 	{@render svg_path(icons[name])}
 {:else}
-	{@render svg_path(icons['neutral'])}
+	{@render svg_path('faction-neutral')}
 {/if}
 
 <style>
