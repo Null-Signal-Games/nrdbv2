@@ -149,7 +149,7 @@ describe('Decklist Builder', () => {
 		const on_select_identity = vi.fn();
 
 		await renderBuilder({
-			identity: ZAHYA.id,
+			identity: ZAHYA,
 			side_cards: [ZAHYA, ESA, RED_TEAM],
 			on_select_identity
 		});
@@ -169,7 +169,7 @@ describe('Decklist Builder', () => {
 
 		await renderBuilder(
 			{
-				identity: ZAHYA.id,
+				identity: ZAHYA,
 				side_cards: [ZAHYA, ESA],
 				on_select_identity
 			},
@@ -510,7 +510,7 @@ describe('Decklist Builder', () => {
 		seedRows(RED_TEAM);
 
 		const { rerender } = await renderBuilder({
-			identity: ZAHYA.id,
+			identity: ZAHYA,
 			side_cards: [ZAHYA, RED_TEAM]
 		});
 

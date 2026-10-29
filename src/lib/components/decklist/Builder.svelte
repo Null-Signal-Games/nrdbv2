@@ -223,7 +223,7 @@
 
 {#snippet card_actions(card: TCard)}
 	{#if isIdentity(card)}
-		<IdentitySelect selected={card.id === identity} onselect={() => select_identity(card)} />
+		<IdentitySelect selected={card.id === identity.id} onselect={() => select_identity(card)} />
 	{:else}
 		<CardQuantity
 			{card}
@@ -298,7 +298,7 @@
 			<DeckBuilderSearchResults
 				cards={search_results}
 				{deck}
-				{identity}
+				identity={identity.id}
 				on_open_card={open_card_modal}
 				on_set_quantity={update_card_quantity}
 				on_select_identity={select_identity}
