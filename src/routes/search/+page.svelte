@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { afterNavigate, replaceState } from '$app/navigation';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import { db_ready, search_query } from '$lib/store';
 	import { searchCards } from '$lib/search';
@@ -12,48 +13,73 @@
 	import Table from '$lib/components/Table.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Ghost from '$lib/components/Ghost.svelte';
+	import GhostText from '$lib/components/GhostText.svelte';
 
 	type View = 'grid' | 'table';
 
-	const query = $derived(page.url.searchParams.get('q')?.trim() ?? '');
-	const view = $derived<View>(page.url.searchParams.get('view') === 'table' ? 'table' : 'grid');
+	const MATCH_ALL = { clause: '1 = 1', params: [] };
+	const ERROR_DELAY_MS = 300;
 
+	let view = $state<View>('grid');
+
+	const query = $derived($search_query.trim());
+
+	let input_element = $state<HTMLInputElement | null>(null);
 	let cards = $state<Card[]>([]);
 	let error_message = $state<string | null>(null);
-	let is_searching = $state(false);
+	let is_first_load = $state(true);
 	let search_request_id = 0;
 
-	// Prefill the nav input so the query can be refined in place.
+	const read_url = () => {
+		const params = page.url.searchParams;
+		$search_query = params.get('q') ?? '';
+		view = params.get('view') === 'table' ? 'table' : 'grid';
+	};
+
+	read_url();
+	afterNavigate(read_url);
+
 	$effect(() => {
-		search_query.set(query);
+		const url = new URL(location.href);
+
+		if (query) url.searchParams.set('q', query);
+		else url.searchParams.delete('q');
+
+		if (view === 'table') url.searchParams.set('view', 'table');
+		else url.searchParams.delete('view');
+
+		if (url.href !== location.href) {
+			replaceState(url, {});
+		}
 	});
 
 	$effect(() => {
-		if (!query) {
-			cards = [];
-			error_message = null;
-			is_searching = false;
-			return;
-		}
-
 		if (!$db_ready) {
-			is_searching = true;
 			return;
 		}
 
+		const options = { constraint: query ? undefined : MATCH_ALL };
 		const request_id = ++search_request_id;
-		is_searching = true;
+		let error_timer: ReturnType<typeof setTimeout> | undefined;
 
 		(async () => {
 			try {
-				const { cards: results, error } = await searchCards(query);
+				const { cards: results, error } = await searchCards(query, options);
 
 				if (request_id !== search_request_id) {
 					return;
 				}
 
-				cards = error ? [] : results;
-				error_message = error ? error.message : null;
+				if (error) {
+					error_timer = setTimeout(() => {
+						cards = [];
+						error_message = error.message;
+					}, ERROR_DELAY_MS);
+					return;
+				}
+
+				cards = results;
+				error_message = null;
 			} catch (error) {
 				if (request_id !== search_request_id) {
 					return;
@@ -64,65 +90,68 @@
 				error_message = error instanceof Error ? error.message : String(error);
 			} finally {
 				if (request_id === search_request_id) {
-					is_searching = false;
+					is_first_load = false;
 				}
 			}
 		})();
+
+		return () => clearTimeout(error_timer);
 	});
 
-	const set_view = (next: View) => {
-		const url = new URL(page.url);
-
-		if (next === 'grid') {
-			url.searchParams.delete('view');
-		} else {
-			url.searchParams.set('view', next);
+	const on_key_down = (event: KeyboardEvent) => {
+		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+			event.preventDefault();
+			input_element?.focus();
 		}
-
-		goto(url, { replaceState: true, keepFocus: true, noScroll: true });
 	};
+
+	onMount(() => {
+		input_element?.focus();
+	});
 </script>
 
 <Meta title={query ? `Search: ${query}` : 'Search'} />
 
-<Header title={query ? `Search results: ${query}` : 'Search'}>
+<svelte:window onkeydown={on_key_down} />
+
+<Header title="Search">
 	{#snippet actions()}
-		{#if query}
-			<div class="view-toggle" role="group" aria-label="Search results">
-				<Button
-					size="sm"
-					color={view === 'grid' ? 'primary' : 'ghost'}
-					aria-pressed={view === 'grid'}
-					data-id="view-grid"
-					onclick={() => set_view('grid')}
-				>
-					Grid
-				</Button>
-				<Button
-					size="sm"
-					color={view === 'table' ? 'primary' : 'ghost'}
-					aria-pressed={view === 'table'}
-					data-id="view-table"
-					onclick={() => set_view('table')}
-				>
-					Table
-				</Button>
-			</div>
-		{/if}
+		<div class="view-toggle" role="group" aria-label="Search results">
+			<Button
+				size="sm"
+				color={view === 'grid' ? 'primary' : 'ghost'}
+				aria-pressed={view === 'grid'}
+				data-id="view-grid"
+				onclick={() => (view = 'grid')}
+			>
+				Grid
+			</Button>
+			<Button
+				size="sm"
+				color={view === 'table' ? 'primary' : 'ghost'}
+				aria-pressed={view === 'table'}
+				data-id="view-table"
+				onclick={() => (view = 'table')}
+			>
+				Table
+			</Button>
+		</div>
 	{/snippet}
 
-	{#if query && !is_searching && !error_message}
-		<p class="result-count" data-id="result-count">
+	<div class="search-form" role="search">
+		<GhostText bind:value={$search_query} bind:inputElement={input_element} />
+	</div>
+
+	<p class="result-count" data-id="result-count" role="status">
+		{#if !is_first_load && !error_message}
 			{cards.length}
 			{cards.length === 1 ? 'card' : 'cards'}
-		</p>
-	{/if}
+		{/if}
+	</p>
 </Header>
 
 <Container class="search-results" data-id="search-results">
-	{#if !query}
-		<p>Search for cards by title, faction, type, cost and more.</p>
-	{:else if is_searching}
+	{#if is_first_load}
 		<p class="visually-hidden" aria-live="polite">Searching</p>
 		<div class="card-grid" aria-hidden="true">
 			{#each Array(12) as _, index (index)}
@@ -150,6 +179,10 @@
 </Container>
 
 <style>
+	.search-form {
+		margin-block: 1.5rem 0;
+	}
+
 	.view-toggle {
 		display: flex;
 		flex-direction: row;
