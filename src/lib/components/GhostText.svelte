@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getGhostRemainder, getWordRangeAtCursor } from '$lib/search/ghost';
+	import Icon from '$lib/components/Icon.svelte';
 
 	let {
 		value = $bindable(''),
@@ -55,6 +56,7 @@
 </script>
 
 <div class="ghost-input">
+	<Icon name="subroutine" size="md" class="search-icon" />
 	<input
 		bind:this={inputElement}
 		bind:value
@@ -92,6 +94,15 @@
 		position: relative;
 		flex: 1;
 		min-width: 0;
+	}
+
+	.ghost-input :global(.search-icon) {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		left: 0.75rem;
+		z-index: 1;
+		pointer-events: none;
 	}
 
 	.ghost-input input {

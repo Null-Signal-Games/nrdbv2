@@ -5,7 +5,6 @@
 	import { afterNavigate, goto } from '$app/navigation';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import { onMount } from 'svelte';
-	import Icon from './Icon.svelte';
 	import type { Card } from '$lib/api.types';
 	import { searchCards, type SearchMode } from '$lib/search';
 	import GhostText from '$lib/components/GhostText.svelte';
@@ -134,7 +133,6 @@
 		action={localizeHref('/search')}
 		onsubmit={submit}
 	>
-		<Icon name="subroutine" size="md" class="search-icon" />
 		<GhostText
 			bind:value={$search_query}
 			bind:inputElement={input_element}
@@ -220,15 +218,6 @@
 		margin: unset;
 		position: relative;
 		z-index: 30;
-	}
-
-	.search-input-container :global(.search-icon) {
-		position: absolute;
-		top: 50%;
-		transform: translateY(-50%);
-		left: 0.75rem;
-		z-index: 1;
-		pointer-events: none;
 	}
 
 	.search-dropdown {
