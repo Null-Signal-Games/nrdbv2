@@ -10,20 +10,12 @@
 	import GhostText from '$lib/components/GhostText.svelte';
 	import { SEARCH_PREVIEW_LIMIT } from '$lib/constants';
 
+	let root_element = $state<HTMLDivElement | null>(null);
 	let input_element = $state<HTMLInputElement | null>(null);
 	let is_open = $state(false);
-	let dropdown_element = $state<HTMLDivElement | null>(null);
 	let filtered_cards = $state<Card[]>([]);
 	let search_request_id = 0;
 	let search_mode = $state<SearchMode>('literal');
-	let pointer_started_in_dropdown = false;
-
-	function keep_open_for_dropdown_pointer() {
-		pointer_started_in_dropdown = true;
-		window.setTimeout(() => {
-			pointer_started_in_dropdown = false;
-		});
-	}
 
 	$effect(() => {
 		const query = $search_query.trim();
@@ -108,24 +100,46 @@
 
 			if (e.key === 'Escape' || e.key === 'Esc') {
 				if (!is_open) return;
-				const active = document.activeElement as Node | null;
-				const focus_inside =
-					(dropdown_element && active ? dropdown_element.contains(active) : false) ||
-					active === input_element;
-				if (focus_inside) {
-					e.preventDefault();
-					is_open = false;
-					input_element?.blur();
-				}
+				if (!root_element?.contains(document.activeElement)) return;
+				e.preventDefault();
+				input_element?.focus();
+				is_open = false;
 			}
 		};
 
+		const on_pointer_down = (e: PointerEvent) => {
+			const target = e.target as Node | null;
+
+			if (!is_open || !root_element || !target || root_element.contains(target)) {
+				return;
+			}
+
+			is_open = false;
+		};
+
+		const on_focus_out = (e: FocusEvent) => {
+			const next = e.relatedTarget as Node | null;
+
+			if (!is_open || !next || !root_element || root_element.contains(next)) {
+				return;
+			}
+
+			is_open = false;
+		};
+
 		window.addEventListener('keydown', on_key_down);
-		return () => window.removeEventListener('keydown', on_key_down);
+		window.addEventListener('pointerdown', on_pointer_down);
+		window.addEventListener('focusout', on_focus_out);
+
+		return () => {
+			window.removeEventListener('keydown', on_key_down);
+			window.removeEventListener('pointerdown', on_pointer_down);
+			window.removeEventListener('focusout', on_focus_out);
+		};
 	});
 </script>
 
-<div class="search-input-root">
+<div class="search-input-root" bind:this={root_element}>
 	<form
 		class="search-input-container"
 		role="search"
@@ -137,27 +151,11 @@
 			bind:value={$search_query}
 			bind:inputElement={input_element}
 			onFocus={() => (is_open = true)}
-			onBlur={(e) => {
-				const next = e.relatedTarget as Node | null;
-				if (pointer_started_in_dropdown) {
-					pointer_started_in_dropdown = false;
-					return;
-				}
-
-				const focus_inside =
-					dropdown_element && next ? dropdown_element.contains(next) : false;
-				if (!focus_inside) {
-					is_open = false;
-				}
-			}}
+			onInput={() => (is_open = true)}
 		/>
 	</form>
 	{#if is_open && $search_query.length > 0}
-		<div
-			class="search-dropdown"
-			bind:this={dropdown_element}
-			onpointerdown={keep_open_for_dropdown_pointer}
-		>
+		<div class="search-dropdown">
 			<label class="search-mode-toggle">
 				<input
 					type="checkbox"
