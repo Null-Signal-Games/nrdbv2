@@ -357,7 +357,7 @@ describe('Decklist Builder', () => {
 		expect(page.getByRole('dialog', { name: 'Red Team' }).query()).toBeNull();
 	});
 
-	it('clears the search query when a card is selected from the modal', async () => {
+	it('keeps the search query when a card is selected from the modal', async () => {
 		seedRows(RED_TEAM);
 
 		await renderBuilder(
@@ -378,11 +378,11 @@ describe('Decklist Builder', () => {
 		await expect.element(dialog).toBeVisible();
 		await userEvent.click(dialog.getByRole('button', { name: '2' }));
 
-		await expect.element(search).toHaveValue('');
-		await expect.element(page.getByRole('button', { name: 'Sure Gamble' })).toBeVisible();
 		await expect
 			.element(page.getByRole('button', { name: 'Red Team, 2 copies' }))
 			.toBeVisible();
+		await expect.element(search).toHaveValue('red');
+		expect(page.getByRole('button', { name: 'Sure Gamble' }).query()).toBeNull();
 	});
 
 	it('scales the modal quantity buttons to the card deck limit', async () => {
