@@ -1,0 +1,60 @@
+name: CI
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+env:
+    AUTH_CLIENT_NAME: ci
+    AUTH_CLIENT_ID: ci
+    AUTH_SECRET: ci-placeholder-secret
+    AUTH_KEYCLOAK_ISSUER: https://draft-id.nullsignal.games/realms/nullsignal
+
+defaults:
+    run:
+        shell: bash --noprofile --norc -e -o pipefail {0}
+
+jobs:
+    lint_format_check:
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - uses: actions/checkout@v7.0.1
+            - uses: ./.github/actions/setup
+            - run: pnpm lint
+            - run: pnpm fmt:check
+            - run: pnpm check
+
+    build:
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - uses: actions/checkout@v7.0.1
+            - uses: ./.github/actions/setup
+            - run: pnpm build
+
+    test:
+        runs-on: ubuntu-latest
+        timeout-minutes: 35
+        steps:
+            - uses: actions/checkout@v7.0.1
+            - uses: ./.github/actions/setup
+            - run: pnpm exec playwright install --with-deps chromium
+            - run: pnpm test:unit
+            - run: pnpm test:e2e
+            - uses: actions/upload-artifact@v7.0.2
+              if: failure()
+              with:
+                  name: playwright-report
+                  path: |
+                      playwright-report
+                      test-results
+                  retention-days: 7
