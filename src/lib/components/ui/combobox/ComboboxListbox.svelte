@@ -18,6 +18,7 @@
 		customAnchor={anchor}
 		sideOffset={2}
 		aria-label={label}
+		onmousedown={(event) => event.preventDefault()}
 	>
 		<BitsCombobox.Viewport>
 			{#each items as item (item.id)}
