@@ -1,5 +1,7 @@
 <script lang="ts">
+	import CardCombobox from '$lib/components/card/CardCombobox.svelte';
 	import DecklistTiles from '$lib/components/decklist/Tiles.svelte';
+	import type { ComboboxItem } from '$lib/components/ui/combobox';
 	import { FACTIONS, NRDB_API_URL } from '$lib/constants';
 	import { faction_name } from '$lib/i18n';
 	import type { Decklist } from '$lib/types';
@@ -8,6 +10,9 @@
 	let is_searching = $state<boolean>(false);
 	let has_searched = $state<boolean>(false);
 	let search_error = $state<string | null>(null);
+	let included_cards = $state<ComboboxItem[]>([]);
+
+	const included_cards_label = 'Contains cards';
 
 	const search = async (event: Event) => {
 		event.preventDefault();
@@ -25,6 +30,10 @@
 
 		const title = form_data.get('title');
 		if (title) parameters.set('filter[name][match]', String(title));
+
+		if (included_cards.length > 0) {
+			parameters.set('filter[card_id]', included_cards.map((card) => card.id).join(','));
+		}
 
 		is_searching = true;
 		search_error = null;
@@ -66,6 +75,15 @@
 		<input type="text" name="title" id="title" placeholder="Enter decklist name" />
 	</div>
 
+	<div class="field field--cards">
+		<span class="field__label" aria-hidden="true">{included_cards_label}</span>
+		<CardCombobox
+			label={included_cards_label}
+			value={included_cards}
+			onchange={(next) => (included_cards = next)}
+		/>
+	</div>
+
 	<button type="submit" disabled={is_searching}>Search</button>
 </form>
 
@@ -94,6 +112,14 @@
 		display: flex;
 		align-items: center;
 		gap: 0.4rem;
+	}
+
+	.field--cards {
+		flex: 1 1 100%;
+	}
+
+	.field__label {
+		flex-shrink: 0;
 	}
 
 	.field input {
