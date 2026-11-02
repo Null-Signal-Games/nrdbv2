@@ -10,9 +10,10 @@
 	interface Props {
 		readonly groups: readonly CardGroup[];
 		readonly cardSlots: CardSlots;
+		readonly on_open_card?: (card: Card) => void;
 	}
 
-	let { groups, cardSlots }: Props = $props();
+	let { groups, cardSlots, on_open_card = openCardModal }: Props = $props();
 
 	const model = $derived(buildDeckGridModel({ groups, cardSlots }));
 
@@ -36,7 +37,7 @@
 							class="deck-grid__card"
 							aria-haspopup="dialog"
 							aria-label={accessibleName(item.card, item.copies)}
-							onclick={() => openCardModal(item.card)}
+							onclick={() => on_open_card(item.card)}
 						>
 							<GridStack card={item.card} copies={item.copies} />
 						</button>

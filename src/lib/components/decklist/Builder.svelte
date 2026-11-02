@@ -254,7 +254,11 @@
 
 		<div class="builder__cards">
 			{#if has_cards}
-				<Grid groups={grouped_cards} cardSlots={card_slots} />
+				<Grid
+					groups={grouped_cards}
+					cardSlots={card_slots}
+					on_open_card={open_card_modal}
+				/>
 			{:else}
 				<p class="builder__empty">No cards selected</p>
 			{/if}
