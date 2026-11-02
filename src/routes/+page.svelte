@@ -3,7 +3,6 @@
 	import DecklistSummary from '$lib/components/decklist/Summary.svelte';
 	import DecklistBreakdown from '$lib/components/decklist/Breakdown.svelte';
 	import DecklistTiles from '$lib/components/decklist/Tiles.svelte';
-	import Factions from '$lib/components/Factions.svelte';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import Container from '$lib/components/Container.svelte';
 	import Ghost from '$lib/components/Ghost.svelte';
@@ -31,8 +30,6 @@
 <Meta />
 
 <Container>
-	<Factions />
-
 	<div class="home">
 		<section class="home__main" data-id="deck-of-the-week">
 			{#await data.decklist_of_the_week}
@@ -77,7 +74,7 @@
 		display: grid;
 		grid-template-columns: 5fr 2fr;
 		gap: 2rem;
-		margin-top: 2rem;
+		margin-block: 2rem;
 	}
 
 	.home__heading {
