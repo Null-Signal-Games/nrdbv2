@@ -253,11 +253,13 @@
 			</div>
 		</div>
 
-		{#if has_cards}
-			<Grid groups={grouped_cards} cardSlots={card_slots} />
-		{:else}
-			<p class="builder__empty">No cards selected</p>
-		{/if}
+		<div class="builder__cards">
+			{#if has_cards}
+				<Grid groups={grouped_cards} cardSlots={card_slots} />
+			{:else}
+				<p class="builder__empty">No cards selected</p>
+			{/if}
+		</div>
 	</div>
 
 	<div class="builder__search">
@@ -277,23 +279,25 @@
 		</div>
 
 		{#if active_tab === 'Build'}
-			<form class="builder__search-form" onsubmit={on_search_submit}>
-				<label class="builder__label" for="deck-search">Find cards</label>
-				<input
-					id="deck-search"
-					class="builder__input"
-					type="search"
-					placeholder="Find a card or filter the list"
-					autocomplete="off"
-					bind:value={search_query}
-				/>
-			</form>
+			<div class="builder__search-controls">
+				<form class="builder__search-form" onsubmit={on_search_submit}>
+					<label class="builder__visually-hidden" for="deck-search">Find cards</label>
+					<input
+						id="deck-search"
+						class="builder__input"
+						type="search"
+						placeholder="Find a card or filter the list"
+						autocomplete="off"
+						bind:value={search_query}
+					/>
+				</form>
 
-			<Toolbar groups={toolbar_groups} label="Deck builder filters">
-				{#snippet option(toolbar_option)}
-					<Icon name={toolbar_option.value} size="sm" label="" />
-				{/snippet}
-			</Toolbar>
+				<Toolbar groups={toolbar_groups} label="Deck builder filters">
+					{#snippet option(toolbar_option)}
+						<Icon name={toolbar_option.value} size="sm" label="" />
+					{/snippet}
+				</Toolbar>
+			</div>
 
 			<DeckBuilderSearchResults
 				cards={search_results}
@@ -346,6 +350,9 @@
 		position: sticky;
 		top: 1rem;
 		align-self: start;
+		display: flex;
+		flex-direction: column;
+		max-block-size: calc(100dvh - 9rem);
 	}
 
 	.builder__identity-row {
@@ -380,6 +387,13 @@
 		font-weight: var(--font-weight-semibold);
 	}
 
+	.builder__cards {
+		min-block-size: 0;
+		overflow-y: auto;
+		padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+		margin: -0.5rem -0.5rem -0.5rem -2.5rem;
+	}
+
 	.builder__empty {
 		color: var(--text-muted);
 	}
@@ -389,12 +403,28 @@
 		gap: 1rem;
 	}
 
-	.builder__label {
-		font-weight: var(--font-weight-semibold);
+	.builder__search-controls {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		display: grid;
+		gap: 1rem;
+		padding-block: 0.5rem;
+		margin-block: -0.5rem;
+		background-color: var(--background);
 	}
 
 	.builder__input {
 		width: 100%;
+	}
+
+	.builder__visually-hidden {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 
 	.builder__tabs {
@@ -437,6 +467,15 @@
 	@media (width <= 1024px) {
 		.builder {
 			grid-template-columns: 1fr;
+		}
+
+		.builder__summary {
+			position: static;
+			max-block-size: none;
+		}
+
+		.builder__cards {
+			overflow: visible;
 		}
 	}
 </style>
