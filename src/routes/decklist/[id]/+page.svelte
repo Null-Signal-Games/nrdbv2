@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Decklist, FileFormat, Card as TCard, CardGroup, Set as TSet } from '$lib/types';
-	import Header from '$lib/components/Header.svelte';
 	import {
 		group_cards_by_type,
 		card_quantity,
@@ -21,6 +20,9 @@
 	import CardImage from '$lib/components/card/CardImage.svelte';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import Container from '$lib/components/Container.svelte';
+	import Meta from '$lib/components/Meta.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import DeckHeader from '$lib/components/decklist/DeckHeader.svelte';
 
 	interface Props {
 		data: {
@@ -33,9 +35,14 @@
 
 	let { data }: Props = $props();
 
+	const attributes = $derived(data.decklist.attributes);
 	const grouped_cards: CardGroup[] = $derived(group_cards_by_type(data.cards));
 	const count = $derived(card_quantity(data.decklist, grouped_cards));
-	// const total_cards = Object.values(count).reduce((sum, n) => sum + n, 0);
+
+	const social = [
+		{ name: 'heart', label: 'Likes' },
+		{ name: 'star', label: 'Favourites' }
+	];
 
 	// TODO(review): Ensure packs are unique and sorted by release date, and anything else useful
 	interface PackUsage {
@@ -86,197 +93,183 @@
 	let active_tab: TabId = $state('classic');
 </script>
 
-{#if data.decklist}
-	<Header title={`Decklist: ${data.decklist.attributes.name}`}>
-		<a href={localizeHref(`/profile/${data.decklist.attributes.user_id}`)}
-			>{data.decklist.attributes.user_id}</a
-		>
-		<Icon name={data.decklist.attributes.faction_id} />
-		<p>
-			Created at:
-			<time datetime={data.decklist.attributes.created_at}>
-				{format_date(data.decklist.attributes.created_at)}
-			</time>
-		</p>
-		<p>
-			Updated at:
-			<time datetime={data.decklist.attributes.updated_at}>
-				{format_date(data.decklist.attributes.updated_at)}
-			</time>
+<Meta title={attributes.name} />
+
+<Container class="decklist">
+	<DeckHeader identity={data.identity} name={attributes.name}>
+		<p class="decklist__byline">
+			by <a href={localizeHref(`/profile/${attributes.user_id}`)}>{attributes.user_id}</a>
+			&middot;
+			<time datetime={attributes.created_at}>{format_date(attributes.created_at)}</time>
 		</p>
 
-		<!-- TODO: get decklists likes count -->
-		<p>
-			<Icon name="heart" />
-			Likes: [NUMBER]
-		</p>
-
-		<!-- TODO: get decklists favourites count -->
-		<p>
-			<Icon name="star" />
-			Favourites: [NUMBER]
-		</p>
-
-		<!-- TODO: get decklists comments count -->
-		<p>
-			<Icon name="comment" />
-			Comments: [NUMBER]
-		</p>
-	</Header>
-
-	<Container>
-		<div>
-			<h2>Actions</h2>
-			<p>Download as:</p>
-			{#each ['json', 'txt', 'otcgn', 'bbcode', 'md', 'jinteki.net'] as format, index (index)}
-				<button onclick={() => export_and_download(format as FileFormat)}>
-					{format}
-				</button>
+		{#snippet actions()}
+			{#each social as { name, label } (name)}
+				<Button color="secondary" size="sm" title={label}>
+					{#snippet icon()}
+						<Icon {name} size="sm" {label} />
+					{/snippet}
+					&ndash;
+				</Button>
 			{/each}
-			<hr />
-			<button onclick={() => print()}>print</button>
-			<button
-				onclick={() =>
-					share({
-						title: data.decklist.attributes.name,
-						text: `Decklist by ${data.decklist.attributes.user_id}`,
-						url: window.location.href
-					})}>share</button
-			>
+		{/snippet}
+	</DeckHeader>
+
+	<div>
+		<h2>Actions</h2>
+		<p>Download as:</p>
+		{#each ['json', 'txt', 'otcgn', 'bbcode', 'md', 'jinteki.net'] as format, index (index)}
+			<button onclick={() => export_and_download(format as FileFormat)}>
+				{format}
+			</button>
+		{/each}
+		<hr />
+		<button onclick={() => print()}>print</button>
+		<button
+			onclick={() =>
+				share({
+					title: attributes.name,
+					text: `Decklist by ${attributes.user_id}`,
+					url: window.location.href
+				})}>share</button
+		>
+	</div>
+
+	<div class="wrapper">
+		<ToggleGroup
+			options={[...tabs]}
+			label="Decklist views"
+			as_tabs
+			id_prefix="decklist-view"
+			selected={active_tab}
+			onselect={(value) => (active_tab = value)}
+		/>
+
+		<div
+			class="panel"
+			role="tabpanel"
+			id="decklist-view-panel-classic"
+			aria-labelledby="decklist-view-tab-classic"
+			tabindex="0"
+			hidden={active_tab !== 'classic'}
+		>
+			<!-- TODO: Abstract to component for reuse on homepage -->
+			<DeckListSummary identity={data.identity} decklist={data.decklist} />
+			<DecklistBreakdown decklist={data.decklist} cards={data.cards} />
 		</div>
 
-		<div class="wrapper">
-			<ToggleGroup
-				options={[...tabs]}
-				label="Decklist views"
-				as_tabs
-				id_prefix="decklist-view"
-				selected={active_tab}
-				onselect={(value) => (active_tab = value)}
-			/>
+		<div
+			class="panel panel--visual"
+			role="tabpanel"
+			id="decklist-view-panel-visual"
+			aria-labelledby="decklist-view-tab-visual"
+			tabindex="0"
+			hidden={active_tab !== 'visual'}
+		>
+			<Grid groups={grouped_cards} cardSlots={attributes.card_slots} />
+		</div>
 
-			<div
-				class="panel"
-				role="tabpanel"
-				id="decklist-view-panel-classic"
-				aria-labelledby="decklist-view-tab-classic"
-				tabindex="0"
-				hidden={active_tab !== 'classic'}
-			>
-				<!-- TODO: Abstract to component for reuse on homepage -->
-				<div class="decklist">
-					<DeckListSummary identity={data.identity} decklist={data.decklist} />
-					<DecklistBreakdown decklist={data.decklist} cards={data.cards} />
+		<div
+			class="panel"
+			role="tabpanel"
+			id="decklist-view-panel-table"
+			aria-labelledby="decklist-view-tab-table"
+			tabindex="0"
+			hidden={active_tab !== 'table'}
+		>
+			{#each grouped_cards as group (group.type)}
+				<div class="group">
+					<div class="icon-text">
+						<Icon name={group.type} />
+						<h3>
+							{card_types[group.type]} ({count[group.type]})
+						</h3>
+					</div>
+					<Table decklist={data.decklist} cards={group.data} />
 				</div>
-			</div>
-
-			<div
-				class="panel panel--visual"
-				role="tabpanel"
-				id="decklist-view-panel-visual"
-				aria-labelledby="decklist-view-tab-visual"
-				tabindex="0"
-				hidden={active_tab !== 'visual'}
-			>
-				<Grid groups={grouped_cards} cardSlots={data.decklist.attributes.card_slots} />
-			</div>
-
-			<div
-				class="panel"
-				role="tabpanel"
-				id="decklist-view-panel-table"
-				aria-labelledby="decklist-view-tab-table"
-				tabindex="0"
-				hidden={active_tab !== 'table'}
-			>
-				{#each grouped_cards as group (group.type)}
-					<div class="group">
-						<div class="icon-text">
-							<Icon name={group.type} />
-							<h3>
-								{card_types[group.type]} ({count[group.type]})
-							</h3>
-						</div>
-						<Table decklist={data.decklist} cards={group.data} />
-					</div>
-				{/each}
-			</div>
-
-			<div
-				class="panel"
-				role="tabpanel"
-				id="decklist-view-panel-legality"
-				aria-labelledby="decklist-view-tab-legality"
-				tabindex="0"
-				hidden={active_tab !== 'legality'}
-			>
-				<h2>Legality</h2>
-				<!-- TODO: get decklists legality(s) -->
-			</div>
-
-			<div
-				class="panel"
-				role="tabpanel"
-				id="decklist-view-panel-rotation"
-				aria-labelledby="decklist-view-tab-rotation"
-				tabindex="0"
-				hidden={active_tab !== 'rotation'}
-			>
-				<h2>Rotation</h2>
-				<!-- TODO: get decklists rotation(s) -->
-			</div>
-
-			<div
-				class="panel"
-				role="tabpanel"
-				id="decklist-view-panel-packs"
-				aria-labelledby="decklist-view-tab-packs"
-				tabindex="0"
-				hidden={active_tab !== 'packs'}
-			>
-				<h2>Packs</h2>
-				{#if cards_by_pack.length > 0}
-					<div class="packs">
-						{#each cards_by_pack as pack (pack.set.id)}
-							<article class="pack">
-								<a
-									class="pack__heading"
-									href={localizeHref(`/sets/${pack.set.id}`)}
-								>
-									<h3>{pack.set.attributes.name}</h3>
-									<p>{pack.total} cards</p>
-								</a>
-
-								<div class="pack__cards">
-									{#each pack.cards as card (card.id)}
-										<div class="pack__card">
-											<CardImage {card} loading="lazy" />
-											{#if card.quantity > 1}
-												<span class="pack__quantity"
-													>&times;{card.quantity}</span
-												>
-											{/if}
-										</div>
-									{/each}
-								</div>
-							</article>
-						{/each}
-					</div>
-				{:else}
-					<p>No packs found</p>
-				{/if}
-			</div>
+			{/each}
 		</div>
-	</Container>
 
-	<Printer decklist={data.decklist} cards={data.cards} />
-{/if}
+		<div
+			class="panel"
+			role="tabpanel"
+			id="decklist-view-panel-legality"
+			aria-labelledby="decklist-view-tab-legality"
+			tabindex="0"
+			hidden={active_tab !== 'legality'}
+		>
+			<h2>Legality</h2>
+			<!-- TODO: get decklists legality(s) -->
+		</div>
+
+		<div
+			class="panel"
+			role="tabpanel"
+			id="decklist-view-panel-rotation"
+			aria-labelledby="decklist-view-tab-rotation"
+			tabindex="0"
+			hidden={active_tab !== 'rotation'}
+		>
+			<h2>Rotation</h2>
+			<!-- TODO: get decklists rotation(s) -->
+		</div>
+
+		<div
+			class="panel"
+			role="tabpanel"
+			id="decklist-view-panel-packs"
+			aria-labelledby="decklist-view-tab-packs"
+			tabindex="0"
+			hidden={active_tab !== 'packs'}
+		>
+			<h2>Packs</h2>
+			{#if cards_by_pack.length > 0}
+				<div class="packs">
+					{#each cards_by_pack as pack (pack.set.id)}
+						<article class="pack">
+							<a class="pack__heading" href={localizeHref(`/sets/${pack.set.id}`)}>
+								<h3>{pack.set.attributes.name}</h3>
+								<p>{pack.total} cards</p>
+							</a>
+
+							<div class="pack__cards">
+								{#each pack.cards as card (card.id)}
+									<div class="pack__card">
+										<CardImage {card} loading="lazy" />
+										{#if card.quantity > 1}
+											<span class="pack__quantity"
+												>&times;{card.quantity}</span
+											>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						</article>
+					{/each}
+				</div>
+			{:else}
+				<p>No packs found</p>
+			{/if}
+		</div>
+	</div>
+</Container>
+
+<Printer decklist={data.decklist} cards={data.cards} />
 
 <style>
-	/* Temporary styles */
-	.group {
+	:global(.decklist) {
 		display: grid;
-		gap: 1rem;
+		gap: 2rem;
+		padding-block: 2rem 3rem;
+	}
+
+	.decklist__byline {
+		margin: 0;
+		color: var(--text-muted);
+	}
+
+	.decklist__byline a {
+		color: var(--text);
 	}
 
 	.wrapper {
@@ -297,6 +290,11 @@
 
 	.panel--visual {
 		min-inline-size: 0;
+	}
+
+	.group {
+		display: grid;
+		gap: 1rem;
 	}
 
 	.packs {
