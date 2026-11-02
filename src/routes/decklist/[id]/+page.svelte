@@ -12,7 +12,6 @@
 	import Table from '$lib/components/Table.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { card_types } from '$lib/i18n';
-	import DeckListSummary from '$lib/components/decklist/Summary.svelte';
 	import DecklistBreakdown from '$lib/components/decklist/Breakdown.svelte';
 	import Grid from '$lib/components/decklist/Grid.svelte';
 	import Printer from '$lib/components/Printer.svelte';
@@ -22,7 +21,10 @@
 	import Container from '$lib/components/Container.svelte';
 	import Meta from '$lib/components/Meta.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { Dropdown, DropdownItem, DropdownSeparator } from '$lib/components/ui/dropdown';
 	import DeckHeader from '$lib/components/decklist/DeckHeader.svelte';
+	import DeckStats from '$lib/components/decklist/DeckStats.svelte';
+	import { computeDeckStats } from '$lib/components/decklist/deck_stats';
 
 	interface Props {
 		data: {
@@ -38,6 +40,7 @@
 	const attributes = $derived(data.decklist.attributes);
 	const grouped_cards: CardGroup[] = $derived(group_cards_by_type(data.cards));
 	const count = $derived(card_quantity(data.decklist, grouped_cards));
+	const stats = $derived(computeDeckStats(data.identity, data.cards, attributes.card_slots));
 
 	const social = [
 		{ name: 'heart', label: 'Likes' },
@@ -91,6 +94,15 @@
 	type TabId = (typeof tabs)[number]['value'];
 
 	let active_tab: TabId = $state('classic');
+
+	const export_formats: { format: FileFormat; label: string }[] = [
+		{ format: 'md', label: 'Markdown' },
+		{ format: 'json', label: 'JSON' },
+		{ format: 'txt', label: 'text' },
+		{ format: 'otcgn', label: 'OCTGN' },
+		{ format: 'bbcode', label: 'BBCode' },
+		{ format: 'jinteki.net', label: 'Jinteki.net' }
+	];
 </script>
 
 <Meta title={attributes.name} />
@@ -112,30 +124,35 @@
 					&ndash;
 				</Button>
 			{/each}
+			<Button
+				color="secondary"
+				size="sm"
+				onclick={() =>
+					share({
+						title: attributes.name,
+						text: `Decklist by ${attributes.user_id}`,
+						url: window.location.href
+					})}
+			>
+				Share
+			</Button>
+			<Dropdown label="Export" color="secondary" size="sm">
+				{#each export_formats as { format, label } (format)}
+					<DropdownItem onSelect={() => export_and_download(format)}
+						>Download {label}</DropdownItem
+					>
+				{/each}
+				<DropdownSeparator />
+				<DropdownItem onSelect={print}>Print proxies</DropdownItem>
+			</Dropdown>
 		{/snippet}
 	</DeckHeader>
 
-	<div>
-		<h2>Actions</h2>
-		<p>Download as:</p>
-		{#each ['json', 'txt', 'otcgn', 'bbcode', 'md', 'jinteki.net'] as format, index (index)}
-			<button onclick={() => export_and_download(format as FileFormat)}>
-				{format}
-			</button>
-		{/each}
-		<hr />
-		<button onclick={() => print()}>print</button>
-		<button
-			onclick={() =>
-				share({
-					title: attributes.name,
-					text: `Decklist by ${attributes.user_id}`,
-					url: window.location.href
-				})}>share</button
-		>
-	</div>
-
 	<div class="wrapper">
+		<div class="decklist__summary">
+			<DeckStats {stats} />
+		</div>
+
 		<ToggleGroup
 			options={[...tabs]}
 			label="Decklist views"
@@ -153,8 +170,6 @@
 			tabindex="0"
 			hidden={active_tab !== 'classic'}
 		>
-			<!-- TODO: Abstract to component for reuse on homepage -->
-			<DeckListSummary identity={data.identity} decklist={data.decklist} />
 			<DecklistBreakdown decklist={data.decklist} cards={data.cards} />
 		</div>
 
@@ -259,7 +274,7 @@
 <style>
 	:global(.decklist) {
 		display: grid;
-		gap: 2rem;
+		gap: 1.5rem;
 		padding-block: 2rem 3rem;
 	}
 
@@ -290,6 +305,11 @@
 
 	.panel--visual {
 		min-inline-size: 0;
+	}
+
+	.decklist__summary {
+		padding-block-end: 0.75rem;
+		border-block-end: 1px solid var(--border);
 	}
 
 	.group {
