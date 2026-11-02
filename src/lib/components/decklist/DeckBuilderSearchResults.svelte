@@ -71,9 +71,15 @@
 								</Button>
 							{/if}
 							<span class="builder__count">{get_quantity(result)}</span>
-							<Button size="sm" color="secondary" onclick={() => increment(result)}>
-								+
-							</Button>
+							{#if get_quantity(result) < result.attributes.deck_limit}
+								<Button
+									size="sm"
+									color="secondary"
+									onclick={() => increment(result)}
+								>
+									+
+								</Button>
+							{/if}
 						</span>
 					{/if}
 				</td>
