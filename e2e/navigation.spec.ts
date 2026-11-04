@@ -6,7 +6,8 @@ import {
 	themeSelect,
 	searchInput,
 	searchDropdown,
-	interpretedSearchCheckbox,
+	interpretedSearchToggle,
+	literalSearchToggle,
 	waitForSearchDatabase
 } from './helpers/navigation';
 
@@ -136,12 +137,12 @@ test.describe('Search input', () => {
 		await expect(searchDropdown(page)).toBeVisible();
 	});
 
-	test('Dropdown shows interpreted checkbox unchecked by default', async ({ page }) => {
+	test('Dropdown shows interpreted toggle pressed by default', async ({ page }) => {
 		await searchInput(page).fill('archive');
 
 		await expect(searchDropdown(page)).toBeVisible();
-		await expect(interpretedSearchCheckbox(page)).toBeVisible();
-		await expect(interpretedSearchCheckbox(page)).not.toBeChecked();
+		await expect(interpretedSearchToggle(page)).toBeVisible();
+		await expect(interpretedSearchToggle(page)).toHaveAttribute('aria-pressed', 'true');
 	});
 
 	test('Dropdown shows card results', async ({ page }) => {
@@ -151,7 +152,7 @@ test.describe('Search input', () => {
 		await expect(searchDropdown(page).locator('.card-grid-item a').first()).toBeVisible();
 	});
 
-	test('Switching to interpreted reruns the current query with one card grid visible', async ({
+	test('Switching to literal reruns the current query with one card grid visible', async ({
 		page
 	}) => {
 		await waitForSearchDatabase(page);
@@ -159,9 +160,9 @@ test.describe('Search input', () => {
 		await expect(searchDropdown(page)).toBeVisible();
 		await expect(searchDropdown(page).locator('.card-grid')).toHaveCount(1);
 
-		await interpretedSearchCheckbox(page).check();
+		await literalSearchToggle(page).click();
 
-		await expect(interpretedSearchCheckbox(page)).toBeChecked();
+		await expect(literalSearchToggle(page)).toHaveAttribute('aria-pressed', 'true');
 		await expect(searchDropdown(page).locator('.card-grid')).toHaveCount(1);
 		await expect(searchDropdown(page).locator('.card-grid-item a').first()).toBeVisible();
 	});
@@ -222,9 +223,10 @@ test.describe('Search input', () => {
 		await searchInput(page).fill('Sure Gamble');
 		await expect(searchDropdown(page).locator('.card-grid-item a').first()).toBeVisible();
 
+		await literalSearchToggle(page).click();
 		await searchInput(page).fill('zzz:foo');
 
-		await expect(interpretedSearchCheckbox(page)).not.toBeChecked();
+		await expect(literalSearchToggle(page)).toHaveAttribute('aria-pressed', 'true');
 		await expect(searchDropdown(page).locator('.card-grid-item')).toHaveCount(0);
 		await expect(searchDropdown(page)).not.toContainText(/Unknown keyword|Failed to load/i);
 	});
