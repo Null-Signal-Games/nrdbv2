@@ -16,6 +16,17 @@ export default defineConfig({
 			strategy: ['url', 'localStorage', 'baseLocale', 'preferredLanguage']
 		}),
 		sqlocal(),
+		{
+			name: 'preview-cross-origin-isolation',
+			enforce: 'pre',
+			configurePreviewServer(server) {
+				server.middlewares.use((_, res, next) => {
+					res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+					res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+					next();
+				});
+			}
+		},
 		sveltekit()
 	]
 });
