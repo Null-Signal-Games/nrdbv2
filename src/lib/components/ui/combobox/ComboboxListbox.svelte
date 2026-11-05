@@ -3,6 +3,7 @@
 	import type { ComboboxItem } from './Combobox.svelte';
 
 	interface Props {
+		/** Rendered in the given order, without sorting */
 		items: T[];
 		anchor: HTMLElement | null;
 		label: string;

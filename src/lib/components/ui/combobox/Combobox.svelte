@@ -4,6 +4,10 @@
 		title: string;
 	}
 
+	/**
+	 * Returns the items matching `query`. The combobox will not sort results,
+	 * so any sorting is up to the provider.
+	 */
 	export type ComboboxSearch<T extends ComboboxItem = ComboboxItem> = (
 		query: string
 	) => T[] | Promise<T[]>;
