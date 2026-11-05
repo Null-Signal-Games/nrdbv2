@@ -31,6 +31,7 @@ jobs:
             - uses: ./.github/actions/setup
             - run: pnpm lint
             - run: pnpm fmt:check
+            - run: pnpm exec paraglide-js compile --outdir ./src/lib/paraglide
             - run: pnpm check
 
     build:
