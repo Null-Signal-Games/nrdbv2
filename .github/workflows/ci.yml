@@ -16,7 +16,7 @@ env:
     AUTH_CLIENT_NAME: ci
     AUTH_CLIENT_ID: ci
     AUTH_SECRET: ci-placeholder-secret
-    AUTH_KEYCLOAK_ISSUER: https://draft-id.nullsignal.games/realms/nullsignal
+    AUTH_KEYCLOAK_ISSUER: https://example.com
 
 defaults:
     run:
