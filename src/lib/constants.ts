@@ -1,6 +1,7 @@
 import { m } from '$lib/paraglide/messages.js';
 import { localizeHref } from '$lib/paraglide/runtime.js';
 import type { CardTypeIds, FactionIds, Formats } from './types';
+import type { SearchMode } from './search';
 
 const NRDB_API = 'https://api.netrunnerdb.com/api/v3';
 const NRDB_API_PREVIEW = 'https://api-preview.netrunnerdb.com/api/v3';
@@ -16,6 +17,11 @@ export const CURRENT_SQLITE_URL_FILENAME = 'current_sqlite_url';
 export const NRDB_CACHE_COOKIE = 'nrdb_cache';
 export const SEARCH_LIMIT = 20;
 export const SEARCH_PREVIEW_LIMIT = 5;
+
+export const SEARCH_MODE_OPTIONS: { value: SearchMode; label: string }[] = [
+	{ value: 'interpreted', label: 'Interpreted' },
+	{ value: 'literal', label: 'Literal' }
+];
 
 export const NAVIGATION_GROUPS = [
 	{
