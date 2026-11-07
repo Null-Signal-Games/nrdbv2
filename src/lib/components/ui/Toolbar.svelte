@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
 	import { Toolbar as BitsToolbar } from 'bits-ui';
+	import Hint from './Hint.svelte';
+	import HintTrigger from './HintTrigger.svelte';
 
 	export interface Option<T extends string = string> {
 		value: T;
@@ -47,22 +49,36 @@
 	}: Props = $props();
 </script>
 
+{#snippet item(group: TGroup, toolbar_option: Option, props: Record<string, unknown> = {})}
+	<BitsToolbar.GroupItem
+		{...props}
+		value={toolbar_option.value}
+		class={['toolbar__item', group.icon_only ? 'toolbar__item--icon' : '']}
+		style={toolbar_option.color ? `--color: ${toolbar_option.color}` : undefined}
+		aria-label={group.icon_only ? toolbar_option.label : undefined}
+	>
+		{#if group.icon_only && option}
+			{@render option(toolbar_option)}
+		{:else}
+			{toolbar_option.label}
+		{/if}
+	</BitsToolbar.GroupItem>
+{/snippet}
+
 {#snippet items(group: TGroup)}
-	{#each group.options as toolbar_option (toolbar_option.value)}
-		<BitsToolbar.GroupItem
-			value={toolbar_option.value}
-			class={['toolbar__item', group.icon_only ? 'toolbar__item--icon' : '']}
-			style={toolbar_option.color ? `--color: ${toolbar_option.color}` : undefined}
-			aria-label={group.icon_only ? toolbar_option.label : undefined}
-			title={group.icon_only ? toolbar_option.label : undefined}
-		>
-			{#if group.icon_only && option}
-				{@render option(toolbar_option)}
+	<Hint>
+		{#each group.options as toolbar_option (toolbar_option.value)}
+			{#if group.icon_only}
+				<HintTrigger content={toolbar_option.label}>
+					{#snippet child({ props })}
+						{@render item(group, toolbar_option, props)}
+					{/snippet}
+				</HintTrigger>
 			{:else}
-				{toolbar_option.label}
+				{@render item(group, toolbar_option)}
 			{/if}
-		</BitsToolbar.GroupItem>
-	{/each}
+		{/each}
+	</Hint>
 {/snippet}
 
 <BitsToolbar.Root class={['toolbar', class_list]} {orientation} {loop} aria-label={label}>
