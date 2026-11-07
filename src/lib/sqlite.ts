@@ -1,7 +1,13 @@
 import { SQLocal } from 'sqlocal';
 import { NRDB_SQLITE_NAME, CURRENT_SQLITE_URL_FILENAME } from '$lib/constants';
+import { fetch_published_databases } from '$lib/utils';
 
-export const { sql, overwriteDatabaseFile, deleteDatabaseFile } = new SQLocal(NRDB_SQLITE_NAME);
+const { sql: run_query, overwriteDatabaseFile, deleteDatabaseFile } = new SQLocal(NRDB_SQLITE_NAME);
+
+export const sql: typeof run_query = async (queryTemplate, ...params) => {
+	await ensure_db_ready();
+	return run_query(queryTemplate, ...params);
+};
 
 const REQUIRED_TABLES = ['unified_cards', 'card_sets', 'card_cycles', 'card_subtypes'];
 
@@ -50,7 +56,7 @@ export const check_sqlite_db_populated = async (): Promise<boolean> => {
 	console.info('[SQLITE] Checking if SQLite DB is populated');
 	try {
 		const placeholders = REQUIRED_TABLES.map(() => '?').join(', ');
-		const rows = await sql(
+		const rows = await run_query(
 			`SELECT name FROM sqlite_master WHERE type = 'table' AND name IN (${placeholders})`,
 			...REQUIRED_TABLES
 		);
@@ -101,3 +107,35 @@ export const download_and_extract_sqlite = async (sqlite_url: string): Promise<v
 	console.info('[SQLITE] Overwriting local SQLite database with decompressed data');
 	await overwriteDatabaseFile(decompressedStream);
 };
+
+const update_database = async (): Promise<void> => {
+	const [sqlite_url, stored_url] = await Promise.all([
+		fetch_published_databases(),
+		get_current_sqlite_url()
+	]);
+	if (sqlite_url === null) {
+		throw new Error('No valid database URL found in published_databases response');
+	}
+	if (stored_url === sqlite_url && (await check_sqlite_db_populated())) {
+		console.log(`[SQLITE] ${NRDB_SQLITE_NAME} already exists and is up to date in OPFS.`);
+		return;
+	}
+	await download_and_extract_sqlite(sqlite_url);
+	console.log(`[SQLITE] ${NRDB_SQLITE_NAME} downloaded and saved to OPFS.`);
+	await set_current_sqlite_url(sqlite_url);
+};
+
+const prepare_database = async (): Promise<void> => {
+	try {
+		await update_database();
+	} catch (error) {
+		console.error('[SQLITE] Failed to update local database:', error);
+	}
+	if (!(await check_sqlite_db_populated())) {
+		throw new Error('Local database is unavailable');
+	}
+};
+
+let db_ready_promise: Promise<void> | undefined;
+
+export const ensure_db_ready = (): Promise<void> => (db_ready_promise ??= prepare_database());
