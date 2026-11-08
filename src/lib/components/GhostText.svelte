@@ -6,11 +6,13 @@
 		value = $bindable(''),
 		onFocus,
 		onBlur,
+		onInput,
 		inputElement = $bindable(null)
 	}: {
 		value?: string;
 		onFocus?: () => void;
 		onBlur?: (event: FocusEvent) => void;
+		onInput?: () => void;
 		inputElement?: HTMLInputElement | null;
 	} = $props();
 
@@ -67,7 +69,10 @@
 		autocapitalize="off"
 		spellcheck={false}
 		placeholder="Search"
-		oninput={refreshInputState}
+		oninput={() => {
+			refreshInputState();
+			onInput?.();
+		}}
 		onkeydown={handleKeydown}
 		onkeyup={refreshInputState}
 		onclick={refreshInputState}
