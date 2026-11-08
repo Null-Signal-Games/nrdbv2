@@ -504,6 +504,30 @@ describe('Decklist Builder', () => {
 			.toBeVisible();
 	});
 
+	it('shows a tooltip naming the faction on hover and focus', async () => {
+		await renderBuilder({ identity: ZAHYA, side_cards: [ZAHYA, SURE_GAMBLE] });
+
+		const faction_filter = page.getByRole('group', { name: 'Filter by faction' });
+		const criminal = faction_filter.getByRole('button', { name: 'Criminal' });
+		const neutral = faction_filter.getByRole('button', { name: 'Neutral' });
+		const tooltip_text = () =>
+			document.querySelector('[data-tooltip-content]')?.textContent?.trim() ?? null;
+		const tooltip_count = () => document.querySelectorAll('[data-tooltip-content]').length;
+
+		await userEvent.hover(criminal);
+		await expect.poll(tooltip_text).toBe('Criminal');
+
+		await userEvent.hover(neutral);
+		await expect.poll(tooltip_text).toBe('Neutral Runner');
+		expect(tooltip_count()).toBe(1);
+
+		await userEvent.unhover(neutral);
+		await expect.poll(tooltip_text).toBeNull();
+
+		(criminal.element() as HTMLElement).focus();
+		await expect.poll(tooltip_text).toBe('Criminal');
+	});
+
 	it('filters the card pool by the selected format', async () => {
 		seedRows(RED_TEAM);
 
