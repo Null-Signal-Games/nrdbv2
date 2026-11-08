@@ -1,21 +1,23 @@
 <script lang="ts">
-	import { search_query, db_ready } from '$lib/store';
+	import { search_query, search_mode, search_format, db_ready } from '$lib/store';
 	import CardImage from '$lib/components/card/CardImage.svelte';
 	import DecklistSuggestions from '$lib/components/DecklistSuggestions.svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import { onMount } from 'svelte';
 	import type { Card } from '$lib/api.types';
-	import { searchCards, type SearchMode } from '$lib/search';
+	import { searchCards } from '$lib/search';
 	import GhostText from '$lib/components/GhostText.svelte';
-	import { SEARCH_PREVIEW_LIMIT } from '$lib/constants';
+	import { SEARCH_MODE_OPTIONS, SEARCH_PREVIEW_LIMIT } from '$lib/constants';
+	import ToggleGroup from '$lib/components/ui/ToggleGroup.svelte';
+	import { format_toggle_options } from '$lib/i18n';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let root_element = $state<HTMLDivElement | null>(null);
 	let input_element = $state<HTMLInputElement | null>(null);
 	let is_open = $state(false);
 	let filtered_cards = $state<Card[]>([]);
 	let search_request_id = 0;
-	let search_mode = $state<SearchMode>('literal');
 
 	$effect(() => {
 		const query = $search_query.trim();
@@ -25,14 +27,16 @@
 			return;
 		}
 
-		const mode = search_mode;
+		const mode = $search_mode;
+		const format = $search_format;
 		const request_id = ++search_request_id;
 
 		(async () => {
 			try {
 				const { cards, error } = await searchCards(query, {
 					limit: SEARCH_PREVIEW_LIMIT,
-					mode
+					mode,
+					format
 				});
 
 				if (request_id !== search_request_id) {
@@ -156,16 +160,22 @@
 	</form>
 	{#if is_open && $search_query.length > 0}
 		<div class="search-dropdown">
-			<label class="search-mode-toggle">
-				<input
-					type="checkbox"
-					checked={search_mode === 'interpreted'}
-					onchange={(event) => {
-						search_mode = event.currentTarget.checked ? 'interpreted' : 'literal';
-					}}
+			<div class="search-options">
+				<ToggleGroup
+					options={SEARCH_MODE_OPTIONS}
+					label="Search mode"
+					size="sm"
+					selected={$search_mode}
+					onselect={(next) => ($search_mode = next)}
 				/>
-				Interpreted
-			</label>
+				<ToggleGroup
+					options={format_toggle_options}
+					label={m.format()}
+					size="sm"
+					selected={$search_format}
+					onselect={(next) => ($search_format = next)}
+				/>
+			</div>
 			<h2>Cards</h2>
 			<div class="card-grid">
 				{#each filtered_cards as card (card.id)}
@@ -232,10 +242,10 @@
 		overflow-x: auto;
 	}
 
-	.search-mode-toggle {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
+	.search-options {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
 		margin-bottom: 1rem;
 	}
 

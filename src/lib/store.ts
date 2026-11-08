@@ -1,8 +1,18 @@
 import { writable } from 'svelte/store';
 import type { Snippet } from 'svelte';
 import type { Card, Printing } from './types';
+import type { SearchMode } from './search';
+import type { DeckFormat } from './deck_formats';
 
 export const search_query = writable<string>('');
+
+export const DEFAULT_SEARCH_MODE: SearchMode = 'interpreted';
+
+export const search_mode = writable<SearchMode>(DEFAULT_SEARCH_MODE);
+
+export const DEFAULT_SEARCH_FORMAT: DeckFormat = 'standard';
+
+export const search_format = writable<DeckFormat>(DEFAULT_SEARCH_FORMAT);
 
 export const tooltip = writable<{
 	element: HTMLElement | null;

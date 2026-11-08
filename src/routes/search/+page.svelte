@@ -3,7 +3,14 @@
 	import { page } from '$app/state';
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import { localizeHref } from '$lib/paraglide/runtime';
-	import { db_ready, search_query } from '$lib/store';
+	import {
+		db_ready,
+		search_query,
+		search_mode,
+		search_format,
+		DEFAULT_SEARCH_FORMAT,
+		DEFAULT_SEARCH_MODE
+	} from '$lib/store';
 	import { searchCards } from '$lib/search';
 	import type { Card } from '$lib/types';
 	import Meta from '$lib/components/Meta.svelte';
@@ -14,6 +21,11 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Ghost from '$lib/components/Ghost.svelte';
 	import GhostText from '$lib/components/GhostText.svelte';
+	import ToggleGroup from '$lib/components/ui/ToggleGroup.svelte';
+	import { isDeckFormat } from '$lib/deck_formats';
+	import { format_toggle_options } from '$lib/i18n';
+	import { SEARCH_MODE_OPTIONS } from '$lib/constants';
+	import { m } from '$lib/paraglide/messages.js';
 
 	type View = 'grid' | 'table';
 
@@ -32,7 +44,14 @@
 
 	const read_url = () => {
 		const params = page.url.searchParams;
+		const format_param = params.get('format') ?? '';
 		$search_query = params.get('q') ?? '';
+		if (isDeckFormat(format_param)) {
+			$search_format = format_param;
+		}
+		if (params.has('mode')) {
+			$search_mode = params.get('mode') === 'literal' ? 'literal' : 'interpreted';
+		}
 		view = params.get('view') === 'table' ? 'table' : 'grid';
 	};
 
@@ -44,6 +63,13 @@
 
 		if (query) url.searchParams.set('q', query);
 		else url.searchParams.delete('q');
+
+		if ($search_format !== DEFAULT_SEARCH_FORMAT)
+			url.searchParams.set('format', $search_format);
+		else url.searchParams.delete('format');
+
+		if ($search_mode !== DEFAULT_SEARCH_MODE) url.searchParams.set('mode', $search_mode);
+		else url.searchParams.delete('mode');
 
 		if (view === 'table') url.searchParams.set('view', 'table');
 		else url.searchParams.delete('view');
@@ -58,7 +84,11 @@
 			return;
 		}
 
-		const options = { constraint: query ? undefined : MATCH_ALL };
+		const options = {
+			mode: $search_mode,
+			format: $search_format,
+			constraint: query ? undefined : MATCH_ALL
+		};
 		const request_id = ++search_request_id;
 		let error_timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -142,12 +172,30 @@
 		<GhostText bind:value={$search_query} bind:inputElement={input_element} />
 	</div>
 
-	<p class="result-count" data-id="result-count" role="status">
-		{#if !is_first_load && !error_message}
-			{cards.length}
-			{cards.length === 1 ? 'card' : 'cards'}
-		{/if}
-	</p>
+	<div class="search-options">
+		<div class="search-toggles">
+			<ToggleGroup
+				options={SEARCH_MODE_OPTIONS}
+				label="Search mode"
+				size="sm"
+				selected={$search_mode}
+				onselect={(next) => ($search_mode = next)}
+			/>
+			<ToggleGroup
+				options={format_toggle_options}
+				label={m.format()}
+				size="sm"
+				selected={$search_format}
+				onselect={(next) => ($search_format = next)}
+			/>
+		</div>
+		<p class="result-count" data-id="result-count" role="status">
+			{#if !is_first_load && !error_message}
+				{cards.length}
+				{cards.length === 1 ? 'card' : 'cards'}
+			{/if}
+		</p>
+	</div>
 </Header>
 
 <Container class="search-results" data-id="search-results">
@@ -189,8 +237,23 @@
 		gap: 0.5rem;
 	}
 
-	.result-count {
+	.search-options {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
 		margin-block: 1rem 0;
+	}
+
+	.search-toggles {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+	}
+
+	.result-count {
+		margin: unset;
 	}
 
 	.search-error {
