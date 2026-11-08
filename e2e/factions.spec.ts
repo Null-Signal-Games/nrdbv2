@@ -6,7 +6,7 @@ test.describe('/factions', () => {
 		await page.goto(`/factions`);
 
 		for (const faction of FACTIONS) {
-			const faction_link = page.locator(`a[href="/faction/${faction}"]`);
+			const faction_link = page.locator(`#main a[href="/faction/${faction}"]`);
 			await expect(faction_link).toBeVisible();
 		}
 	});
@@ -14,7 +14,7 @@ test.describe('/factions', () => {
 	test('Navigate to each faction', async ({ page }) => {
 		for (const faction of FACTIONS) {
 			await page.goto(`/factions`);
-			const faction_link = page.locator(`a[href="/faction/${faction}"]`);
+			const faction_link = page.locator(`#main a[href="/faction/${faction}"]`);
 			await faction_link.click();
 			await page.waitForURL(`/faction/${faction}`);
 		}
