@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { NRDB_API_URL } from '$lib/constants';
+import { fetch_card_sets } from '$lib/server/card_sets';
 import { fetch_private } from '$lib/server/private_api';
 import type { PageServerLoad } from './$types';
 import type { Card, CollectionResponse, Decklist, SingleResponse } from '$lib/types';
@@ -21,5 +22,6 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const { data: cards }: CollectionResponse<Card> = await cards_response.json();
-	return { deck, cards };
+
+	return { deck, cards, sets: await fetch_card_sets(event.fetch, cards) };
 };
