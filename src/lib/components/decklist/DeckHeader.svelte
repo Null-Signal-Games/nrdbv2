@@ -8,17 +8,18 @@
 	interface Props {
 		identity: Card;
 		name: string;
+		compact?: boolean;
 		children?: Snippet;
 		actions?: Snippet;
 	}
 
-	let { identity, name, children, actions }: Props = $props();
+	let { identity, name, compact = false, children, actions }: Props = $props();
 
 	const faction_id = $derived(identity.attributes.faction_id);
 	const [identity_name, identity_subtitle] = $derived(identity.attributes.title.split(': '));
 </script>
 
-<header class="deck-header">
+<header class="deck-header" class:deck-header--compact={compact}>
 	<button
 		type="button"
 		class="deck-header__art"
@@ -49,9 +50,13 @@
 						<span>{identity_subtitle}</span>
 					{/if}
 				</p>
+
+				{#if compact && children}
+					{@render children()}
+				{/if}
 			</hgroup>
 
-			{#if children}
+			{#if !compact && children}
 				<hr />
 				{@render children()}
 			{/if}
@@ -168,5 +173,44 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem;
+	}
+
+	.deck-header--compact {
+		grid-template-columns: 6rem minmax(0, 1fr);
+	}
+
+	.deck-header--compact .deck-header__info {
+		margin-block: 0.5rem;
+		padding: 0.75rem 0.75rem 0.75rem 1.75rem;
+	}
+
+	.deck-header--compact .deck-header__details {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem 1rem;
+	}
+
+	.deck-header--compact .deck-header__heading {
+		display: flex;
+		flex: 1 1 16rem;
+		flex-direction: column;
+		align-self: stretch;
+		min-inline-size: 0;
+		line-height: var(--leading-tight);
+	}
+
+	.deck-header--compact .deck-header__title {
+		font-size: var(--font-size-xl);
+	}
+
+	.deck-header--compact .deck-header__identity {
+		font-size: var(--font-size-base);
+	}
+
+	.deck-header--compact .deck-header__identity + :global(*) {
+		margin-block-start: auto;
+		padding-block-start: 0.5rem;
 	}
 </style>
