@@ -7,7 +7,10 @@
 	import { isCurrentPath } from '$lib/utils';
 	import AccountMenu from '$lib/components/AccountMenu.svelte';
 
-	const is_search_page = $derived(isCurrentPath(page.url.pathname, localizeHref('/search')));
+	const has_own_search = $derived(
+		isCurrentPath(page.url.pathname, localizeHref('/')) ||
+			isCurrentPath(page.url.pathname, localizeHref('/search'))
+	);
 </script>
 
 <header class="navigation">
@@ -37,7 +40,7 @@
 		</div>
 
 		<div class="navigation__search">
-			{#if !is_search_page}
+			{#if !has_own_search}
 				<SearchInput />
 			{/if}
 		</div>

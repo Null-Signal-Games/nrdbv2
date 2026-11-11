@@ -108,6 +108,11 @@
 		left: 0.75rem;
 		z-index: 1;
 		pointer-events: none;
+		color: var(--text-muted);
+	}
+
+	.ghost-input:focus-within :global(.search-icon) {
+		color: var(--text);
 	}
 
 	.ghost-input input {
@@ -115,17 +120,28 @@
 		width: 100%;
 		padding: 0.375rem 0.5rem;
 		padding-left: 2.5rem;
-		border: 1px solid #ccc;
+		border: none;
+		border-radius: 0;
+		background-color: var(--field);
 		font-size: var(--font-size-base);
 		line-height: var(--leading-body);
 		font-family: inherit;
 		caret-color: var(--text);
 	}
 
+	.ghost-input input::placeholder {
+		color: var(--text-muted);
+	}
+
+	.ghost-input input:focus {
+		outline: 2px solid transparent;
+		background-color: var(--foreground);
+		box-shadow: inset 0 -1px var(--text-muted);
+	}
+
 	.ghost {
 		position: absolute;
 		inset: 0;
-		border: 1px solid transparent;
 		padding: 0.375rem 0.5rem;
 		padding-left: 2.5rem;
 		font-size: var(--font-size-base);

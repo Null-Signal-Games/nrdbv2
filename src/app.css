@@ -51,6 +51,7 @@
 		--text: light-dark(#000000, #ffffff);
 		--text-muted: light-dark(#555555, #a0a0a0);
 		--border: light-dark(#e0e0e0, #222222);
+		--field: light-dark(#e4e4e6, #232325);
 
 		/* TODO(style): Update latter `dark` parameter value to use a real-world dark value */
 		--adam: light-dark(#a89c33, #a89c33);
