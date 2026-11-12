@@ -8,6 +8,7 @@ import { createMockCard } from '$lib/test-helpers';
 import { cardModal } from '$lib/store';
 import CardModalHarness from '$lib/test/CardModalHarness.svelte';
 import type { Card } from '$lib/types';
+import type { CardSlots } from './card_slots';
 import Builder from './Builder.svelte';
 
 const { sqlMock, adaptCardMock } = vi.hoisted(() => ({
@@ -43,6 +44,7 @@ function renderBuilder(
 		format?: DeckFormat;
 		on_select_format?: (format: DeckFormat) => void;
 		on_select_identity?: (identity: string) => void;
+		deck?: CardSlots;
 	},
 	options?: { wrapper: typeof CardModalHarness }
 ) {
@@ -132,10 +134,10 @@ describe('Decklist Builder', () => {
 
 		const { rerender } = await renderBuilder({
 			identity: ZAHYA,
-			side_cards: [ZAHYA, ESA, RED_TEAM, CARNIVORE]
+			side_cards: [ZAHYA, ESA, RED_TEAM, CARNIVORE],
+			deck: { [RED_TEAM.id]: 1 }
 		});
 
-		await userEvent.click(redTeamRow.getByRole('button', { name: '+' }));
 		await expect.element(page.getByRole('button', { name: 'Red Team, 1 copy' })).toBeVisible();
 
 		await rerender({ identity: ESA });
