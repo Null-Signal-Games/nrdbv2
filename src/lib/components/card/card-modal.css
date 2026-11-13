@@ -121,36 +121,6 @@
 	margin-inline-start: auto;
 }
 
-.card-modal__cost {
-	flex: none;
-	display: grid;
-	place-items: center;
-	width: 2.125rem;
-	height: 2.125rem;
-}
-
-.card-modal__cost-frame {
-	grid-area: 1 / 1;
-	width: 100%;
-	height: 100%;
-	fill: var(--faction, var(--text));
-}
-
-.card-modal__cost-frame--credit {
-	width: 90%;
-	height: 90%;
-	border-radius: 50%;
-	background-color: var(--faction, var(--text));
-}
-
-.card-modal__cost-value {
-	grid-area: 1 / 1;
-	color: var(--faction-contrast, var(--foreground));
-	font-size: var(--font-size-base);
-	font-weight: var(--font-weight-bold);
-	line-height: 1;
-}
-
 .card-modal__type {
 	margin: 0;
 }
@@ -173,30 +143,6 @@
 	color: var(--text-muted);
 	font-size: var(--font-size-sm);
 	font-style: italic;
-}
-
-.card-modal__footer {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 0.75rem;
-}
-
-.card-modal__faction,
-.card-modal__stats,
-.card-modal__stat {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.card-modal__stats {
-	gap: 0.75rem;
-}
-
-.card-modal__stat {
-	gap: 0.25rem;
-	font-variant-numeric: tabular-nums;
 }
 
 .card-modal__credits {

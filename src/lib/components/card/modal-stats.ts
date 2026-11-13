@@ -1,8 +1,8 @@
 import type { Card, Printing } from '$lib/types';
 
-type CardModalAttributes = Card['attributes'] | Printing['attributes'];
+export type CardModalAttributes = Card['attributes'] | Printing['attributes'];
 
-type CardModalStat = {
+export type CardModalStat = {
 	value: string;
 	announcement: string;
 	icon?: 'agenda_points' | 'mu' | 'trash';
