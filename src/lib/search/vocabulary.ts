@@ -6,7 +6,11 @@ export interface VocabOption {
 	name: string;
 }
 
-export const FACTION_MAP: Record<string, FactionIds | FactionIds[]> = {
+function phraseMap<V>(entries: Record<string, V>): Map<string, V> {
+	return new Map(Object.entries(entries));
+}
+
+export const FACTION_MAP = phraseMap<FactionIds | FactionIds[]>({
 	shaper: 'shaper',
 	anarch: 'anarch',
 	criminal: 'criminal',
@@ -27,17 +31,17 @@ export const FACTION_MAP: Record<string, FactionIds | FactionIds[]> = {
 	'neutral corp': 'neutral_corp',
 	'neutral runner': 'neutral_runner',
 	neutral: ['neutral_corp', 'neutral_runner']
-};
+});
 
 // Checked after every other map, and only for single words. Subtypes named like a side
 // are left out of SUBTYPE_MAP (see SUBTYPE_EXCLUSIONS) so these words always mean the side.
-export const SIDE_MAP: Record<string, string> = {
+export const SIDE_MAP = phraseMap<string>({
 	runner: 'runner',
 	corp: 'corp',
 	corporation: 'corp'
-};
+});
 
-export const CARD_TYPE_MAP: Record<string, CardTypeIds | CardTypeIds[]> = {
+export const CARD_TYPE_MAP = phraseMap<CardTypeIds | CardTypeIds[]>({
 	'runner identity': 'runner_identity',
 	'runner identities': 'runner_identity',
 	'corp identity': 'corp_identity',
@@ -62,19 +66,19 @@ export const CARD_TYPE_MAP: Record<string, CardTypeIds | CardTypeIds[]> = {
 	identities: ['corp_identity', 'runner_identity'],
 	ids: ['corp_identity', 'runner_identity'],
 	id: ['corp_identity', 'runner_identity']
-};
+});
 
 // Populated at runtime by populateSubtypeMap; maps a typed phrase to its `s:` filter token.
-export const SUBTYPE_MAP: Record<string, string> = {};
+export const SUBTYPE_MAP = new Map<string, string>();
 
 // Spelling variants not derivable from a canonical subtype name (typed phrase -> `s:` token).
-const SUBTYPE_ALIASES: Record<string, string> = {
+const SUBTYPE_ALIASES = phraseMap<string>({
 	'grey ops': '"gray ops"',
 	caissa: 'caïssa'
-};
+});
 
 // Negation flips onValue to (1 - onValue) in matchAt
-export const BOOLEAN_MAP: Record<string, { field: string; onValue: 1 | 0 }> = {
+export const BOOLEAN_MAP = phraseMap<{ field: string; onValue: 1 | 0 }>({
 	trash: { field: 'trash_ability', onValue: 1 },
 	'trash abilities': { field: 'trash_ability', onValue: 1 },
 	'performs trace': { field: 'performs_trace', onValue: 1 },
@@ -90,74 +94,76 @@ export const BOOLEAN_MAP: Record<string, { field: string; onValue: 1 | 0 }> = {
 	interrupt: { field: 'interrupt', onValue: 1 },
 	interrupts: { field: 'interrupt', onValue: 1 },
 	advanceable: { field: 'advanceable', onValue: 1 }
-};
+});
 
-// Order is cosmetic; matchAt's length-descending scan determines priority.
-export const SEMANTIC_ENTRIES: Array<{ phrase: string; tokens: string[] }> = [
-	{ phrase: 'once per turn', tokens: ['x:"once per turn"'] },
-	{ phrase: 'once-per-turn', tokens: ['x:"once per turn"'] },
-	{ phrase: 'place advancement counters', tokens: ['x:"advancement counter"'] },
-	{ phrase: 'place advancement counter', tokens: ['x:"advancement counter"'] },
-	{ phrase: 'advancement counters', tokens: ['x:"advancement counter"'] },
-	{ phrase: 'advancement counter', tokens: ['x:"advancement counter"'] },
-	{ phrase: 'place advancement', tokens: ['x:"advancement counter"'] },
-	{ phrase: 'end the run', tokens: ['x:"end the run"'] },
-	{ phrase: 'bad publicity', tokens: ['x:"bad publicity"'] },
-	{ phrase: 'bad pub', tokens: ['x:"bad publicity"'] },
-	{ phrase: 'virus counters', tokens: ['x:"virus counter"'] },
-	{ phrase: 'virus counter', tokens: ['x:"virus counter"'] },
-	{ phrase: 'power counters', tokens: ['x:"power counter"'] },
-	{ phrase: 'power counter', tokens: ['x:"power counter"'] },
-	{ phrase: 'recurring credits', tokens: ['x:"recurring"'] },
-	{ phrase: 'recurring credit', tokens: ['x:"recurring"'] },
-	{ phrase: 'loses credits', tokens: ['x:"lose"', 'x:"credit"'] },
-	{ phrase: 'lose credits', tokens: ['x:"lose"', 'x:"credit"'] },
-	{ phrase: 'loses credit', tokens: ['x:"lose"', 'x:"credit"'] },
-	{ phrase: 'lose credit', tokens: ['x:"lose"', 'x:"credit"'] },
-	{ phrase: 'draw cards', tokens: ['x:"draw"'] },
-	{ phrase: 'draw card', tokens: ['x:"draw"'] },
-	{ phrase: 'gains credits', tokens: ['x:"gain"', 'x:"credit"'] },
-	{ phrase: 'gain credits', tokens: ['x:"gain"', 'x:"credit"'] },
-	{ phrase: 'gains credit', tokens: ['x:"gain"', 'x:"credit"'] },
-	{ phrase: 'gain credit', tokens: ['x:"gain"', 'x:"credit"'] },
-	{ phrase: 'gives tags', tokens: ['x:"tag"'] },
-	{ phrase: 'gives tag', tokens: ['x:"tag"'] },
-	{ phrase: 'give tags', tokens: ['x:"tag"'] },
-	{ phrase: 'give tag', tokens: ['x:"tag"'] },
-	{ phrase: 'tags', tokens: ['x:"tag"'] },
-	{ phrase: 'tag', tokens: ['x:"tag"'] },
-	{ phrase: 'draw', tokens: ['x:"draw"'] },
-	{ phrase: 'draws', tokens: ['x:"draw"'] },
-	{ phrase: 'net damage', tokens: ['x:"net damage"'] },
-	{ phrase: 'meat damage', tokens: ['x:"meat damage"'] },
-	{ phrase: 'core damage', tokens: ['x:"core damage"'] },
-	{ phrase: 'damage', tokens: ['x:"damage"'] }
-];
-
-export const SEMANTIC_MAP = new Map<string, string[]>(
-	SEMANTIC_ENTRIES.map((e) => [e.phrase, e.tokens])
-);
+// Maps a phrase to the card text search tokens it stands for.
+export const SEMANTIC_MAP = phraseMap<string[]>({
+	'once per turn': ['x:"once per turn"'],
+	'once-per-turn': ['x:"once per turn"'],
+	'place advancement counters': ['x:"advancement counter"'],
+	'place advancement counter': ['x:"advancement counter"'],
+	'advancement counters': ['x:"advancement counter"'],
+	'advancement counter': ['x:"advancement counter"'],
+	'place advancement': ['x:"advancement counter"'],
+	'end the run': ['x:"end the run"'],
+	'bad publicity': ['x:"bad publicity"'],
+	'bad pub': ['x:"bad publicity"'],
+	'virus counters': ['x:"virus counter"'],
+	'virus counter': ['x:"virus counter"'],
+	'power counters': ['x:"power counter"'],
+	'power counter': ['x:"power counter"'],
+	'recurring credits': ['x:"recurring"'],
+	'recurring credit': ['x:"recurring"'],
+	'loses credits': ['x:"lose"', 'x:"credit"'],
+	'lose credits': ['x:"lose"', 'x:"credit"'],
+	'loses credit': ['x:"lose"', 'x:"credit"'],
+	'lose credit': ['x:"lose"', 'x:"credit"'],
+	'draw cards': ['x:"draw"'],
+	'draw card': ['x:"draw"'],
+	'gains credits': ['x:"gain"', 'x:"credit"'],
+	'gain credits': ['x:"gain"', 'x:"credit"'],
+	'gains credit': ['x:"gain"', 'x:"credit"'],
+	'gain credit': ['x:"gain"', 'x:"credit"'],
+	'gives tags': ['x:"tag"'],
+	'gives tag': ['x:"tag"'],
+	'give tags': ['x:"tag"'],
+	'give tag': ['x:"tag"'],
+	tags: ['x:"tag"'],
+	tag: ['x:"tag"'],
+	draw: ['x:"draw"'],
+	draws: ['x:"draw"'],
+	'net damage': ['x:"net damage"'],
+	'meat damage': ['x:"meat damage"'],
+	'core damage': ['x:"core damage"'],
+	damage: ['x:"damage"']
+});
 
 // Populated at runtime by populateDynamicVocab.
-export const SET_MAP: Record<string, string> = {};
-export const CYCLE_MAP: Record<string, string> = {};
+export const SET_MAP = new Map<string, string>();
+export const CYCLE_MAP = new Map<string, string>();
 
-function computeMaxPhraseWords(): number {
-	return Math.max(
-		...[
-			...Object.keys(FACTION_MAP),
-			...Object.keys(CARD_TYPE_MAP),
-			...Object.keys(SUBTYPE_MAP),
-			...Object.keys(BOOLEAN_MAP),
-			...Object.keys(SET_MAP),
-			...Object.keys(CYCLE_MAP),
-			...SEMANTIC_MAP.keys()
-		].map((p) => p.split(/\s+/).length)
-	);
+// The maps recognizeIntents looks phrases up in. Numeric field phrases are matched
+// separately, and side phrases are single words.
+const PHRASE_MAPS: Map<string, unknown>[] = [
+	FACTION_MAP,
+	CARD_TYPE_MAP,
+	SUBTYPE_MAP,
+	BOOLEAN_MAP,
+	SET_MAP,
+	CYCLE_MAP,
+	SEMANTIC_MAP
+];
+
+// Cleared whenever a dynamic map is repopulated.
+let maxPhraseWords: number | null = null;
+
+export function getMaxPhraseWords(): number {
+	if (maxPhraseWords === null) {
+		const phrases = PHRASE_MAPS.flatMap((map) => [...map.keys()]);
+		maxPhraseWords = Math.max(...phrases.map((phrase) => phrase.split(/\s+/).length));
+	}
+	return maxPhraseWords;
 }
-
-// Recomputed by populateDynamicVocab once set/cycle/subtype names are loaded.
-export let MAX_PHRASE_WORDS = computeMaxPhraseWords();
 
 export function populateDynamicVocab(
 	sets: VocabOption[],
@@ -167,21 +173,19 @@ export function populateDynamicVocab(
 	populateMap(SET_MAP, sets);
 	populateMap(CYCLE_MAP, cycles);
 	populateSubtypeMap(subtypes);
-	MAX_PHRASE_WORDS = computeMaxPhraseWords();
 }
 
-function populateMap(target: Record<string, string>, options: VocabOption[]) {
-	for (const key of Object.keys(target)) delete target[key];
+function populateMap(target: Map<string, string>, options: VocabOption[]) {
+	target.clear();
 	for (const { id, name } of options) {
-		const lowerName = name.toLowerCase();
-		target[lowerName] = id;
-		const lowerIdSpaces = id.toLowerCase().replace(/_/g, ' ');
-		if (lowerIdSpaces !== lowerName) target[lowerIdSpaces] = id;
+		target.set(name.toLowerCase(), id);
+		target.set(id.toLowerCase().replace(/_/g, ' '), id);
 	}
+	maxPhraseWords = null;
 }
 
 // Excluded so matchAt (which checks subtypes before sides) doesn't shadow the side intent.
-const SUBTYPE_EXCLUSIONS = new Set(Object.keys(SIDE_MAP));
+const SUBTYPE_EXCLUSIONS = new Set(SIDE_MAP.keys());
 
 function subtypeToken(lowerName: string): string {
 	return /[\s-]/.test(lowerName) ? `"${lowerName}"` : lowerName;
@@ -206,7 +210,7 @@ function pluralizeLast(phrase: string): string | null {
 
 // Registers each subtype name plus its plural and (for hyphenated names) a space variant; aliases last.
 export function populateSubtypeMap(subtypes: VocabOption[]) {
-	for (const key of Object.keys(SUBTYPE_MAP)) delete SUBTYPE_MAP[key];
+	SUBTYPE_MAP.clear();
 
 	for (const { name } of subtypes) {
 		const base = name.toLowerCase();
@@ -219,57 +223,55 @@ export function populateSubtypeMap(subtypes: VocabOption[]) {
 			const plural = pluralizeLast(key);
 			if (plural) keys.add(plural);
 		}
-		for (const key of keys) SUBTYPE_MAP[key] = token;
+		for (const key of keys) SUBTYPE_MAP.set(key, token);
 	}
 
-	for (const [phrase, token] of Object.entries(SUBTYPE_ALIASES)) {
-		SUBTYPE_MAP[phrase] = token;
-	}
+	for (const [phrase, token] of SUBTYPE_ALIASES) SUBTYPE_MAP.set(phrase, token);
+	maxPhraseWords = null;
 }
 
-// Order is cosmetic; buildNumericFieldPattern sorts by word count descending.
-export const NUMERIC_FIELDS: Array<{ words: string; field: string }> = [
-	{ words: 'advancement requirement', field: 'g' },
-	{ words: 'advancement cost', field: 'g' },
-	{ words: 'agenda points', field: 'v' },
-	{ words: 'agenda point', field: 'v' },
-	{ words: 'points', field: 'v' },
-	{ words: 'point', field: 'v' },
-	{ words: 'influence cost', field: 'n' },
-	{ words: 'memory cost', field: 'm' },
-	{ words: 'base link', field: 'l' },
-	{ words: 'trash cost', field: 'h' },
-	{ words: 'rez cost', field: 'o' },
-	{ words: 'play cost', field: 'o' },
-	{ words: 'install cost', field: 'o' },
-	{ words: 'cost', field: 'o' },
-	{ words: 'strength', field: 'p' },
-	{ words: 'str', field: 'p' },
-	{ words: 'mu', field: 'm' },
-	{ words: 'memory', field: 'm' },
-	{ words: 'influence', field: 'n' },
-	{ words: 'inf', field: 'n' },
-	{ words: 'advancement', field: 'g' },
-	{ words: 'adv', field: 'g' },
-	{ words: 'link', field: 'l' },
-	{ words: 'trash', field: 'h' },
-	{ words: 'printed subroutines', field: 'num_printed_subroutines' },
-	{ words: 'printed subroutine', field: 'num_printed_subroutines' },
-	{ words: 'subroutines', field: 'num_printed_subroutines' },
-	{ words: 'subroutine', field: 'num_printed_subroutines' },
-	{ words: 'subs', field: 'num_printed_subroutines' },
-	{ words: 'sub', field: 'num_printed_subroutines' }
-];
-
-const WORD_TO_FIELD = new Map(NUMERIC_FIELDS.map((f) => [f.words, f.field]));
+export const NUMERIC_FIELD_MAP = phraseMap<string>({
+	'advancement requirement': 'g',
+	'advancement cost': 'g',
+	'agenda points': 'v',
+	'agenda point': 'v',
+	points: 'v',
+	point: 'v',
+	'influence cost': 'n',
+	'memory cost': 'm',
+	'base link': 'l',
+	'trash cost': 'h',
+	'rez cost': 'o',
+	'play cost': 'o',
+	'install cost': 'o',
+	cost: 'o',
+	strength: 'p',
+	str: 'p',
+	mu: 'm',
+	memory: 'm',
+	influence: 'n',
+	inf: 'n',
+	advancement: 'g',
+	adv: 'g',
+	link: 'l',
+	trash: 'h',
+	'printed subroutines': 'num_printed_subroutines',
+	'printed subroutine': 'num_printed_subroutines',
+	subroutines: 'num_printed_subroutines',
+	subroutine: 'num_printed_subroutines',
+	subs: 'num_printed_subroutines',
+	sub: 'num_printed_subroutines'
+});
 
 export function wordToField(word: string): string | undefined {
-	return WORD_TO_FIELD.get(word.trim().toLowerCase().replace(/\s+/g, ' '));
+	return NUMERIC_FIELD_MAP.get(word.trim().toLowerCase().replace(/\s+/g, ' '));
 }
 
+// Every numeric field phrase joined with `|` for the numeric regexes. Longer phrases go
+// first so "advancement cost" isn't matched as just "advancement".
 export function buildNumericFieldPattern(): string {
-	return [...NUMERIC_FIELDS]
-		.sort((a, b) => b.words.split(/\s+/).length - a.words.split(/\s+/).length)
-		.map((f) => f.words.replace(/[-]/g, '\\-').replace(/\s+/g, '\\s+'))
+	return [...NUMERIC_FIELD_MAP.keys()]
+		.sort((a, b) => b.split(/\s+/).length - a.split(/\s+/).length)
+		.map((phrase) => phrase.replace(/[-]/g, '\\-').replace(/\s+/g, '\\s+'))
 		.join('|');
 }
