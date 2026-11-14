@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { buildCompletionTiers, getGhostRemainder, getWordRangeAtCursor } from './ghost';
+import { buildCompletionTiers, getCompletionRemainder, getWordRangeAtCursor } from './completion';
 import { populateSubtypeMap } from './vocabulary';
 import { SUBTYPE_FIXTURE } from './subtypes.fixture';
 
@@ -53,48 +53,47 @@ describe('buildCompletionTiers', () => {
 	});
 });
 
-describe('getGhostRemainder', () => {
+describe('getCompletionRemainder', () => {
 	it('completes a card type', () => {
-		expect(getGhostRemainder('eve', 3)).toBe('nt');
+		expect(getCompletionRemainder('eve', 3)).toBe('nt');
 	});
 
 	it('completes a faction', () => {
-		expect(getGhostRemainder('sha', 3)).toBe('per');
+		expect(getCompletionRemainder('sha', 3)).toBe('per');
 	});
 
 	it('completes a subtype', () => {
-		expect(getGhostRemainder('iceb', 4)).toBe('reaker');
+		expect(getCompletionRemainder('iceb', 4)).toBe('reaker');
 	});
 
 	it('completes a boolean', () => {
-		expect(getGhostRemainder('uni', 3)).toBe('que');
+		expect(getCompletionRemainder('uni', 3)).toBe('que');
 	});
 
 	it('prefers earlier tiers when several match', () => {
-		// "pro" matches card type "program" before any subtype.
-		expect(getGhostRemainder('pro', 3)).toBe('gram');
+		// "co" matches the card type "corp identity" and subtypes like "code gate".
+		expect(getCompletionRemainder('co', 2)).toBe('rp identity');
 	});
 
 	it('returns empty for words shorter than two characters', () => {
-		expect(getGhostRemainder('e', 1)).toBe('');
+		expect(getCompletionRemainder('e', 1)).toBe('');
 	});
 
 	it('returns empty when the word is already complete', () => {
-		expect(getGhostRemainder('event', 5)).toBe('');
+		expect(getCompletionRemainder('event', 5)).toBe('');
 	});
 
 	it('returns empty when nothing matches', () => {
-		expect(getGhostRemainder('zzz', 3)).toBe('');
+		expect(getCompletionRemainder('zzz', 3)).toBe('');
 	});
 
 	it('only completes the word at the cursor', () => {
-		// "event " has a trailing space; the word at the cursor is empty.
-		expect(getGhostRemainder('event ', 6)).toBe('');
+		expect(getCompletionRemainder('event ', 6)).toBe('');
 	});
 
 	it('completes the whole word when the cursor sits inside it', () => {
-		expect(getGhostRemainder('jin', 1)).toBe('teki');
-		expect(getGhostRemainder('jin', 2)).toBe('teki');
+		expect(getCompletionRemainder('jin', 1)).toBe('teki');
+		expect(getCompletionRemainder('jin', 2)).toBe('teki');
 	});
 });
 

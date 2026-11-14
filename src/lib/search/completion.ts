@@ -58,25 +58,24 @@ export function buildCompletionTiers(): string[][] {
 
 // The bounds of the word the cursor is in.
 export function getWordRangeAtCursor(
-	text: string,
-	cursorPosition: number
+	input: string,
+	cursor: number
 ): { start: number; end: number } {
-	if (cursorPosition < 0 || cursorPosition > text.length) return { start: 0, end: 0 };
+	if (cursor < 0 || cursor > input.length) return { start: 0, end: 0 };
 
-	const beforeCursor = text.substring(0, cursorPosition);
-	const afterCursor = text.substring(cursorPosition);
+	const beforeCursor = input.substring(0, cursor);
+	const afterCursor = input.substring(cursor);
 
 	const start = beforeCursor.lastIndexOf(' ') + 1;
 	const space = afterCursor.indexOf(' ');
-	const end = space === -1 ? text.length : cursorPosition + space;
+	const end = space === -1 ? input.length : cursor + space;
 
 	return { start, end };
 }
 
-// The rest of the word we can fill in, or '' if there's nothing to suggest.
-export function getGhostRemainder(text: string, cursor: number): string {
-	const { start, end } = getWordRangeAtCursor(text, cursor);
-	const word = text.substring(start, end);
+export function getCompletionRemainder(input: string, cursor: number): string {
+	const { start, end } = getWordRangeAtCursor(input, cursor);
+	const word = input.substring(start, end);
 	if (word.length < 2) return '';
 	const lower = word.toLowerCase();
 	for (const tier of buildCompletionTiers()) {
