@@ -16,7 +16,6 @@ export const NRDB_SQLITE_NAME = 'netrunnerdb.sqlite3';
 export const CURRENT_SQLITE_URL_FILENAME = 'current_sqlite_url';
 export const NRDB_CACHE_COOKIE = 'nrdb_cache';
 export const SEARCH_LIMIT = 20;
-export const SEARCH_PREVIEW_LIMIT = 5;
 
 export const SEARCH_MODE_OPTIONS: { value: SearchMode; label: string }[] = [
 	{ value: 'interpreted', label: 'Interpreted' },

@@ -125,11 +125,17 @@ test.describe('Theme toggle', () => {
 
 test.describe('Search input', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('/');
+		await page.goto('/sets');
 	});
 
-	test('Search input is visible in navigation', async ({ page }) => {
-		await expect(searchInput(page)).toBeVisible();
+	test('Search input is in the homepage body, and in the navigation elsewhere', async ({
+		page
+	}) => {
+		await expect(page.locator('.navigation').locator(searchInput(page))).toBeVisible();
+
+		await page.goto('/');
+		await expect(page.locator('main').locator(searchInput(page))).toBeVisible();
+		await expect(page.locator('.navigation').locator(searchInput(page))).toHaveCount(0);
 	});
 
 	test('Typing opens the search dropdown', async ({ page }) => {
@@ -167,16 +173,27 @@ test.describe('Search input', () => {
 		await expect(searchDropdown(page).locator('.card-grid-item a').first()).toBeVisible();
 	});
 
-	test('Dropdown is not visible when input is empty', async ({ page }) => {
+	test('Focusing the empty input shows the filters without results', async ({ page }) => {
 		await searchInput(page).click();
-		await expect(searchDropdown(page)).not.toBeVisible();
+		await expect(searchDropdown(page)).toBeVisible();
+		await expect(interpretedSearchToggle(page)).toBeVisible();
+		await expect(searchDropdown(page).locator('.card-grid')).toHaveCount(0);
 	});
 
-	test('Escape key closes the dropdown', async ({ page }) => {
+	test('Escape closes the dropdown and unfocuses the input', async ({ page }) => {
 		await searchInput(page).fill('archive');
 		await expect(searchDropdown(page)).toBeVisible();
 		await page.keyboard.press('Escape');
 		await expect(searchDropdown(page)).not.toBeVisible();
+		await expect(searchInput(page)).not.toBeFocused();
+	});
+
+	test('Escape from a filter toggle closes the dropdown and unfocuses it', async ({ page }) => {
+		await searchInput(page).click();
+		await interpretedSearchToggle(page).focus();
+		await page.keyboard.press('Escape');
+		await expect(searchDropdown(page)).not.toBeVisible();
+		await expect(page.locator('.search-input-root :focus')).toHaveCount(0);
 	});
 
 	test('Clicking a card result navigates to card page', async ({ page }) => {
@@ -198,16 +215,18 @@ test.describe('Search input', () => {
 	});
 
 	test('Cmd/Ctrl+K focuses the search input', async ({ page }) => {
+		await expect(searchInput(page)).toBeVisible();
 		await page.keyboard.press((await isMac(page)) ? 'Meta+k' : 'Control+k');
 		await expect(searchInput(page)).toBeFocused();
-		await expect(searchDropdown(page)).not.toBeVisible();
+		await expect(searchDropdown(page)).toBeVisible();
 	});
 
-	test('Clearing search query hides the dropdown', async ({ page }) => {
+	test('Clearing search query hides the results', async ({ page }) => {
 		await searchInput(page).fill('abc');
-		await expect(searchDropdown(page)).toBeVisible();
+		await expect(searchDropdown(page).locator('.card-grid')).toHaveCount(1);
 		await searchInput(page).fill('');
-		await expect(searchDropdown(page)).not.toBeVisible();
+		await expect(searchDropdown(page)).toBeVisible();
+		await expect(searchDropdown(page).locator('.card-grid')).toHaveCount(0);
 	});
 
 	test('No results: unsearchable query hides card grid', async ({ page }) => {

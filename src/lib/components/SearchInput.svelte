@@ -1,17 +1,22 @@
 <script lang="ts">
 	import { search_query, search_mode, search_format, db_ready } from '$lib/store';
 	import CardImage from '$lib/components/card/CardImage.svelte';
-	import DecklistSuggestions from '$lib/components/DecklistSuggestions.svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import { onMount } from 'svelte';
 	import type { Card } from '$lib/api.types';
 	import { searchCards } from '$lib/search';
 	import GhostText from '$lib/components/GhostText.svelte';
-	import { SEARCH_MODE_OPTIONS, SEARCH_PREVIEW_LIMIT } from '$lib/constants';
+	import { SEARCH_MODE_OPTIONS } from '$lib/constants';
 	import ToggleGroup from '$lib/components/ui/ToggleGroup.svelte';
 	import { format_toggle_options } from '$lib/i18n';
 	import { m } from '$lib/paraglide/messages.js';
+
+	interface Props {
+		inline?: boolean;
+	}
+
+	let { inline = false }: Props = $props();
 
 	let root_element = $state<HTMLDivElement | null>(null);
 	let input_element = $state<HTMLInputElement | null>(null);
@@ -34,7 +39,6 @@
 		(async () => {
 			try {
 				const { cards, error } = await searchCards(query, {
-					limit: SEARCH_PREVIEW_LIMIT,
 					mode,
 					format
 				});
@@ -106,8 +110,8 @@
 				if (!is_open) return;
 				if (!root_element?.contains(document.activeElement)) return;
 				e.preventDefault();
-				input_element?.focus();
 				is_open = false;
+				(document.activeElement as HTMLElement | null)?.blur();
 			}
 		};
 
@@ -143,7 +147,7 @@
 	});
 </script>
 
-<div class="search-input-root" bind:this={root_element}>
+<div class="search-input-root" class:inline bind:this={root_element}>
 	<form
 		class="search-input-container"
 		role="search"
@@ -158,7 +162,7 @@
 			onInput={() => (is_open = true)}
 		/>
 	</form>
-	{#if is_open && $search_query.length > 0}
+	{#if is_open}
 		<div class="search-dropdown">
 			<div class="search-options">
 				<ToggleGroup
@@ -176,26 +180,25 @@
 					onselect={(next) => ($search_format = next)}
 				/>
 			</div>
-			<h2>Cards</h2>
-			<div class="card-grid">
-				{#each filtered_cards as card (card.id)}
-					<div class="card-grid-item">
-						<CardImage
-							{card}
-							loading="lazy"
-							boxShadow={false}
-							hasTransition={true}
-							href={localizeHref(`/card/${card.id}`)}
-						/>
-					</div>
-				{/each}
-			</div>
-			{#if filtered_cards.length > 0}
-				<a class="search-all" href={results_href($search_query.trim())}>
-					View all results
-				</a>
+			{#if $search_query.length > 0}
+				<p class="search-count">
+					{filtered_cards.length}
+					{filtered_cards.length === 1 ? 'card' : 'cards'}
+				</p>
+				<div class="card-grid">
+					{#each filtered_cards as card (card.id)}
+						<div class="card-grid-item">
+							<CardImage
+								{card}
+								loading="lazy"
+								boxShadow={false}
+								hasTransition={true}
+								href={localizeHref(`/card/${card.id}`)}
+							/>
+						</div>
+					{/each}
+				</div>
 			{/if}
-			<DecklistSuggestions firstCard={filtered_cards[0]} />
 		</div>
 	{/if}
 </div>
@@ -206,7 +209,7 @@
 		width: 100%;
 	}
 
-	.search-input-root:has(.search-dropdown)::after {
+	.search-input-root:not(.inline):has(.search-dropdown)::after {
 		content: '';
 		position: fixed;
 		inset: 0;
@@ -239,7 +242,28 @@
 		padding: 1.5rem;
 		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 		max-height: 75dvh;
-		overflow-x: auto;
+		overflow-y: auto;
+	}
+
+	.inline :global(.ghost-input input),
+	.inline :global(.ghost-input .ghost) {
+		padding: 0.625rem 1rem 0.625rem 2.75rem;
+	}
+
+	.inline :global(.ghost-input .search-icon) {
+		left: 1rem;
+	}
+
+	.inline .search-dropdown {
+		position: static;
+		max-height: none;
+		box-shadow: none;
+		border: none;
+	}
+
+	.search-input-root:has(.search-dropdown) :global(.ghost-input input) {
+		background-color: var(--foreground);
+		box-shadow: inset 0 -1px var(--text-muted);
 	}
 
 	.search-options {
@@ -249,21 +273,22 @@
 		margin-bottom: 1rem;
 	}
 
+	.search-options:last-child {
+		margin-bottom: 0;
+	}
+
+	.search-count {
+		margin: 0 0 1rem;
+		color: var(--text-muted);
+	}
+
 	.card-grid {
-		padding: 0.5rem;
-		display: flex;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 		gap: 1rem;
-		overflow-x: scroll;
 	}
 
-	.card-grid-item {
-		max-width: 200px;
-		display: block;
-		flex: 0 0 auto;
-	}
-
-	.search-all {
-		display: inline-block;
-		padding: 0.5rem;
+	.inline .card-grid {
+		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 	}
 </style>

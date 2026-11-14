@@ -7,6 +7,7 @@
 	import Container from '$lib/components/Container.svelte';
 	import Ghost from '$lib/components/Ghost.svelte';
 	import Meta from '$lib/components/Meta.svelte';
+	import SearchInput from '$lib/components/SearchInput.svelte';
 
 	interface Props {
 		data: {
@@ -30,6 +31,9 @@
 <Meta />
 
 <Container>
+	<div class="home__search">
+		<SearchInput inline />
+	</div>
 	<div class="home">
 		<section class="home__main" data-id="deck-of-the-week">
 			{#await data.decklist_of_the_week}
@@ -70,6 +74,16 @@
 </Container>
 
 <style>
+	.home__search {
+		max-width: 40rem;
+		margin-block-start: 2rem;
+		margin-inline: auto;
+	}
+
+	.home__search:has(:global(.search-dropdown)) {
+		max-width: 56rem;
+	}
+
 	.home {
 		display: grid;
 		grid-template-columns: 5fr 2fr;
