@@ -4,7 +4,7 @@ import type { CardTypeIds, FactionIds } from '$lib/types';
 // Filters are the faction and card type toggles in the deckbuilder toolbar. They mirror the
 // typed input: a toggle is active when the input names it, and toggling edits the input.
 
-export type Filter = { kind: 'faction'; id: FactionIds } | { kind: 'cardType'; id: CardTypeIds };
+export type Filter = { kind: 'faction'; id: FactionIds } | { kind: 'card_type'; id: CardTypeIds };
 
 interface SourceRange {
 	start: number;
@@ -59,7 +59,7 @@ function collectFilterOccurrences({ input, matches }: Interpretation): FilterOcc
 	let cursor = 0;
 
 	for (const match of matches) {
-		if (match.intent.kind !== 'faction' && match.intent.kind !== 'type') continue;
+		if (match.intent.kind !== 'faction' && match.intent.kind !== 'card_type') continue;
 		const source = findPhraseRange(input, match.phrase, cursor);
 		if (!source) continue;
 		cursor = source.end;
@@ -68,7 +68,7 @@ function collectFilterOccurrences({ input, matches }: Interpretation): FilterOcc
 		const filters: Filter[] =
 			match.intent.kind === 'faction'
 				? toArray(match.intent.value).map((id) => ({ kind: 'faction', id }))
-				: toArray(match.intent.value).map((id) => ({ kind: 'cardType', id }));
+				: toArray(match.intent.value).map((id) => ({ kind: 'card_type', id }));
 		occurrences.push({ source, filters });
 	}
 

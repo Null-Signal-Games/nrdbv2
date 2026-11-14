@@ -1,68 +1,72 @@
-import type { Intent, StructuredIntent } from './intents';
+import type { Intent, IntentOrConnective } from './intents';
 
-const KIND_PRIORITY: Record<StructuredIntent['kind'], number> = {
+const KIND_PRIORITY: Record<Intent['kind'], number> = {
 	side: 0,
 	faction: 1,
-	type: 2,
+	card_type: 2,
 	subtype: 3,
 	set: 4,
 	cycle: 5,
-	agendaRatio: 6,
+	agenda_ratio: 6,
 	numeric: 7,
 	boolean: 8,
 	semantic: 9,
 	freeform: 10
 };
 
-interface OrGroupIntent {
+interface OrGroup {
 	kind: 'or_group';
-	members: StructuredIntent[];
+	members: Intent[];
 	priority: number;
 }
 
-type AssemblyItem = StructuredIntent | OrGroupIntent;
+type AssemblyItem = Intent | OrGroup;
 
-function expandForOrGroup(intent: StructuredIntent): StructuredIntent[] {
+// Inside an or-group an any-of intent becomes one member per value, so the group stays flat.
+function expandForOrGroup(intent: Intent): Intent[] {
 	if (intent.kind === 'faction' && Array.isArray(intent.value) && !intent.negated) {
 		return intent.value.map((value) => ({ kind: 'faction', value, negated: false }));
 	}
-	if (intent.kind === 'type' && Array.isArray(intent.value) && !intent.negated) {
-		return intent.value.map((value) => ({ kind: 'type', value, negated: false }));
+	if (intent.kind === 'card_type' && Array.isArray(intent.value) && !intent.negated) {
+		return intent.value.map((value) => ({ kind: 'card_type', value, negated: false }));
 	}
 	return [intent];
 }
 
-// A run of structured intents joined by single or_markers, starting at i.
-// Stops at the first non-marker gap (or a doubled marker like "a or or b").
-function collectOrChain(flat: Intent[], i: number): { members: StructuredIntent[]; next: number } {
-	const members: StructuredIntent[] = [flat[i] as StructuredIntent];
+// A run of intents joined by single connectives, starting at i.
+// Stops at the first gap without one (or a doubled connective like "a or or b").
+function collectOrChain(
+	items: IntentOrConnective[],
+	i: number
+): { members: Intent[]; next: number } {
+	const members: Intent[] = [items[i] as Intent];
 	let j = i + 1;
-	while (flat[j]?.kind === 'or_marker' && flat[j + 1] && flat[j + 1].kind !== 'or_marker') {
-		members.push(flat[j + 1] as StructuredIntent);
+	while (items[j]?.kind === 'or' && items[j + 1] && items[j + 1].kind !== 'or') {
+		members.push(items[j + 1] as Intent);
 		j += 2;
 	}
 	return { members, next: j };
 }
 
-function groupOrIntents(flat: Intent[]): AssemblyItem[] {
+function groupOrChains(items: IntentOrConnective[]): AssemblyItem[] {
 	const result: AssemblyItem[] = [];
 	let i = 0;
 
-	while (i < flat.length) {
-		const cur = flat[i];
+	while (i < items.length) {
+		const cur = items[i];
 
-		if (cur.kind === 'or_marker') {
-			i++; // orphaned marker, nothing to anchor it to
+		if (cur.kind === 'or') {
+			i++; // orphaned connective, nothing to anchor it to
 			continue;
 		}
 
-		const chain = collectOrChain(flat, i);
+		const chain = collectOrChain(items, i);
 		if (chain.members.length > 1) {
 			const members = chain.members.flatMap(expandForOrGroup);
 			const priority = Math.min(...members.map((m) => KIND_PRIORITY[m.kind]));
 			result.push({ kind: 'or_group', members, priority });
 		} else {
-			result.push(cur as StructuredIntent);
+			result.push(cur);
 		}
 		i = chain.next;
 	}
@@ -70,7 +74,7 @@ function groupOrIntents(flat: Intent[]): AssemblyItem[] {
 	return result;
 }
 
-function arrayFieldStr(prefix: string, v: string | string[], negated: boolean): string {
+function valueTerms(prefix: string, v: string | string[], negated: boolean): string {
 	if (Array.isArray(v)) {
 		// negated array must match none (AND): one negative token each
 		return negated
@@ -80,14 +84,14 @@ function arrayFieldStr(prefix: string, v: string | string[], negated: boolean): 
 	return negated ? `${prefix}!${v}` : `${prefix}:${v}`;
 }
 
-export function intentFilterStr(intent: StructuredIntent): string {
+export function writeIntent(intent: Intent): string {
 	switch (intent.kind) {
 		case 'side':
 			return intent.negated ? `d!${intent.value}` : `d:${intent.value}`;
 		case 'faction':
-			return arrayFieldStr('f', intent.value, intent.negated);
-		case 'type':
-			return arrayFieldStr('t', intent.value, intent.negated);
+			return valueTerms('f', intent.value, intent.negated);
+		case 'card_type':
+			return valueTerms('t', intent.value, intent.negated);
 		case 'subtype':
 			return intent.negated ? `s!${intent.value}` : `s:${intent.value}`;
 		case 'set':
@@ -95,8 +99,8 @@ export function intentFilterStr(intent: StructuredIntent): string {
 		case 'cycle':
 			return intent.negated ? `c!${intent.value}` : `c:${intent.value}`;
 		case 'numeric':
-			return `${intent.field}${intent.op}${intent.value}`;
-		case 'agendaRatio':
+			return `${intent.field}${intent.operator}${intent.value}`;
+		case 'agenda_ratio':
 			return `g:${intent.advancement} v:${intent.points}`;
 		case 'boolean':
 			return `${intent.field}:${intent.value}`;
@@ -108,8 +112,10 @@ export function intentFilterStr(intent: StructuredIntent): string {
 	}
 }
 
-export function assembleOutput(intents: Intent[]): string {
-	const grouped = groupOrIntents(intents);
+// Writes the expression for intents given in input order: or-chains become parenthesized
+// groups, everything is sorted by kind, and freeform words go last.
+export function assembleExpression(intents: IntentOrConnective[]): string {
+	const grouped = groupOrChains(intents);
 
 	const sorted = grouped
 		.map((item, idx) => ({ item, idx }))
@@ -129,11 +135,11 @@ export function assembleOutput(intents: Intent[]): string {
 			continue;
 		}
 		if (item.kind === 'or_group') {
-			const memberStrs = item.members.map((m) => intentFilterStr(m));
+			const memberStrs = item.members.map((m) => writeIntent(m));
 			parts.push(`(${memberStrs.join(' or ')})`);
 			continue;
 		}
-		parts.push(intentFilterStr(item));
+		parts.push(writeIntent(item));
 	}
 
 	parts.push(...freeformParts);

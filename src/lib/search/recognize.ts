@@ -1,9 +1,9 @@
 import type {
 	AgendaRatioIntent,
-	Intent,
 	IntentMatch,
+	IntentOrConnective,
 	NumericIntent,
-	OrMarkerIntent,
+	Connective,
 	SemanticIntent
 } from './intents';
 import {
@@ -16,7 +16,7 @@ import {
 	BOOLEAN_MAP,
 	SEMANTIC_MAP,
 	getMaxPhraseWords,
-	wordToField
+	findNumericField
 } from './vocabulary';
 import {
 	RE_GTE_WORDS,
@@ -96,28 +96,28 @@ export function normalizeInput(input: string): string {
 }
 
 export function extractNumericIntents(normalized: string): {
-	intents: (NumericIntent | AgendaRatioIntent | OrMarkerIntent)[];
+	intents: (NumericIntent | AgendaRatioIntent | Connective)[];
 	remainder: string;
 } {
-	const intents: (NumericIntent | AgendaRatioIntent | OrMarkerIntent)[] = [];
-	const or: OrMarkerIntent = { kind: 'or_marker' };
+	const intents: (NumericIntent | AgendaRatioIntent | Connective)[] = [];
+	const or: Connective = { kind: 'or' };
 
-	const pushNumeric = (fieldWord: string, op: string, n: string) => {
-		const field = wordToField(fieldWord);
-		if (field) intents.push({ kind: 'numeric', field, op, value: parseInt(n, 10) });
+	const pushNumeric = (fieldPhrase: string, operator: string, n: string) => {
+		const field = findNumericField(fieldPhrase);
+		if (field) intents.push({ kind: 'numeric', field, operator, value: parseInt(n, 10) });
 	};
 	const pushCompoundOr = (
-		fieldWord: string,
+		fieldPhrase: string,
 		op1: string,
 		n1: string,
 		op2: string,
 		n2: string
 	) => {
-		const field = wordToField(fieldWord);
+		const field = findNumericField(fieldPhrase);
 		if (!field) return;
-		intents.push({ kind: 'numeric', field, op: op1, value: parseInt(n1, 10) });
+		intents.push({ kind: 'numeric', field, operator: op1, value: parseInt(n1, 10) });
 		intents.push(or);
-		intents.push({ kind: 'numeric', field, op: op2, value: parseInt(n2, 10) });
+		intents.push({ kind: 'numeric', field, operator: op2, value: parseInt(n2, 10) });
 	};
 
 	let remainder = normalized;
@@ -125,7 +125,7 @@ export function extractNumericIntents(normalized: string): {
 	// "5/3s" or "5/3"
 	remainder = remainder.replace(RE_AGENDA_RATIO, (_, advancement, points) => {
 		intents.push({
-			kind: 'agendaRatio',
+			kind: 'agenda_ratio',
 			advancement: parseInt(advancement, 10),
 			points: parseInt(points, 10)
 		});
@@ -194,7 +194,7 @@ export function recognizeIntents(remainder: string): IntentMatch[] {
 
 	while (i < words.length) {
 		const negated = negatedSet.has(i);
-		const intents: Intent[] = [];
+		const intents: IntentOrConnective[] = [];
 		const consumed = matchAt(words, i, negated, intents);
 		const phrase = words.slice(i, i + consumed).join(' ');
 		matches.push(...intents.map((intent) => ({ intent, phrase })));
@@ -205,9 +205,14 @@ export function recognizeIntents(remainder: string): IntentMatch[] {
 }
 
 // Matches the longest phrase at index i and returns words consumed. At each length the
-// lookup order is semantic > boolean > faction > type > subtype > set > cycle > side.
+// lookup order is semantic > boolean > faction > card type > subtype > set > cycle > side.
 // Side comes last and only matches single words, so "corp identity" stays a card type.
-function matchAt(words: string[], i: number, negated: boolean, intents: Intent[]): number {
+function matchAt(
+	words: string[],
+	i: number,
+	negated: boolean,
+	intents: IntentOrConnective[]
+): number {
 	const maxLen = Math.min(getMaxPhraseWords(), words.length - i);
 
 	for (let len = maxLen; len >= 1; len--) {
@@ -234,7 +239,7 @@ function matchAt(words: string[], i: number, negated: boolean, intents: Intent[]
 
 		const cardType = CARD_TYPE_MAP.get(phrase);
 		if (cardType) {
-			intents.push({ kind: 'type', value: cardType, negated });
+			intents.push({ kind: 'card_type', value: cardType, negated });
 			return len;
 		}
 
@@ -265,7 +270,7 @@ function matchAt(words: string[], i: number, negated: boolean, intents: Intent[]
 
 	const word = words[i];
 	if (word === 'or') {
-		intents.push({ kind: 'or_marker' });
+		intents.push({ kind: 'or' });
 		return 1;
 	}
 	// bare digits are leftovers from the numeric pre-pass

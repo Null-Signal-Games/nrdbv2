@@ -51,6 +51,6 @@ export const RE_QUOTED_GROUP = /!?\([^()]*"[^"]+"[^()]*\)/g;
 // NULL so it survives lowercasing/normalization and the numeric pre-pass untouched, and is a
 // single whitespace-free token so recognizeIntents keeps it whole. Restoring it in place
 // (rather than extracting and re-appending) preserves its position relative to `or` - pulling
-// quoted terms out would orphan the or-marker and turn `x:"tag" or x:"damage"` into an AND.
+// quoted terms out would orphan the or connective and turn `x:"tag" or x:"damage"` into an AND.
 // oxlint-disable-next-line no-control-regex -- NULL is an intentional, collision-proof delimiter
 export const RE_PLACEHOLDER = /^\x00(\d+)\x00$/;

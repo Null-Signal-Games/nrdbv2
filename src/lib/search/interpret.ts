@@ -6,7 +6,7 @@ import {
 	recognizeIntents,
 	restoreQuotedTerms
 } from './recognize';
-import { assembleOutput } from './assemble';
+import { assembleExpression } from './assemble';
 
 export interface Interpretation {
 	input: string;
@@ -21,6 +21,9 @@ export function interpret(input: string): Interpretation {
 	const normalized = normalizeInput(remainder);
 	const { intents: numericIntents, remainder: afterNumeric } = extractNumericIntents(normalized);
 	const matches = restoreQuotedTerms(recognizeIntents(afterNumeric), terms);
-	const expression = assembleOutput([...numericIntents, ...matches.map(({ intent }) => intent)]);
+	const expression = assembleExpression([
+		...numericIntents,
+		...matches.map(({ intent }) => intent)
+	]);
 	return { input, expression, matches };
 }

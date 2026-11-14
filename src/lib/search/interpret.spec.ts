@@ -180,7 +180,7 @@ describe('interpret - literal NRDB syntax (quoted field values)', () => {
 		expectTransform('shaper x:"end the run"', 'f:shaper x:"end the run"');
 	});
 
-	it('still treats a bare quoted phrase as a semantic search', () => {
+	it('still treats a bare quoted phrase as a title/text search', () => {
 		expectTransform('"end the run"', '"end the run"');
 	});
 

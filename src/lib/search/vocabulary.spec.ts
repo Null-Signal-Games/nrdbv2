@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import {
 	SUBTYPE_MAP,
 	NUMERIC_FIELD_MAP,
-	wordToField,
+	findNumericField,
 	buildNumericFieldPattern,
 	populateSubtypeMap
 } from './vocabulary';
@@ -10,16 +10,16 @@ import { SUBTYPE_FIXTURE } from './subtypes.fixture';
 
 beforeAll(() => populateSubtypeMap(SUBTYPE_FIXTURE));
 
-describe('wordToField', () => {
+describe('findNumericField', () => {
 	it('normalizes whitespace and case', () => {
-		expect(wordToField('  STRENGTH  ')).toBe('p');
-		expect(wordToField('Rez Cost')).toBe('o');
+		expect(findNumericField('  STRENGTH  ')).toBe('p');
+		expect(findNumericField('Rez Cost')).toBe('o');
 	});
 
-	it('returns undefined for unknown words', () => {
-		expect(wordToField('foobar')).toBeUndefined();
-		expect(wordToField('')).toBeUndefined();
-		expect(wordToField('damage')).toBeUndefined();
+	it('returns undefined for unknown phrases', () => {
+		expect(findNumericField('foobar')).toBeUndefined();
+		expect(findNumericField('')).toBeUndefined();
+		expect(findNumericField('damage')).toBeUndefined();
 	});
 });
 
