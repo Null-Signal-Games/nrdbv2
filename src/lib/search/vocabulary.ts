@@ -1,4 +1,5 @@
 import type { CardTypeIds, FactionIds } from '$lib/types';
+import type { BooleanField, NumericField } from './intents';
 
 // id/name pairs for dynamic vocab, decoupled from any store/filter type.
 export interface VocabOption {
@@ -68,74 +69,73 @@ export const CARD_TYPE_MAP = phraseMap<CardTypeIds | CardTypeIds[]>({
 	id: ['corp_identity', 'runner_identity']
 });
 
-// Populated at runtime by populateSubtypeMap; maps a typed phrase to its `s:` filter token.
+// Populated at runtime by populateSubtypeMap; maps a phrase to the subtype's lowercased name.
 export const SUBTYPE_MAP = new Map<string, string>();
 
-// Spelling variants not derivable from a canonical subtype name (typed phrase -> `s:` token).
+// Spelling variants not derivable from a canonical subtype name.
 const SUBTYPE_ALIASES = phraseMap<string>({
-	'grey ops': '"gray ops"',
+	'grey ops': 'gray ops',
 	caissa: 'caïssa'
 });
 
-// Negation flips onValue to (1 - onValue) in matchAt
-export const BOOLEAN_MAP = phraseMap<{ field: string; onValue: 1 | 0 }>({
-	trash: { field: 'trash_ability', onValue: 1 },
-	'trash abilities': { field: 'trash_ability', onValue: 1 },
-	'performs trace': { field: 'performs_trace', onValue: 1 },
-	'on encounter': { field: 'on_encounter_effect', onValue: 1 },
-	'gains subroutines': { field: 'gains_subroutines', onValue: 1 },
-	'gains subroutine': { field: 'gains_subroutines', onValue: 1 },
-	'gain subroutines': { field: 'gains_subroutines', onValue: 1 },
-	'additional cost': { field: 'additional_cost', onValue: 1 },
-	unique: { field: 'u', onValue: 1 },
-	trashable: { field: 'trash_ability', onValue: 1 },
-	trace: { field: 'performs_trace', onValue: 1 },
-	traces: { field: 'performs_trace', onValue: 1 },
-	interrupt: { field: 'interrupt', onValue: 1 },
-	interrupts: { field: 'interrupt', onValue: 1 },
-	advanceable: { field: 'advanceable', onValue: 1 }
+export const BOOLEAN_MAP = phraseMap<BooleanField>({
+	trash: 'trash_ability',
+	'trash abilities': 'trash_ability',
+	'performs trace': 'performs_trace',
+	'on encounter': 'on_encounter_effect',
+	'gains subroutines': 'gains_subroutines',
+	'gains subroutine': 'gains_subroutines',
+	'gain subroutines': 'gains_subroutines',
+	'additional cost': 'additional_cost',
+	unique: 'is_unique',
+	trashable: 'trash_ability',
+	trace: 'performs_trace',
+	traces: 'performs_trace',
+	interrupt: 'interrupt',
+	interrupts: 'interrupt',
+	advanceable: 'advanceable'
 });
 
-// Maps a phrase to the card text search tokens it stands for.
-export const SEMANTIC_MAP = phraseMap<string[]>({
-	'once per turn': ['x:"once per turn"'],
-	'once-per-turn': ['x:"once per turn"'],
-	'place advancement counters': ['x:"advancement counter"'],
-	'place advancement counter': ['x:"advancement counter"'],
-	'advancement counters': ['x:"advancement counter"'],
-	'advancement counter': ['x:"advancement counter"'],
-	'place advancement': ['x:"advancement counter"'],
-	'end the run': ['x:"end the run"'],
-	'bad publicity': ['x:"bad publicity"'],
-	'bad pub': ['x:"bad publicity"'],
-	'virus counters': ['x:"virus counter"'],
-	'virus counter': ['x:"virus counter"'],
-	'power counters': ['x:"power counter"'],
-	'power counter': ['x:"power counter"'],
-	'recurring credits': ['x:"recurring"'],
-	'recurring credit': ['x:"recurring"'],
-	'loses credits': ['x:"lose"', 'x:"credit"'],
-	'lose credits': ['x:"lose"', 'x:"credit"'],
-	'loses credit': ['x:"lose"', 'x:"credit"'],
-	'lose credit': ['x:"lose"', 'x:"credit"'],
-	'draw cards': ['x:"draw"'],
-	'draw card': ['x:"draw"'],
-	'gains credits': ['x:"gain"', 'x:"credit"'],
-	'gain credits': ['x:"gain"', 'x:"credit"'],
-	'gains credit': ['x:"gain"', 'x:"credit"'],
-	'gain credit': ['x:"gain"', 'x:"credit"'],
-	'gives tags': ['x:"tag"'],
-	'gives tag': ['x:"tag"'],
-	'give tags': ['x:"tag"'],
-	'give tag': ['x:"tag"'],
-	tags: ['x:"tag"'],
-	tag: ['x:"tag"'],
-	draw: ['x:"draw"'],
-	draws: ['x:"draw"'],
-	'net damage': ['x:"net damage"'],
-	'meat damage': ['x:"meat damage"'],
-	'core damage': ['x:"core damage"'],
-	damage: ['x:"damage"']
+// Maps a phrase to the phrases a card's text must contain.
+export const TEXT_MAP = phraseMap<string[]>({
+	'once per turn': ['once per turn'],
+	'once-per-turn': ['once per turn'],
+	'place advancement counters': ['advancement counter'],
+	'place advancement counter': ['advancement counter'],
+	'advancement counters': ['advancement counter'],
+	'advancement counter': ['advancement counter'],
+	'place advancement': ['advancement counter'],
+	'end the run': ['end the run'],
+	'bad publicity': ['bad publicity'],
+	'bad pub': ['bad publicity'],
+	'virus counters': ['virus counter'],
+	'virus counter': ['virus counter'],
+	'power counters': ['power counter'],
+	'power counter': ['power counter'],
+	'recurring credits': ['recurring'],
+	'recurring credit': ['recurring'],
+	'loses credits': ['lose', 'credit'],
+	'lose credits': ['lose', 'credit'],
+	'loses credit': ['lose', 'credit'],
+	'lose credit': ['lose', 'credit'],
+	'draw cards': ['draw'],
+	'draw card': ['draw'],
+	'gains credits': ['gain', 'credit'],
+	'gain credits': ['gain', 'credit'],
+	'gains credit': ['gain', 'credit'],
+	'gain credit': ['gain', 'credit'],
+	'gives tags': ['tag'],
+	'gives tag': ['tag'],
+	'give tags': ['tag'],
+	'give tag': ['tag'],
+	tags: ['tag'],
+	tag: ['tag'],
+	draw: ['draw'],
+	draws: ['draw'],
+	'net damage': ['net damage'],
+	'meat damage': ['meat damage'],
+	'core damage': ['core damage'],
+	damage: ['damage']
 });
 
 // Populated at runtime by populateDynamicVocab.
@@ -151,7 +151,7 @@ const PHRASE_MAPS: Map<string, unknown>[] = [
 	BOOLEAN_MAP,
 	SET_MAP,
 	CYCLE_MAP,
-	SEMANTIC_MAP
+	TEXT_MAP
 ];
 
 // Cleared whenever a dynamic map is repopulated.
@@ -187,10 +187,6 @@ function populateMap(target: Map<string, string>, options: VocabOption[]) {
 // Excluded so matchAt (which checks subtypes before sides) doesn't shadow the side intent.
 const SUBTYPE_EXCLUSIONS = new Set(SIDE_MAP.keys());
 
-function subtypeToken(lowerName: string): string {
-	return /[\s-]/.test(lowerName) ? `"${lowerName}"` : lowerName;
-}
-
 // Plural of the last word, or null when it is already plural.
 function pluralizeLast(phrase: string): string | null {
 	const words = phrase.split(' ');
@@ -216,45 +212,44 @@ export function populateSubtypeMap(subtypes: VocabOption[]) {
 		const base = name.toLowerCase();
 		if (SUBTYPE_EXCLUSIONS.has(base)) continue;
 
-		const token = subtypeToken(base);
 		const keys = new Set<string>([base]);
 		if (base.includes('-')) keys.add(base.replace(/-/g, ' '));
 		for (const key of [...keys]) {
 			const plural = pluralizeLast(key);
 			if (plural) keys.add(plural);
 		}
-		for (const key of keys) SUBTYPE_MAP.set(key, token);
+		for (const key of keys) SUBTYPE_MAP.set(key, base);
 	}
 
-	for (const [phrase, token] of SUBTYPE_ALIASES) SUBTYPE_MAP.set(phrase, token);
+	for (const [phrase, subtype] of SUBTYPE_ALIASES) SUBTYPE_MAP.set(phrase, subtype);
 	maxPhraseWords = null;
 }
 
-export const NUMERIC_FIELD_MAP = phraseMap<string>({
-	'advancement requirement': 'g',
-	'advancement cost': 'g',
-	'agenda points': 'v',
-	'agenda point': 'v',
-	points: 'v',
-	point: 'v',
-	'influence cost': 'n',
-	'memory cost': 'm',
-	'base link': 'l',
-	'trash cost': 'h',
-	'rez cost': 'o',
-	'play cost': 'o',
-	'install cost': 'o',
-	cost: 'o',
-	strength: 'p',
-	str: 'p',
-	mu: 'm',
-	memory: 'm',
-	influence: 'n',
-	inf: 'n',
-	advancement: 'g',
-	adv: 'g',
-	link: 'l',
-	trash: 'h',
+export const NUMERIC_FIELD_MAP = phraseMap<NumericField>({
+	'advancement requirement': 'advancement_cost',
+	'advancement cost': 'advancement_cost',
+	'agenda points': 'agenda_points',
+	'agenda point': 'agenda_points',
+	points: 'agenda_points',
+	point: 'agenda_points',
+	'influence cost': 'influence_cost',
+	'memory cost': 'memory_usage',
+	'base link': 'base_link',
+	'trash cost': 'trash_cost',
+	'rez cost': 'cost',
+	'play cost': 'cost',
+	'install cost': 'cost',
+	cost: 'cost',
+	strength: 'strength',
+	str: 'strength',
+	mu: 'memory_usage',
+	memory: 'memory_usage',
+	influence: 'influence_cost',
+	inf: 'influence_cost',
+	advancement: 'advancement_cost',
+	adv: 'advancement_cost',
+	link: 'base_link',
+	trash: 'trash_cost',
 	'printed subroutines': 'num_printed_subroutines',
 	'printed subroutine': 'num_printed_subroutines',
 	subroutines: 'num_printed_subroutines',
@@ -263,7 +258,7 @@ export const NUMERIC_FIELD_MAP = phraseMap<string>({
 	sub: 'num_printed_subroutines'
 });
 
-export function findNumericField(phrase: string): string | undefined {
+export function findNumericField(phrase: string): NumericField | undefined {
 	return NUMERIC_FIELD_MAP.get(phrase.trim().toLowerCase().replace(/\s+/g, ' '));
 }
 

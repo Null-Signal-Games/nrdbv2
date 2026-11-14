@@ -12,8 +12,8 @@ beforeAll(() => populateSubtypeMap(SUBTYPE_FIXTURE));
 
 describe('findNumericField', () => {
 	it('normalizes whitespace and case', () => {
-		expect(findNumericField('  STRENGTH  ')).toBe('p');
-		expect(findNumericField('Rez Cost')).toBe('o');
+		expect(findNumericField('  STRENGTH  ')).toBe('strength');
+		expect(findNumericField('Rez Cost')).toBe('cost');
 	});
 
 	it('returns undefined for unknown phrases', () => {
@@ -41,23 +41,23 @@ describe('buildNumericFieldPattern', () => {
 });
 
 describe('SUBTYPE_MAP', () => {
-	it('maps multi-word subtypes with embedded quotes', () => {
-		expect(SUBTYPE_MAP.get('code gate')).toBe('"code gate"');
-		expect(SUBTYPE_MAP.get('code gates')).toBe('"code gate"');
-		expect(SUBTYPE_MAP.get('security protocol')).toBe('"security protocol"');
+	it('maps multi-word subtypes to their name', () => {
+		expect(SUBTYPE_MAP.get('code gate')).toBe('code gate');
+		expect(SUBTYPE_MAP.get('code gates')).toBe('code gate');
+		expect(SUBTYPE_MAP.get('security protocol')).toBe('security protocol');
 	});
 
 	it('maps hyphenated variants', () => {
-		expect(SUBTYPE_MAP.get('consumer-grade')).toBe('"consumer-grade"');
-		expect(SUBTYPE_MAP.get('consumer grade')).toBe('"consumer-grade"');
+		expect(SUBTYPE_MAP.get('consumer-grade')).toBe('consumer-grade');
+		expect(SUBTYPE_MAP.get('consumer grade')).toBe('consumer-grade');
 	});
 
 	it('maps grey/gray ops variants to the same value', () => {
-		expect(SUBTYPE_MAP.get('grey ops')).toBe('"gray ops"');
-		expect(SUBTYPE_MAP.get('gray ops')).toBe('"gray ops"');
+		expect(SUBTYPE_MAP.get('grey ops')).toBe('gray ops');
+		expect(SUBTYPE_MAP.get('gray ops')).toBe('gray ops');
 	});
 
-	it('maps plural forms to singular filter values', () => {
+	it('maps plural forms to the singular name', () => {
 		expect(SUBTYPE_MAP.get('barriers')).toBe('barrier');
 		expect(SUBTYPE_MAP.get('consoles')).toBe('console');
 		expect(SUBTYPE_MAP.get('icebreakers')).toBe('icebreaker');

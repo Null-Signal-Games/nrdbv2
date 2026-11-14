@@ -113,7 +113,7 @@ describe('extractNumericIntents', () => {
 		expect(intents).toHaveLength(1);
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'p',
+			field: 'strength',
 			operator: '>',
 			value: 5
 		});
@@ -125,7 +125,7 @@ describe('extractNumericIntents', () => {
 		expect(intents).toHaveLength(1);
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'p',
+			field: 'strength',
 			operator: '>',
 			value: 5
 		});
@@ -135,7 +135,7 @@ describe('extractNumericIntents', () => {
 		const { intents } = extractNumericIntents('rez cost > 5');
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'o',
+			field: 'cost',
 			operator: '>',
 			value: 5
 		});
@@ -146,14 +146,14 @@ describe('extractNumericIntents', () => {
 		expect(intents).toHaveLength(3);
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'p',
+			field: 'strength',
 			operator: '<',
 			value: 2
 		});
 		expect(intents[1]).toMatchObject({ kind: 'or' });
 		expect(intents[2]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'p',
+			field: 'strength',
 			operator: '>',
 			value: 5
 		});
@@ -164,14 +164,14 @@ describe('extractNumericIntents', () => {
 		expect(intents).toHaveLength(3);
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'p',
+			field: 'strength',
 			operator: '<',
 			value: 2
 		});
 		expect(intents[1]).toMatchObject({ kind: 'or' });
 		expect(intents[2]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'p',
+			field: 'strength',
 			operator: '>',
 			value: 5
 		});
@@ -182,15 +182,15 @@ describe('extractNumericIntents', () => {
 		expect(intents).toHaveLength(3);
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'h',
-			operator: ':',
+			field: 'trash_cost',
+			operator: '=',
 			value: 1
 		});
 		expect(intents[1]).toMatchObject({ kind: 'or' });
 		expect(intents[2]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'h',
-			operator: ':',
+			field: 'trash_cost',
+			operator: '=',
 			value: 2
 		});
 	});
@@ -199,8 +199,8 @@ describe('extractNumericIntents', () => {
 		const { intents } = extractNumericIntents('0 cost');
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
-			field: 'o',
-			operator: ':',
+			field: 'cost',
+			operator: '=',
 			value: 0
 		});
 	});
@@ -239,8 +239,8 @@ describe('extractNumericIntents', () => {
 	it('extracts multiple numeric intents from one string', () => {
 		const { intents } = extractNumericIntents('> 5 strength 0 cost');
 		expect(intents).toHaveLength(2);
-		expect(intents.some((i) => i.kind === 'numeric' && i.field === 'p')).toBe(true);
-		expect(intents.some((i) => i.kind === 'numeric' && i.field === 'o')).toBe(true);
+		expect(intents.some((i) => i.kind === 'numeric' && i.field === 'strength')).toBe(true);
+		expect(intents.some((i) => i.kind === 'numeric' && i.field === 'cost')).toBe(true);
 	});
 });
 
@@ -270,7 +270,7 @@ describe('recognizeIntents', () => {
 	it('matches multi-word subtype as a single intent', () => {
 		const intents = recognizedIntents('code gate');
 		expect(intents).toHaveLength(1);
-		expect(intents[0]).toMatchObject({ kind: 'subtype', value: '"code gate"' });
+		expect(intents[0]).toMatchObject({ kind: 'subtype', value: 'code gate' });
 	});
 
 	it('disambiguates "corp" as side, not subtype', () => {
@@ -313,14 +313,14 @@ describe('recognizeIntents', () => {
 		]);
 	});
 
-	it('negates boolean: non_unique produces value 0', () => {
+	it('negates boolean: non_unique is negated', () => {
 		const intents = recognizedIntents('non_unique');
-		expect(intents[0]).toMatchObject({ kind: 'boolean', field: 'u', value: 0 });
+		expect(intents[0]).toMatchObject({ kind: 'boolean', field: 'is_unique', negated: true });
 	});
 
-	it('positive boolean: unique produces value 1', () => {
+	it('positive boolean: unique is not negated', () => {
 		const intents = recognizedIntents('unique');
-		expect(intents[0]).toMatchObject({ kind: 'boolean', field: 'u', value: 1 });
+		expect(intents[0]).toMatchObject({ kind: 'boolean', field: 'is_unique', negated: false });
 	});
 
 	it('recognizes ids as array-valued card type', () => {
