@@ -113,9 +113,6 @@ export interface IntentMatch {
 	phrase: string;
 }
 
-// Must stay in sync with resolveNeutralFaction on the consuming side.
-export const NEUTRAL_FACTION_OR_QUERY = '(f:neutral_corp or f:neutral_runner)';
-
 export function normalizeInput(input: string): string {
 	return (
 		input
@@ -131,7 +128,7 @@ export function normalizeInput(input: string): string {
 			.replace(RE_FEWER_THAN, '<')
 			.replace(RE_N_OR_MORE, '>=$1')
 			.replace(RE_N_OR_FEWER, '<=$1')
-			// non_ marks a negated word for phase 3
+			// non_ marks a negated word for recognizeIntents
 			.replace(RE_NON_HYPHEN, 'non_$1')
 			.replace(RE_NOT_WORD, 'non_$1')
 	);
@@ -246,9 +243,9 @@ export function recognizeIntents(remainder: string): IntentMatch[] {
 	return matches;
 }
 
-// Matches the longest phrase at index i and returns words consumed. Lookup order
-// semantic > boolean > faction > type > subtype > side keeps single-word side from
-// shadowing "corp"/"runner" subtypes.
+// Matches the longest phrase at index i and returns words consumed. At each length the
+// lookup order is semantic > boolean > faction > type > subtype > set > cycle > side.
+// Side comes last and only matches single words, so "corp identity" stays a card type.
 function matchAt(words: string[], i: number, negated: boolean, intents: Intent[]): number {
 	const maxLen = Math.min(MAX_PHRASE_WORDS, words.length - i);
 
@@ -370,7 +367,7 @@ function groupOrIntents(flat: Intent[]): AssemblyItem[] {
 		const chain = collectOrChain(flat, i);
 		if (chain.members.length > 1) {
 			const members = chain.members.flatMap(expandForOrGroup);
-			const priority = Math.min(...members.map((m) => KIND_PRIORITY[m.kind] ?? 99));
+			const priority = Math.min(...members.map((m) => KIND_PRIORITY[m.kind]));
 			result.push({ kind: 'or_group', members, priority });
 		} else {
 			result.push(cur as StructuredIntent);
@@ -425,10 +422,8 @@ export function assembleOutput(intents: Intent[]): string {
 	const sorted = grouped
 		.map((item, idx) => ({ item, idx }))
 		.sort((a, b) => {
-			const pa =
-				a.item.kind === 'or_group' ? a.item.priority : (KIND_PRIORITY[a.item.kind] ?? 99);
-			const pb =
-				b.item.kind === 'or_group' ? b.item.priority : (KIND_PRIORITY[b.item.kind] ?? 99);
+			const pa = a.item.kind === 'or_group' ? a.item.priority : KIND_PRIORITY[a.item.kind];
+			const pb = b.item.kind === 'or_group' ? b.item.priority : KIND_PRIORITY[b.item.kind];
 			return pa !== pb ? pa - pb : a.idx - b.idx;
 		})
 		.map(({ item }) => item);
