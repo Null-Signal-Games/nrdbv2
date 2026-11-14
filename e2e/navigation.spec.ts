@@ -214,6 +214,33 @@ test.describe('Search input', () => {
 		await expect(searchDropdown(page)).not.toBeVisible();
 	});
 
+	test('Enter with a single card result opens the card modal over the dropdown', async ({
+		page
+	}) => {
+		await waitForSearchDatabase(page);
+		await searchInput(page).fill('Sure Gamble');
+		await expect(searchDropdown(page).locator('.card-grid-item')).toHaveCount(1);
+		await searchInput(page).press('Enter');
+
+		await expect(page.getByRole('dialog', { name: 'Sure Gamble' })).toBeVisible();
+		await expect(page).toHaveURL(/\/sets$/);
+		await expect(searchDropdown(page)).toBeVisible();
+
+		await page.keyboard.press('Escape');
+		await expect(page.locator('.card-modal')).toHaveCount(0);
+		await expect(searchDropdown(page)).toBeVisible();
+	});
+
+	test('Enter with several card results goes to the search page', async ({ page }) => {
+		await waitForSearchDatabase(page);
+		await searchInput(page).fill('t:event');
+		await expect(searchDropdown(page).locator('.card-grid-item').nth(1)).toBeVisible();
+		await searchInput(page).press('Enter');
+
+		await expect(page).toHaveURL(/\/search\?q=t%3Aevent/);
+		await expect(page.locator('.card-modal')).toHaveCount(0);
+	});
+
 	test('Cmd/Ctrl+K focuses the search input', async ({ page }) => {
 		await expect(searchInput(page)).toBeVisible();
 		await page.keyboard.press((await isMac(page)) ? 'Meta+k' : 'Control+k');
