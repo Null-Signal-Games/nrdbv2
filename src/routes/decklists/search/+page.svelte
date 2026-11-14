@@ -11,8 +11,10 @@
 	let has_searched = $state<boolean>(false);
 	let search_error = $state<string | null>(null);
 	let included_cards = $state<ComboboxItem[]>([]);
+	let excluded_cards = $state<ComboboxItem[]>([]);
 
 	const included_cards_label = 'Contains cards';
+	const excluded_cards_label = 'Excludes cards';
 
 	const search = async (event: Event) => {
 		event.preventDefault();
@@ -33,6 +35,13 @@
 
 		if (included_cards.length > 0) {
 			parameters.set('filter[card_id]', included_cards.map((card) => card.id).join(','));
+		}
+
+		if (excluded_cards.length > 0) {
+			parameters.set(
+				'filter[exclude_card_id]',
+				excluded_cards.map((card) => card.id).join(',')
+			);
 		}
 
 		is_searching = true;
@@ -81,6 +90,15 @@
 			label={included_cards_label}
 			value={included_cards}
 			onchange={(next) => (included_cards = next)}
+		/>
+	</div>
+
+	<div class="field field--cards">
+		<span class="field__label" aria-hidden="true">{excluded_cards_label}</span>
+		<CardCombobox
+			label={excluded_cards_label}
+			value={excluded_cards}
+			onchange={(next) => (excluded_cards = next)}
 		/>
 	</div>
 
