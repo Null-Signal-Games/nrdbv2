@@ -1,7 +1,7 @@
 import { FACTIONS } from './constants';
 import type { ActiveCardPoolIds, DeckFormat } from './deck_formats';
 import { faction_name } from './i18n';
-import { normalizedIncludes } from './search/filter';
+import { normalizedIncludes } from './title_match';
 import type { Card, Faction, FactionIds, SidesIds } from './types';
 
 export interface DecklistCatalog {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Combobox, type ComboboxItem, type ComboboxSearch } from '$lib/components/ui/combobox';
 	import { searchCards } from '$lib/search';
-	import { rankCards } from '$lib/search/filter';
+	import { rankCards } from '$lib/title_match';
 	import { db_ready } from '$lib/store';
 
 	interface Props {
