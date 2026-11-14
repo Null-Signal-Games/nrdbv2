@@ -1,8 +1,18 @@
 import { NRDB_API_URL } from '$lib/constants';
-import type { PageServerLoad } from './$types';
+import { fail, isHttpError, redirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 import { isDeckFormat, type ActiveCardPoolIds } from '$lib/deck_formats';
-import type { Card, CollectionResponse, Faction, Format } from '$lib/types';
+import type {
+	Card,
+	CollectionResponse,
+	Decklist,
+	Faction,
+	Format,
+	SingleResponse
+} from '$lib/types';
 import { cache_guard } from '$lib/server/guard';
+import { fetch_private } from '$lib/server/private_api';
+import { localizeHref } from '$lib/paraglide/runtime';
 
 const IDENTITY_TYPES = ['corp_identity', 'runner_identity'] as const;
 
@@ -50,4 +60,46 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
 	return {
 		...(coldData ?? {})
 	};
+};
+
+export const actions: Actions = {
+	save: async (event) => {
+		let draft;
+		try {
+			const { identity_card_id, side_id, card_slots } = JSON.parse(
+				String((await event.request.formData()).get('draft'))
+			);
+			draft = { identity_card_id, side_id, card_slots };
+		} catch {
+			return fail(400, { message: 'The deck could not be read.' });
+		}
+
+		let id: string;
+		try {
+			const response = await fetch_private(event, '/decks', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/vnd.api+json' },
+				body: JSON.stringify({
+					data: {
+						type: 'decks',
+						attributes: {
+							...draft,
+							name: 'Untitled deck',
+							follows_basic_deckbuilding_rules: true,
+							notes: '',
+							tags: []
+						}
+					}
+				})
+			});
+			if (!response.ok)
+				return fail(response.status, { message: 'Your deck could not be saved.' });
+			({ id } = ((await response.json()) as SingleResponse<Decklist>).data);
+		} catch (cause) {
+			if (isHttpError(cause)) return fail(cause.status, { message: cause.body.message });
+			return fail(500, { message: 'Your deck could not be saved.' });
+		}
+
+		redirect(303, localizeHref(`/decks/${encodeURIComponent(id)}`));
+	}
 };

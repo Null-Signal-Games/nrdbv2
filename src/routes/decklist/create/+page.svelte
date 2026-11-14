@@ -1,5 +1,9 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
+	import { enhance } from '$app/forms';
+	import { signIn } from '@auth/sveltekit/client';
+	import Button from '$lib/components/ui/Button.svelte';
+	import type { CardSlots } from '$lib/components/decklist/card_slots';
 	import Container from '$lib/components/Container.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import { page } from '$app/state';
@@ -11,9 +15,12 @@
 
 	interface Props {
 		data: PageData;
+		form: ActionData;
 	}
 
-	let { data }: Props = $props();
+	let { data, form }: Props = $props();
+
+	let deck = $state<CardSlots>({});
 
 	let catalog = $derived({
 		cards: data.cards ?? [],
@@ -35,7 +42,29 @@
 </script>
 
 {#if identity}
-	<DeckBar on_change_identity={decklistNav.clearIdentity} />
+	<DeckBar on_change_identity={decklistNav.clearIdentity}>
+		{#snippet actions()}
+			{#if form?.message}
+				<span class="save-error" role="alert">{form.message}</span>
+			{/if}
+			{#if page.data.session}
+				<form method="POST" action="?/save" use:enhance>
+					<input
+						type="hidden"
+						name="draft"
+						value={JSON.stringify({
+							identity_card_id: identity.id,
+							side_id: identity.attributes.side_id,
+							card_slots: deck
+						})}
+					/>
+					<Button type="submit" size="sm">Save</Button>
+				</form>
+			{:else}
+				<Button size="sm" onclick={() => signIn('nsg-keycloak')}>Sign in to save</Button>
+			{/if}
+		{/snippet}
+	</DeckBar>
 {:else}
 	<Header title="Build a new deck" subtitle="" />
 {/if}
@@ -49,8 +78,16 @@
 			format={selected.format}
 			on_select_format={decklistNav.selectFormat}
 			on_select_identity={decklistNav.selectIdentity}
+			bind:deck
 		/>
 	{:else}
 		<IdentityPicker {catalog} {selected} />
 	{/if}
 </Container>
+
+<style>
+	.save-error {
+		color: var(--jinteki);
+		font-size: var(--font-size-sm);
+	}
+</style>

@@ -36,6 +36,7 @@
 		format: DeckFormat;
 		on_select_format: (format: DeckFormat) => void;
 		on_select_identity: (identity: TCard['id']) => void;
+		deck?: CardSlots;
 	}
 
 	let {
@@ -44,7 +45,8 @@
 		active_card_pool_ids,
 		format,
 		on_select_format,
-		on_select_identity
+		on_select_identity,
+		deck = $bindable({})
 	}: Props = $props();
 
 	let search_query = $state('');
@@ -53,8 +55,6 @@
 	);
 	let notes_tags = $state('');
 	let notes_body = $state('');
-
-	let deck = $state<CardSlots>({});
 
 	let side = $derived<SidesIds>(identity.attributes.side_id);
 
