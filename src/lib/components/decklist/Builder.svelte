@@ -6,11 +6,7 @@
 	import { collectFactionsInActiveCardPool } from '$lib/identities';
 	import { group_cards_by_type } from '$lib/utils';
 	import { searchCards } from '$lib/search';
-	import {
-		interpretQuery,
-		collectActiveFilters,
-		toggleFilterInQuery
-	} from '$lib/search/interpret';
+	import { interpret, collectActiveFilters, toggleFilterInInput } from '$lib/search/interpret';
 	import { onDestroy } from 'svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { closeCardModal, openCardModal } from '$lib/store';
@@ -49,7 +45,7 @@
 		deck = $bindable({})
 	}: Props = $props();
 
-	let search_query = $state('');
+	let search_input = $state('');
 	let active_tab = $state<'Build' | 'Notes' | 'Check' | 'History' | 'Collection' | 'Settings'>(
 		'Build'
 	);
@@ -58,8 +54,8 @@
 
 	let side = $derived<SidesIds>(identity.attributes.side_id);
 
-	let interpreted_query = $derived(interpretQuery(search_query));
-	let active_filters = $derived(collectActiveFilters(interpreted_query));
+	let interpretation = $derived(interpret(search_input));
+	let active_filters = $derived(collectActiveFilters(interpretation));
 	let faction_filters = $derived(
 		active_filters.flatMap((filter) => (filter.kind === 'faction' ? [filter.id] : []))
 	);
@@ -98,7 +94,7 @@
 	let has_current_results = $state(true);
 
 	$effect(() => {
-		const expression = interpreted_query.expression;
+		const expression = interpretation.expression;
 
 		if (!expression.trim() && format === 'all') {
 			search_results = side_cards;
@@ -124,11 +120,11 @@
 	});
 
 	const on_toggle_faction_change = (faction_id: FactionIds) => {
-		search_query = toggleFilterInQuery(interpreted_query, { kind: 'faction', id: faction_id });
+		search_input = toggleFilterInInput(interpretation, { kind: 'faction', id: faction_id });
 	};
 
 	const on_toggle_type_change = (card_type_id: CardTypeIds) => {
-		search_query = toggleFilterInQuery(interpreted_query, {
+		search_input = toggleFilterInInput(interpretation, {
 			kind: 'cardType',
 			id: card_type_id
 		});
@@ -185,7 +181,7 @@
 
 	const select_identity = (card: TCard) => {
 		on_select_identity(card.id);
-		search_query = '';
+		search_input = '';
 		closeCardModal();
 	};
 
@@ -291,7 +287,7 @@
 						type="search"
 						placeholder="Find a card or filter the list"
 						autocomplete="off"
-						bind:value={search_query}
+						bind:value={search_input}
 					/>
 				</form>
 

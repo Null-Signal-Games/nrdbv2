@@ -1,6 +1,6 @@
 import { sql } from '$lib/sqlite';
-import { interpretSearch } from '$lib/search/interpret';
-import { translateToQuery, type TranslateOptions } from '$lib/search/translate';
+import { interpret } from '$lib/search/interpret';
+import { compileExpression, type CompileOptions } from '$lib/search/compile';
 import { populateDynamicVocab, type VocabOption } from '$lib/search/vocabulary';
 import { adaptCard } from '$lib/adapter';
 import type { Card } from '$lib/api.types';
@@ -8,25 +8,25 @@ import type { UnifiedCardRow } from '$lib/sqlite.types';
 
 export type SearchMode = 'literal' | 'interpreted';
 
-export interface SearchCardsOptions extends TranslateOptions {
+export interface SearchCardsOptions extends CompileOptions {
 	mode?: SearchMode;
 }
 
-// Card search runs in four steps: optionally interpret -> translate -> run -> adapt.
+// Card search runs in four steps: optionally interpret -> compile -> run -> adapt.
 export async function searchCards(
 	input: string,
 	options: SearchCardsOptions = {}
 ): Promise<{ cards: Card[]; error: Error | null }> {
-	const { mode = 'literal', ...translate_options } = options;
-	// 1. expression: literal NRDB syntax or natural-language words -> NRDB search expression
-	const expression = mode === 'interpreted' ? interpretSearch(input) : input;
-	// 2. translate: expression -> SQL
-	const { sql: text, params, error } = translateToQuery(expression, translate_options);
-	if (error || !text) {
+	const { mode = 'literal', ...compileOptions } = options;
+	// 1. interpret: typed input -> NRDB search expression
+	const expression = mode === 'interpreted' ? interpret(input).expression : input;
+	// 2. compile: expression -> SQL
+	const { sql: statement, params, error } = compileExpression(expression, compileOptions);
+	if (error || !statement) {
 		return { cards: [], error };
 	}
-	// 3. run: execute against the local SQLite database
-	const rows = (await sql(text, ...params)) as UnifiedCardRow[];
+	// 3. run: execute the SQL against the local SQLite database
+	const rows = (await sql(statement, ...params)) as UnifiedCardRow[];
 	// 4. adapt: rows -> Card objects
 	return { cards: rows.map(adaptCard), error: null };
 }

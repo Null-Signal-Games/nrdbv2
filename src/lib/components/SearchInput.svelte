@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {
-		search_query,
+		search_input,
 		search_mode,
 		search_format,
 		db_ready,
@@ -33,9 +33,9 @@
 	let search_request_id = 0;
 
 	$effect(() => {
-		const query = $search_query.trim();
+		const input = $search_input.trim();
 
-		if (!is_open || !$db_ready || !query) {
+		if (!is_open || !$db_ready || !input) {
 			filtered_cards = [];
 			results_ready = false;
 			return;
@@ -48,7 +48,7 @@
 
 		(async () => {
 			try {
-				const { cards, error } = await searchCards(query, {
+				const { cards, error } = await searchCards(input, {
 					mode,
 					format
 				});
@@ -82,14 +82,14 @@
 		is_open = false;
 	});
 
-	const results_href = (query: string) => localizeHref(`/search?q=${encodeURIComponent(query)}`);
+	const results_href = (input: string) => localizeHref(`/search?q=${encodeURIComponent(input)}`);
 
 	const submit = (event: SubmitEvent) => {
 		event.preventDefault();
 
-		const query = $search_query.trim();
+		const input = $search_input.trim();
 
-		if (!query) {
+		if (!input) {
 			return;
 		}
 
@@ -100,7 +100,7 @@
 
 		is_open = false;
 		input_element?.blur();
-		goto(results_href(query));
+		goto(results_href(input));
 	};
 
 	onMount(() => {
@@ -180,7 +180,7 @@
 		onsubmit={submit}
 	>
 		<GhostText
-			bind:value={$search_query}
+			bind:value={$search_input}
 			bind:inputElement={input_element}
 			onFocus={() => (is_open = true)}
 			onInput={() => (is_open = true)}
@@ -204,7 +204,7 @@
 					onselect={(next) => ($search_format = next)}
 				/>
 			</div>
-			{#if $search_query.length > 0}
+			{#if $search_input.length > 0}
 				<p class="search-count">
 					{filtered_cards.length}
 					{filtered_cards.length === 1 ? 'card' : 'cards'}

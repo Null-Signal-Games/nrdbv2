@@ -4,7 +4,7 @@ import type { Card, Printing } from './types';
 import type { SearchMode } from './search';
 import type { DeckFormat } from './deck_formats';
 
-export const search_query = writable<string>('');
+export const search_input = writable<string>('');
 
 export const DEFAULT_SEARCH_MODE: SearchMode = 'interpreted';
 
