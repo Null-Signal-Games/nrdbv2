@@ -4,10 +4,13 @@
 	import Meta from '$lib/components/Meta.svelte';
 	import CardMeta from '$lib/components/card/Meta.svelte';
 	import CardImage from '$lib/components/card/CardImage.svelte';
+	import CardCost from '$lib/components/card/CardCost.svelte';
+	import CardStat from '$lib/components/card/CardStat.svelte';
+	import CardStats from '$lib/components/card/CardStats.svelte';
+	import { getCardModalStats } from '$lib/components/card/modal-stats';
 	import Review from '$lib/components/review/Item.svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import { card_types, card_sub_types, factions } from '$lib/i18n';
-	import Influence from '$lib/components/Influence.svelte';
+	import { card_types, card_sub_types } from '$lib/i18n';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import { createHref } from '$lib/decklist_params';
 	import { getHighResImage } from '$lib/utils';
@@ -24,6 +27,12 @@
 	}
 
 	let { data }: Props = $props();
+
+	const agenda_stat = $derived(getCardModalStats(data.card.attributes).title);
+
+	const subtypes = $derived(
+		data.card.attributes.card_subtype_ids.map((subtype) => card_sub_types[subtype]).join(', ')
+	);
 </script>
 
 <Meta title={data.card.attributes.title}>
@@ -47,7 +56,11 @@
 </Meta>
 
 <Container>
-	<div class="card-page">
+	<div
+		class="card-page"
+		style="--faction: var(--{data.card.attributes.faction_id}); --faction-contrast: var(--{data
+			.card.attributes.faction_id}-contrast)"
+	>
 		<aside class="rail">
 			<div class="cover">
 				<CardImage card={data.card} hasTransition={true} href={null} />
@@ -80,116 +93,74 @@
 		</aside>
 
 		<div class="main">
-			<div class="title-row">
-				<h1 class="title">{data.card.attributes.title}</h1>
+			<div class="info">
+				<div class="info-head">
+					<div class="title-row">
+						{#if data.card.attributes.cost !== null}
+							<CardCost
+								cost={data.card.attributes.cost}
+								type={data.card.attributes.card_type_id}
+							/>
+						{/if}
+						<h1 class="title">
+							{data.card.attributes.is_unique ? '◆ ' : ''}{data.card.attributes.title}
+						</h1>
 
-				{#if data.card_prev}
-					<Button href={localizeHref(`/card/${data.card_prev.id}`)}>
-						{previous()}
-					</Button>
-				{/if}
-				{#if data.card_next}
-					<Button href={localizeHref(`/card/${data.card_next.id}`)}>
-						{next()}
-					</Button>
-				{/if}
-			</div>
+						{#if data.card_prev}
+							<Button href={localizeHref(`/card/${data.card_prev.id}`)}>
+								{previous()}
+							</Button>
+						{/if}
+						{#if data.card_next}
+							<Button href={localizeHref(`/card/${data.card_next.id}`)}>
+								{next()}
+							</Button>
+						{/if}
+					</div>
 
-			<div>
-				<table>
-					<tbody>
-						<tr>
-							<td>Type</td>
-							<td>
-								<span class="icon-label">
-									<Icon name={data.card.attributes.card_type_id} size="sm" />
-									{card_types[data.card.attributes.card_type_id]}
-								</span>
-							</td>
-						</tr>
-						{#if data.card.attributes.card_subtype_ids.length > 0}
-							<tr>
-								<td>Subtypes</td>
-								<td>
-									{data.card.attributes.card_subtype_ids
-										.map((subtype) => card_sub_types[subtype])
-										.join(', ')}
-								</td>
-							</tr>
-						{/if}
-						<tr>
-							<td>Faction</td>
-							<td>
-								<a
-									href={localizeHref(
-										`/faction/${data.card.attributes.faction_id}`
-									)}
-									class="icon-label"
-								>
-									<span data-faction-theme={data.card.attributes.faction_id}>
-										<Icon name={data.card.attributes.faction_id} size="sm" />
-									</span>
-									{factions[data.card.attributes.faction_id]}
-								</a>
-							</td>
-						</tr>
-						{#if data.card.attributes.influence_cost !== null}
-							<tr>
-								<td>Influence</td>
-								<td>
-									<Influence count={data.card.attributes.influence_cost} />
-								</td>
-							</tr>
-						{/if}
-						<tr>
-							<td>Cost</td>
-							<td>
-								<span class="icon-label">
-									<Icon name="credit" size="sm" />
-									{data.card.attributes.cost}
-								</span>
-							</td>
-						</tr>
-						{#if data.card.attributes.trash_cost}
-							<tr>
-								<td>Trash</td>
-								<td>
-									<span class="icon-label">
-										<Icon name="trash" size="sm" />
-										{data.card.attributes.trash_cost}
-									</span>
-								</td>
-							</tr>
-						{/if}
-					</tbody>
-				</table>
-				<div>
-					{#if data.card.attributes.text}
-						<FormatText text={data.card.attributes.text} />
-					{/if}
-					{#if data.card.attributes.text && data.printings[0]?.attributes.flavor}
-						<br />
-						<hr />
-						<br />
-					{/if}
-					{#if data.printings[0]?.attributes.flavor}
-						<p>Flavor: {data.printings[0].attributes.flavor}</p>
-					{/if}
+					<hr />
+
+					<div class="type-row">
+						<p class="type">
+							<strong>{card_types[data.card.attributes.card_type_id]}</strong
+							>{subtypes ? `: ${subtypes}` : ''}
+						</p>
+						<div class="stats-row">
+							<CardStats attributes={data.card.attributes} link_faction />
+							{#if agenda_stat}
+								<CardStat stat={agenda_stat} />
+							{/if}
+						</div>
+					</div>
 				</div>
 
-				{#if data.printings.length > 0 && data.printings[0].attributes.illustrator_ids.length > 0}
-					<p>
-						<a
-							href={localizeHref(
-								`/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`
-							)}
-							class="underline"
-						>
-							Illustrated by {data.printings[0].attributes.display_illustrators}
-						</a>
-					</p>
-				{/if}
+				<div class="info-body">
+					<hr />
+
+					{#if data.card.attributes.text}
+						<div class="card-text">
+							<FormatText text={data.card.attributes.text} />
+						</div>
+					{/if}
+
+					{#if data.printings[0]?.attributes.flavor}
+						<p class="flavor">{data.printings[0].attributes.flavor}</p>
+					{/if}
+				</div>
 			</div>
+
+			{#if data.printings.length > 0 && data.printings[0].attributes.illustrator_ids.length > 0}
+				<p>
+					<a
+						href={localizeHref(
+							`/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`
+						)}
+						class="underline"
+					>
+						Illustrated by {data.printings[0].attributes.display_illustrators}
+					</a>
+				</p>
+			{/if}
 
 			<div>
 				<div>
@@ -324,7 +295,35 @@
 		min-width: 0;
 	}
 
+	.info-head,
+	.info-body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		background-color: var(--foreground);
+		border: 1px solid var(--border);
+	}
+
+	.info-head {
+		padding: 1.5rem 1.5rem 0;
+		border-bottom: none;
+	}
+
+	.info-body {
+		padding: 0.75rem 1.5rem 1.5rem;
+		border-top: none;
+		box-shadow: 0 6px 12px -6px rgb(0 0 0 / 0.12);
+	}
+
+	.info hr {
+		width: 100%;
+		margin: 0;
+		border: none;
+		border-top: 1px solid var(--border);
+	}
+
 	.title-row {
+		--card-cost-size: 2.5rem;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -336,6 +335,45 @@
 		margin: 0;
 		font-size: var(--font-size-3xl);
 		overflow-wrap: anywhere;
+	}
+
+	.type {
+		margin: 0;
+	}
+
+	.card-text {
+		font-size: var(--font-size-lg);
+		line-height: 1.55;
+	}
+
+	.card-text :global(.formatted-text) {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.card-text :global(p) {
+		margin: 0;
+	}
+
+	.flavor {
+		margin: 0;
+		font-style: italic;
+		color: var(--text-muted);
+	}
+
+	.type-row {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+
+	.stats-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 0.75rem;
 	}
 
 	.reviews {
@@ -361,6 +399,19 @@
 		.cover :global(img.card) {
 			width: min(62%, 300px);
 			margin-inline: auto;
+		}
+	}
+	@media (max-width: 640px) {
+		.info-head {
+			padding: 1.25rem 1.25rem 0;
+		}
+
+		.info-body {
+			padding: 0.75rem 1.25rem 1.25rem;
+		}
+
+		.title {
+			font-size: var(--font-size-2xl);
 		}
 	}
 </style>
