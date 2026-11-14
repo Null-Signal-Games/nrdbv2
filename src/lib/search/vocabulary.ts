@@ -29,7 +29,8 @@ export const FACTION_MAP: Record<string, FactionIds | FactionIds[]> = {
 	neutral: ['neutral_corp', 'neutral_runner']
 };
 
-// Checked before SUBTYPE_MAP to resolve corp/runner ambiguity
+// Checked after every other map, and only for single words. Subtypes named like a side
+// are left out of SUBTYPE_MAP (see SUBTYPE_EXCLUSIONS) so these words always mean the side.
 export const SIDE_MAP: Record<string, string> = {
 	runner: 'runner',
 	corp: 'corp',

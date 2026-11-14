@@ -9,8 +9,6 @@ import {
 import { RE_QUOTED_TERM } from './patterns';
 import type { CardTypeIds, FactionIds } from '$lib/types';
 
-export { NEUTRAL_FACTION_OR_QUERY } from './intents';
-
 // A quoted term swapped out for a positional placeholder. The placeholder is delimited by
 // NULL so it survives lowercasing/normalization and the numeric pre-pass untouched, and is a
 // single whitespace-free token so recognizeIntents keeps it whole. Restoring it in place
