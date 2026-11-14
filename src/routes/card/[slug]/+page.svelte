@@ -5,7 +5,6 @@
 	import CardMeta from '$lib/components/card/Meta.svelte';
 	import CardImage from '$lib/components/card/CardImage.svelte';
 	import Review from '$lib/components/review/Item.svelte';
-	import Header from '$lib/components/Header.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { card_types, card_sub_types, factions } from '$lib/i18n';
 	import Influence from '$lib/components/Influence.svelte';
@@ -47,261 +46,296 @@
 	{/if}
 </Meta>
 
-<!-- <pre>{JSON.stringify(data.card, null, 2)}</pre> -->
-
-<Header title={data.card.attributes.title}>
-	{#snippet actions()}
-		{#if data?.card_prev}
-			<Button href={localizeHref(`/card/${data.card_prev.id}`)}>
-				{previous()}
-			</Button>
-		{/if}
-
-		{#if data?.card_next}
-			<Button href={localizeHref(`/card/${data.card_next.id}`)}>
-				{next()}
-			</Button>
-		{/if}
-	{/snippet}
-
-	<!-- <p>
-        <a
-            href={localizeHref(
-                `/sets/${data.card.card_set_ids[0]}`,
-            )}>{data.card.card_set_names}</a
-        >
-    </p> -->
-</Header>
-
 <Container>
-	<div class="card-details">
-		<CardImage card={data.card} hasTransition={true} href={null} />
-		<div>
-			<table>
-				<tbody>
-					<tr>
-						<td>Type</td>
-						<td>
-							<span class="icon-label">
-								<Icon name={data.card.attributes.card_type_id} size="sm" />
-								{card_types[data.card.attributes.card_type_id]}
-							</span>
-						</td>
-					</tr>
-					{#if data.card.attributes.card_subtype_ids.length > 0}
-						<tr>
-							<td>Subtypes</td>
-							<td>
-								{data.card.attributes.card_subtype_ids
-									.map((subtype) => card_sub_types[subtype])
-									.join(', ')}
-							</td>
-						</tr>
-					{/if}
-					<tr>
-						<td>Faction</td>
-						<td>
-							<a
-								href={localizeHref(`/faction/${data.card.attributes.faction_id}`)}
-								class="icon-label"
-							>
-								<span data-faction-theme={data.card.attributes.faction_id}>
-									<Icon name={data.card.attributes.faction_id} size="sm" />
-								</span>
-								{factions[data.card.attributes.faction_id]}
-							</a>
-						</td>
-					</tr>
-					{#if data.card.attributes.influence_cost !== null}
-						<tr>
-							<td>Influence</td>
-							<td>
-								<Influence count={data.card.attributes.influence_cost} />
-							</td>
-						</tr>
-					{/if}
-					<tr>
-						<td>Cost</td>
-						<td>
-							<span class="icon-label">
-								<Icon name="credit" size="sm" />
-								{data.card.attributes.cost}
-							</span>
-						</td>
-					</tr>
-					{#if data.card.attributes.trash_cost}
-						<tr>
-							<td>Trash</td>
-							<td>
-								<span class="icon-label">
-									<Icon name="trash" size="sm" />
-									{data.card.attributes.trash_cost}
-								</span>
-							</td>
-						</tr>
-					{/if}
-				</tbody>
-			</table>
-			<div>
-				{#if data.card.attributes.text}
-					<FormatText text={data.card.attributes.text} />
-				{/if}
-				{#if data.card.attributes.text && data.printings[0]?.attributes.flavor}
-					<br />
-					<hr />
-					<br />
-				{/if}
-				{#if data.printings[0]?.attributes.flavor}
-					<p>Flavor: {data.printings[0].attributes.flavor}</p>
-				{/if}
+	<div class="card-page">
+		<aside class="rail">
+			<div class="cover">
+				<CardImage card={data.card} hasTransition={true} href={null} />
 			</div>
 
-			{#if data.printings.length > 0 && data.printings[0].attributes.illustrator_ids.length > 0}
-				<p>
-					<a
-						href={localizeHref(
-							`/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`
-						)}
-						class="underline"
-					>
-						Illustrated by {data.printings[0].attributes.display_illustrators}
-					</a>
-				</p>
-			{/if}
-
-			<p>
-				<Button
-					href={localizeHref(`/decklists/search?cards[]=${data.card.id}`)}
-					class="underline"
-				>
+			<div class="actions">
+				<Button href={localizeHref(`/decklists/search?cards[]=${data.card.id}`)}>
 					<Icon name="subroutine" size="sm" />
 					<!-- TODO(i18n) -->
 					Decklists with this card
 				</Button>
-				<Button href={`${NRDB_API_URL}/cards/${data.card.id}`} target="_blank">
+				{#if data.card.attributes.card_type_id.includes('_identity')}
+					<Button
+						href={localizeHref(createHref({ identity: data.card.id }))}
+						color="secondary"
+					>
+						Create deck with this identity
+					</Button>
+				{/if}
+				<Button
+					href={`${NRDB_API_URL}/cards/${data.card.id}`}
+					target="_blank"
+					color="secondary"
+				>
 					<Icon name="subroutine" size="sm" />
 					<!-- TODO(i18n) -->
 					View on NetrunnerDB
 				</Button>
-			</p>
+			</div>
+		</aside>
 
-			{#if data.card.attributes.card_type_id.includes('_identity')}
-				<p>
-					<Button href={localizeHref(createHref({ identity: data.card.id }))}>
-						Create deck with this identity
+		<div class="main">
+			<div class="title-row">
+				<h1 class="title">{data.card.attributes.title}</h1>
+
+				{#if data.card_prev}
+					<Button href={localizeHref(`/card/${data.card_prev.id}`)}>
+						{previous()}
 					</Button>
-				</p>
-			{/if}
-		</div>
-
-		<div>
-			<div>
-				<p>Cycle</p>
-				{#each data.card.attributes.card_cycle_ids as cycle_id, index}
-					<a href={localizeHref(`/cycles/${cycle_id}`)} class="underline">
-						{data.card.attributes.card_cycle_names[index]}
-					</a>
-				{/each}
-			</div>
-			<hr />
-			<div>
-				<p>sets</p>
-				{#each data.card.attributes.card_set_ids as set_id, index}
-					<a href={localizeHref(`/sets/${set_id}`)} class="underline">
-						{data.card.attributes.card_set_names[index]}
-					</a>
-				{/each}
-			</div>
-			<hr />
-			<div>
-				<p>legality</p>
-			</div>
-		</div>
-	</div>
-
-	<div style="display: grid; gap: 1rem;">
-		<!-- PRINTINGS/ALTERNATIVE-ARTS -->
-		{#if data.printings.length > 1}
-			<div class="box">
-				<!-- TODO(i18n) -->
-				<h2>Prints &amp; Alternative Arts</h2>
-				<div>
-					<div
-						style="display: grid; grid-template-columns: repeat(5, minmax(auto, 1fr)); gap: 1rem;"
-					>
-						{#each data.printings as printing (printing.id)}
-							<CardMeta card={printing} title={false}>
-								<CardImage card={printing} href={null} />
-								<!-- <pre>{JSON.stringify(printing, null, 2)}</pre> -->
-								{#snippet content()}
-									Illusrated by <a
-										href={localizeHref(
-											`/illustrators/${printing.attributes.illustrator_ids[0]}`
-										)}>{printing.attributes.display_illustrators}</a
-									>
-								{/snippet}
-							</CardMeta>
-						{/each}
-					</div>
-				</div>
-			</div>
-		{/if}
-
-		<!-- RULINGS -->
-		{#await data.rulings}
-			<Ghost />
-		{:then rulings}
-			<!-- <pre>{JSON.stringify(rulings, null, 2)}</pre> -->
-			<div class="box rulings">
-				<!-- TODO: i18n value for header -->
-				<h2>Rulings</h2>
-				{#if rulings.length > 0}
-					<ul>
-						{#each rulings as ruling (ruling.id)}
-							<RulingItem data={ruling} />
-						{/each}
-					</ul>
-				{:else}
-					<p>No rulings found for this card.</p>
+				{/if}
+				{#if data.card_next}
+					<Button href={localizeHref(`/card/${data.card_next.id}`)}>
+						{next()}
+					</Button>
 				{/if}
 			</div>
-		{:catch error}
-			<p>error loading rulings: {error.message}</p>
-		{/await}
 
-		<!-- REVIEWS -->
-		{#await data.reviews}
-			Loading reviews...
-		{:then reviews}
-			<div class="box reviews">
-				<h2>Reviews</h2>
-				{#each reviews as review (review.id)}
-					<Review {review} />
-				{/each}
+			<div>
+				<table>
+					<tbody>
+						<tr>
+							<td>Type</td>
+							<td>
+								<span class="icon-label">
+									<Icon name={data.card.attributes.card_type_id} size="sm" />
+									{card_types[data.card.attributes.card_type_id]}
+								</span>
+							</td>
+						</tr>
+						{#if data.card.attributes.card_subtype_ids.length > 0}
+							<tr>
+								<td>Subtypes</td>
+								<td>
+									{data.card.attributes.card_subtype_ids
+										.map((subtype) => card_sub_types[subtype])
+										.join(', ')}
+								</td>
+							</tr>
+						{/if}
+						<tr>
+							<td>Faction</td>
+							<td>
+								<a
+									href={localizeHref(
+										`/faction/${data.card.attributes.faction_id}`
+									)}
+									class="icon-label"
+								>
+									<span data-faction-theme={data.card.attributes.faction_id}>
+										<Icon name={data.card.attributes.faction_id} size="sm" />
+									</span>
+									{factions[data.card.attributes.faction_id]}
+								</a>
+							</td>
+						</tr>
+						{#if data.card.attributes.influence_cost !== null}
+							<tr>
+								<td>Influence</td>
+								<td>
+									<Influence count={data.card.attributes.influence_cost} />
+								</td>
+							</tr>
+						{/if}
+						<tr>
+							<td>Cost</td>
+							<td>
+								<span class="icon-label">
+									<Icon name="credit" size="sm" />
+									{data.card.attributes.cost}
+								</span>
+							</td>
+						</tr>
+						{#if data.card.attributes.trash_cost}
+							<tr>
+								<td>Trash</td>
+								<td>
+									<span class="icon-label">
+										<Icon name="trash" size="sm" />
+										{data.card.attributes.trash_cost}
+									</span>
+								</td>
+							</tr>
+						{/if}
+					</tbody>
+				</table>
+				<div>
+					{#if data.card.attributes.text}
+						<FormatText text={data.card.attributes.text} />
+					{/if}
+					{#if data.card.attributes.text && data.printings[0]?.attributes.flavor}
+						<br />
+						<hr />
+						<br />
+					{/if}
+					{#if data.printings[0]?.attributes.flavor}
+						<p>Flavor: {data.printings[0].attributes.flavor}</p>
+					{/if}
+				</div>
+
+				{#if data.printings.length > 0 && data.printings[0].attributes.illustrator_ids.length > 0}
+					<p>
+						<a
+							href={localizeHref(
+								`/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`
+							)}
+							class="underline"
+						>
+							Illustrated by {data.printings[0].attributes.display_illustrators}
+						</a>
+					</p>
+				{/if}
 			</div>
-		{:catch error}
-			<p>error loading comments: {error.message}</p>
-		{/await}
 
-		<!-- <pre>{JSON.stringify(data.card, null, 2)}</pre>
+			<div>
+				<div>
+					<p>Cycle</p>
+					{#each data.card.attributes.card_cycle_ids as cycle_id, index}
+						<a href={localizeHref(`/cycles/${cycle_id}`)} class="underline">
+							{data.card.attributes.card_cycle_names[index]}
+						</a>
+					{/each}
+				</div>
+				<hr />
+				<div>
+					<p>sets</p>
+					{#each data.card.attributes.card_set_ids as set_id, index}
+						<a href={localizeHref(`/sets/${set_id}`)} class="underline">
+							{data.card.attributes.card_set_names[index]}
+						</a>
+					{/each}
+				</div>
+				<hr />
+				<div>
+					<p>legality</p>
+				</div>
+			</div>
+
+			<div style="display: grid; gap: 1rem;">
+				<!-- PRINTINGS/ALTERNATIVE-ARTS -->
+				{#if data.printings.length > 1}
+					<div class="box">
+						<!-- TODO(i18n) -->
+						<h2>Prints &amp; Alternative Arts</h2>
+						<div>
+							<div
+								style="display: grid; grid-template-columns: repeat(5, minmax(auto, 1fr)); gap: 1rem;"
+							>
+								{#each data.printings as printing (printing.id)}
+									<CardMeta card={printing} title={false}>
+										<CardImage card={printing} href={null} />
+										<!-- <pre>{JSON.stringify(printing, null, 2)}</pre> -->
+										{#snippet content()}
+											Illusrated by <a
+												href={localizeHref(
+													`/illustrators/${printing.attributes.illustrator_ids[0]}`
+												)}>{printing.attributes.display_illustrators}</a
+											>
+										{/snippet}
+									</CardMeta>
+								{/each}
+							</div>
+						</div>
+					</div>
+				{/if}
+
+				<!-- RULINGS -->
+				{#await data.rulings}
+					<Ghost />
+				{:then rulings}
+					<!-- <pre>{JSON.stringify(rulings, null, 2)}</pre> -->
+					<div class="box rulings">
+						<!-- TODO: i18n value for header -->
+						<h2>Rulings</h2>
+						{#if rulings.length > 0}
+							<ul>
+								{#each rulings as ruling (ruling.id)}
+									<RulingItem data={ruling} />
+								{/each}
+							</ul>
+						{:else}
+							<p>No rulings found for this card.</p>
+						{/if}
+					</div>
+				{:catch error}
+					<p>error loading rulings: {error.message}</p>
+				{/await}
+
+				<!-- REVIEWS -->
+				{#await data.reviews}
+					Loading reviews...
+				{:then reviews}
+					<div class="box reviews">
+						<h2>Reviews</h2>
+						{#each reviews as review (review.id)}
+							<Review {review} />
+						{/each}
+					</div>
+				{:catch error}
+					<p>error loading comments: {error.message}</p>
+				{/await}
+
+				<!-- <pre>{JSON.stringify(data.card, null, 2)}</pre>
     
             prev:
             <pre>{JSON.stringify(data.card_prev, null, 2)}</pre>
             next:
             <pre>{JSON.stringify(data.card_next, null, 2)}</pre> -->
+			</div>
+		</div>
 	</div>
 </Container>
 
 <HeaderImage card={data.card} />
 
-<pre>{JSON.stringify(data.card, null, 2)}</pre>
-
 <style>
 	/* Temporary styles */
-	.card-details {
+	.card-page {
 		display: grid;
-		grid-template-columns: minmax(240px, 1fr) 2fr 1fr;
+		grid-template-columns: 340px minmax(0, 1fr);
+		gap: 1.5rem;
+		align-items: start;
+		padding-block: 1.5rem 3rem;
+	}
+
+	.rail {
+		position: sticky;
+		top: 1.5rem;
+		display: grid;
 		gap: 1rem;
+	}
+
+	.actions {
+		display: grid;
+		gap: 0.5rem;
+	}
+
+	.actions :global(.button) {
+		width: 100%;
+	}
+
+	.main {
+		display: grid;
+		gap: 1rem;
+		min-width: 0;
+	}
+
+	.title-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.title {
+		flex: 1 1 auto;
+		min-width: 0;
+		margin: 0;
+		font-size: var(--font-size-3xl);
+		overflow-wrap: anywhere;
 	}
 
 	.reviews {
@@ -313,5 +347,20 @@
 		padding: 2rem;
 		border-radius: 0.5rem;
 		background-color: var(--foreground);
+	}
+
+	@media (max-width: 900px) {
+		.card-page {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.rail {
+			position: static;
+		}
+
+		.cover :global(img.card) {
+			width: min(62%, 300px);
+			margin-inline: auto;
+		}
 	}
 </style>
