@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Card } from '$lib/api.types';
 import type { UnifiedCardRow } from '$lib/sqlite.types';
 
-// Mock the DB layer so the vocabulary-loading queries in initSearchVocab are controllable.
 const { sqlMock, interpretMock, compileExpressionMock, adaptCardMock } = vi.hoisted(() => ({
 	sqlMock: vi.fn(),
 	interpretMock: vi.fn(),
@@ -14,7 +13,7 @@ vi.mock('$lib/search/interpret', () => ({ interpret: interpretMock }));
 vi.mock('$lib/search/compile', () => ({ compileExpression: compileExpressionMock }));
 vi.mock('$lib/adapter', () => ({ adaptCard: adaptCardMock }));
 
-import { prepareSearch, searchCards } from './index';
+import { searchCards } from './index';
 
 function mockSuccessfulSearch() {
 	const row = { id: 'row-1' } as UnifiedCardRow;
@@ -30,10 +29,6 @@ function mockSuccessfulSearch() {
 
 	return { row, card };
 }
-
-afterEach(() => {
-	vi.restoreAllMocks();
-});
 
 describe('searchCards', () => {
 	beforeEach(() => {
@@ -94,45 +89,5 @@ describe('searchCards', () => {
 		await searchCards('corp', { format: 'startup' });
 
 		expect(compileExpressionMock).toHaveBeenCalledWith('corp', { format: 'startup' });
-	});
-});
-
-describe('prepareSearch', () => {
-	beforeEach(() => {
-		sqlMock.mockReset();
-		vi.spyOn(console, 'error').mockImplementation(() => {});
-	});
-
-	it('does not signal ready until vocab initialization resolves', async () => {
-		let resolveSql!: (rows: unknown[]) => void;
-		sqlMock.mockReturnValue(
-			new Promise<unknown[]>((resolve) => {
-				resolveSql = resolve;
-			})
-		);
-
-		let ready = false;
-		const done = prepareSearch(() => {
-			ready = true;
-		});
-
-		// Vocab is still pending: readiness must not have been signaled yet.
-		await Promise.resolve();
-		expect(ready).toBe(false);
-
-		resolveSql([]);
-		await done;
-		expect(ready).toBe(true);
-	});
-
-	it('still signals ready when vocab initialization fails', async () => {
-		sqlMock.mockRejectedValue(new Error('db unavailable'));
-
-		let ready = false;
-		await prepareSearch(() => {
-			ready = true;
-		});
-
-		expect(ready).toBe(true);
 	});
 });
