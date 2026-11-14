@@ -9,6 +9,7 @@
 	interface DeckHeaderArgs {
 		identity: Card;
 		name: string;
+		compact?: boolean;
 	}
 
 	const { Story } = defineMeta({
@@ -31,7 +32,7 @@
 
 {#snippet template(args: DeckHeaderArgs)}
 	<div class="preview">
-		<DeckHeader identity={args.identity} name={args.name}>
+		<DeckHeader identity={args.identity} name={args.name} compact={args.compact}>
 			<p class="byline">by Null Signal Games &middot; May 3, 2025</p>
 
 			{#snippet actions()}
@@ -47,6 +48,7 @@
 
 <Story name="Runner" />
 <Story name="Corp" args={{ identity: PRECISION_DESIGN, name: 'Brutal Efficiency' }} />
+<Story name="Compact" args={{ compact: true }} />
 
 <style>
 	.preview {
