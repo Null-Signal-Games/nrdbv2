@@ -2,11 +2,12 @@
 	import { Dialog } from 'bits-ui';
 	import { resolve } from '$app/paths';
 	import type { Card, Printing } from '$lib/types';
-	import RezCost from './RezCost.svelte';
+	import CardCost from './CardCost.svelte';
+	import CardStat from './CardStat.svelte';
+	import CardStats from './CardStats.svelte';
 	import { getCardModalStats } from './modal-stats';
 	import FormatText from '$lib/components/FormatText.svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import Influence from '$lib/components/Influence.svelte';
 	import { card_types } from '$lib/i18n';
 	import { localizeHref } from '$lib/paraglide/runtime';
 
@@ -37,11 +38,6 @@
 
 	const attributes = $derived(printing?.attributes ?? card.attributes);
 	const illustrators = $derived(printing ? get_illustrator_credits(printing) : []);
-	const uses_rez_cost = $derived(
-		attributes.card_type_id === 'ice' ||
-			attributes.card_type_id === 'asset' ||
-			attributes.card_type_id === 'upgrade'
-	);
 	const stats = $derived(getCardModalStats(attributes));
 </script>
 
@@ -52,27 +48,15 @@
 <div class="card-modal__details">
 	<div class="card-modal__title-row">
 		{#if attributes.cost != null}
-			<span class="card-modal__cost" aria-hidden="true">
-				{#if uses_rez_cost}
-					<RezCost class="card-modal__cost-frame" />
-				{:else}
-					<span class="card-modal__cost-frame card-modal__cost-frame--credit"></span>
-				{/if}
-				<span class="card-modal__cost-value">{attributes.cost}</span>
-			</span>
-			<span class="visually-hidden">Cost: {attributes.cost}</span>
+			<CardCost cost={attributes.cost} type={attributes.card_type_id} />
 		{/if}
 		<Dialog.Title class="card-modal__title"
 			>{attributes.is_unique ? '◆ ' : ''}{attributes.title}</Dialog.Title
 		>
 		{#if stats.title}
-			<span class="card-modal__title-stat card-modal__stat" aria-hidden="true">
-				{stats.title.value}
-				{#if stats.title.icon}
-					<Icon name={stats.title.icon} />
-				{/if}
+			<span class="card-modal__title-stat">
+				<CardStat stat={stats.title} icon_size="md" />
 			</span>
-			<span class="visually-hidden">{stats.title.announcement}</span>
 		{/if}
 	</div>
 
@@ -100,31 +84,7 @@
 
 	<hr />
 
-	<div class="card-modal__footer">
-		<span class="card-modal__faction">
-			<Icon name={attributes.faction_id} theme={attributes.faction_id} />
-			{#if attributes.influence_cost}
-				<Influence
-					count={attributes.influence_cost}
-					total={true}
-					theme={attributes.faction_id}
-				/>
-			{/if}
-		</span>
-		{#if stats.footer.length}
-			<span class="card-modal__stats">
-				{#each stats.footer as stat (stat.announcement)}
-					<span class="card-modal__stat" aria-hidden="true">
-						{stat.value}
-						{#if stat.icon}
-							<Icon name={stat.icon} size="sm" />
-						{/if}
-					</span>
-					<span class="visually-hidden">{stat.announcement}</span>
-				{/each}
-			</span>
-		{/if}
-	</div>
+	<CardStats {attributes} spread />
 
 	{#if printing}
 		<hr />
