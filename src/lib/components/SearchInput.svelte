@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { search_query, search_mode, search_format, db_ready } from '$lib/store';
+	import {
+		search_query,
+		search_mode,
+		search_format,
+		db_ready,
+		cardModal,
+		openCardModal
+	} from '$lib/store';
 	import CardImage from '$lib/components/card/CardImage.svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { localizeHref } from '$lib/paraglide/runtime';
@@ -22,6 +29,7 @@
 	let input_element = $state<HTMLInputElement | null>(null);
 	let is_open = $state(false);
 	let filtered_cards = $state<Card[]>([]);
+	let results_ready = $state(false);
 	let search_request_id = 0;
 
 	$effect(() => {
@@ -29,12 +37,14 @@
 
 		if (!is_open || !$db_ready || !query) {
 			filtered_cards = [];
+			results_ready = false;
 			return;
 		}
 
 		const mode = $search_mode;
 		const format = $search_format;
 		const request_id = ++search_request_id;
+		results_ready = false;
 
 		(async () => {
 			try {
@@ -46,6 +56,8 @@
 				if (request_id !== search_request_id) {
 					return;
 				}
+
+				results_ready = true;
 
 				if (error) {
 					filtered_cards = [];
@@ -60,6 +72,7 @@
 
 				console.error('Failed to load search results:', error);
 				filtered_cards = [];
+				results_ready = false;
 			}
 		})();
 	});
@@ -77,6 +90,11 @@
 		const query = $search_query.trim();
 
 		if (!query) {
+			return;
+		}
+
+		if (results_ready && filtered_cards.length === 1) {
+			openCardModal(filtered_cards[0]);
 			return;
 		}
 
@@ -107,7 +125,7 @@
 			}
 
 			if (e.key === 'Escape' || e.key === 'Esc') {
-				if (!is_open) return;
+				if (!is_open || e.defaultPrevented) return;
 				if (!root_element?.contains(document.activeElement)) return;
 				e.preventDefault();
 				is_open = false;
@@ -118,7 +136,13 @@
 		const on_pointer_down = (e: PointerEvent) => {
 			const target = e.target as Node | null;
 
-			if (!is_open || !root_element || !target || root_element.contains(target)) {
+			if (
+				!is_open ||
+				$cardModal ||
+				!root_element ||
+				!target ||
+				root_element.contains(target)
+			) {
 				return;
 			}
 
@@ -128,7 +152,7 @@
 		const on_focus_out = (e: FocusEvent) => {
 			const next = e.relatedTarget as Node | null;
 
-			if (!is_open || !next || !root_element || root_element.contains(next)) {
+			if (!is_open || $cardModal || !next || !root_element || root_element.contains(next)) {
 				return;
 			}
 
