@@ -1,7 +1,7 @@
 import { NRDB_API_URL } from '$lib/constants';
+import { fetch_card_sets } from '$lib/server/card_sets';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import type { Card } from '$lib/types';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const decklist = await fetch(`${NRDB_API_URL}/decklists?filter[id]=${params.id}`);
@@ -21,21 +21,10 @@ export const load: PageServerLoad = async ({ params }) => {
 	);
 	const cards_data = await cards.json();
 
-	const _sets = [
-		...new Set(
-			cards_data.data
-				?.flatMap((card: Card) => card.attributes.card_set_ids)
-				.filter(Boolean) ?? []
-		)
-	];
-
-	const sets = await fetch(`${NRDB_API_URL}/card_sets?filter[id]=${_sets.join(',')}`);
-	const sets_data = await sets.json();
-
 	return {
 		decklist: decklist_data.data[0],
 		identity: identity_data.data,
 		cards: cards_data.data,
-		sets: sets_data.data
+		sets: await fetch_card_sets(fetch, cards_data.data ?? [])
 	};
 };

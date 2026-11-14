@@ -1,78 +1,66 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Header from '$lib/components/Header.svelte';
 	import Container from '$lib/components/Container.svelte';
 	import Meta from '$lib/components/Meta.svelte';
-	import Breakdown from '$lib/components/decklist/Breakdown.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import CardImage from '$lib/components/card/CardImage.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import { localizeHref } from '$lib/paraglide/runtime';
+	import Printer from '$lib/components/Printer.svelte';
+	import DeckHeader from '$lib/components/decklist/DeckHeader.svelte';
+	import DeckDetails from '$lib/components/decklist/DeckDetails.svelte';
+	import DeckExportMenu from '$lib/components/decklist/DeckExportMenu.svelte';
+	import { format_date } from '$lib/utils';
 
 	let { data }: { data: PageData } = $props();
 
-	const identity = $derived(
-		data.cards.find((card) => card.id === data.deck.attributes.identity_card_id)
-	);
+	const attributes = $derived(data.deck.attributes);
+	const identity = $derived(data.cards.find((card) => card.id === attributes.identity_card_id));
 </script>
 
-<Meta title={data.deck.attributes.name} />
+<Meta title={attributes.name} />
 
-<Header title={data.deck.attributes.name}>
-	{#snippet actions()}
-		<Button color="secondary" href={localizeHref('/decks')}>My decks</Button>
-	{/snippet}
-</Header>
-
-<Container>
+<Container class="deck">
 	{#if identity}
-		<section class="identity" aria-label="Identity">
-			<div class="identity__image">
-				<CardImage card={identity} loading="eager" />
-			</div>
-			<p class="identity__name">
-				<span class="identity__faction">
-					<Icon name={identity.attributes.faction_id} size="xl" />
-				</span>
-				{identity.attributes.title}
+		<DeckHeader {identity} name={attributes.name} compact>
+			<p class="deck__byline">
+				Updated <time datetime={attributes.updated_at}
+					>{format_date(attributes.updated_at)}</time
+				>
 			</p>
-		</section>
+
+			{#snippet actions()}
+				<DeckExportMenu decklist={data.deck} cards={data.cards} />
+			{/snippet}
+		</DeckHeader>
+
+		<DeckDetails {identity} decklist={data.deck} cards={data.cards} sets={data.sets} />
+	{:else}
+		<h1>{attributes.name}</h1>
+		<p>The identity for this deck could not be found.</p>
 	{/if}
-	<Breakdown decklist={data.deck} cards={data.cards} />
-	{#if data.deck.attributes.notes?.trim()}
-		<p class="notes">{data.deck.attributes.notes}</p>
+
+	{#if attributes.notes?.trim()}
+		<section class="deck__notes" aria-label="Notes">
+			<h2>Notes</h2>
+			<p>{attributes.notes}</p>
+		</section>
 	{/if}
 </Container>
 
+<Printer decklist={data.deck} cards={data.cards} />
+
 <style>
-	.identity {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-block-end: 2rem;
-	}
-
-	.identity__image {
+	:global(.deck) {
 		display: grid;
-		inline-size: 6rem;
-		flex-shrink: 0;
+		gap: 1.5rem;
+		padding-block: 2rem 3rem;
 	}
 
-	.identity__name {
-		display: flex;
-		min-inline-size: 0;
-		align-items: center;
-		gap: 0.5rem;
+	.deck__byline {
 		margin: 0;
-		overflow-wrap: anywhere;
+		color: var(--text-muted);
+		font-size: var(--font-size-sm);
 	}
 
-	.identity__faction {
-		display: flex;
-		flex-shrink: 0;
-	}
-
-	.notes {
+	.deck__notes p {
+		margin: 0;
 		white-space: pre-line;
 	}
 </style>

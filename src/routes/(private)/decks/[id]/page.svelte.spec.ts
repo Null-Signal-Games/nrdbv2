@@ -14,7 +14,7 @@ const deck: Decklist = {
 };
 
 const render_deck = () =>
-	render(DeckDetail, { data: { locale: 'en' as const, session: null, deck, cards } });
+	render(DeckDetail, { data: { locale: 'en' as const, session: null, deck, cards, sets: [] } });
 
 describe('saved deck detail', () => {
 	it('renders the saved deck details and identity', async () => {
@@ -26,11 +26,10 @@ describe('saved deck detail', () => {
 			.element(page.getByRole('link', { name: /^3× Hedge Fund/ }))
 			.toHaveAttribute('href', '/card/hedge_fund');
 		await expect.element(page.getByText(/Will win worlds/)).toBeVisible();
-		const identity = page.getByRole('region', { name: 'Identity' });
 		await expect
-			.element(identity.getByRole('img', { name: 'Haas-Bioroid: Precision Design' }))
+			.element(page.getByRole('button', { name: 'Haas-Bioroid: Precision Design' }))
 			.toBeVisible();
-		await expect.element(identity.getByText('Haas-Bioroid: Precision Design')).toBeVisible();
-		await expect.element(identity.getByRole('img', { name: 'haas_bioroid' })).toBeVisible();
+		await expect.element(page.getByRole('tab', { name: 'Visual layout' })).toBeVisible();
+		await expect.element(page.getByText(/^Updated [^·]+$/)).toBeVisible();
 	});
 });
