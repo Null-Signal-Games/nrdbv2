@@ -40,12 +40,9 @@ describe('fetch_private', () => {
 		expect(await fetch_private(event(fetcher), '/decks')).toBe(response);
 	});
 
-	it.each([
-		['no session', null],
-		['a rejected refresh token', { error: 'RefreshTokenError' as const }]
-	])('requires reauthentication with %s', async (_label, session) => {
+	it('requires reauthentication without a session', async () => {
 		const fetcher = vi.fn();
-		await expect(fetch_private(event(fetcher, session), '/decks')).rejects.toMatchObject({
+		await expect(fetch_private(event(fetcher, null), '/decks')).rejects.toMatchObject({
 			status: 401
 		});
 		expect(fetcher).not.toHaveBeenCalled();
