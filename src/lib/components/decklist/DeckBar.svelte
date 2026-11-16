@@ -3,16 +3,24 @@
 	import Button from '../ui/Button.svelte';
 
 	interface Props {
+		name: string;
 		on_change_identity: () => void;
 		actions?: Snippet;
 	}
 
-	let { on_change_identity, actions }: Props = $props();
+	let { name = $bindable(), on_change_identity, actions }: Props = $props();
 </script>
 
 <div class="deck-bar">
 	<div class="deck-bar__inner container">
-		<h1>Untitled deck</h1>
+		<input
+			class="deck-bar__name"
+			type="text"
+			aria-label="Deck name"
+			placeholder="Untitled deck"
+			autocomplete="off"
+			bind:value={name}
+		/>
 
 		<div class="deck-bar__actions">
 			<Button color="ghost" size="sm" onclick={on_change_identity}>Change identity</Button>
@@ -42,9 +50,33 @@
 		gap: var(--space-2);
 	}
 
-	h1 {
+	.deck-bar__name {
+		flex: 1 1 16rem;
+		box-sizing: border-box;
 		margin: 0;
+		margin-inline-start: -0.25rem;
+		padding: 0.125rem 0.25rem;
+		border: 1px solid transparent;
+		border-radius: 0.25rem;
+		background: transparent;
+		color: inherit;
+		font: inherit;
 		font-size: var(--font-size-xl);
+		font-weight: var(--font-weight-bold);
 		line-height: var(--leading-tight);
+	}
+
+	.deck-bar__name:hover {
+		border-color: var(--border);
+	}
+
+	.deck-bar__name:focus-visible {
+		border-color: currentColor;
+		outline: none;
+	}
+
+	.deck-bar__name::placeholder {
+		color: var(--text-muted);
+		opacity: 1;
 	}
 </style>
