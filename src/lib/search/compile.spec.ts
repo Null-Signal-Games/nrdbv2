@@ -78,27 +78,21 @@ describe('compileExpression (interpreted input -> SQL)', () => {
 	});
 });
 
-describe('compileExpression constraints', () => {
-	const sideConstraint = { clause: 'unified_cards.side_id = ?', params: ['runner'] };
-
-	it('ANDs the constraint onto the expression, expression parameters first', () => {
-		const result = compileExpression(interpret('corroder').expression, {
-			constraint: sideConstraint
-		});
+describe('compileExpression matchAllWhenBlank', () => {
+	it('selects every card when the expression is blank', () => {
+		const result = compileExpression('', { matchAllWhenBlank: true });
 		expect(result.error).toBeNull();
-		expect(result.sql).toBe(
-			expectedSql(
-				'(lower(unified_cards.stripped_title) LIKE ?) AND (unified_cards.side_id = ?)'
-			)
-		);
-		expect(result.params).toEqual(['%corroder%', 'runner']);
+		expect(result.sql).toBe('SELECT * FROM unified_cards ORDER BY title ASC');
+		expect(result.params).toEqual([]);
 	});
 
-	it('selects a limited constrained result set when the expression is blank', () => {
-		const result = compileExpression('', { constraint: sideConstraint, limit: 101 });
-		expect(result.error).toBeNull();
-		expect(result.sql).toBe(`${expectedSql('unified_cards.side_id = ?')} LIMIT ?`);
-		expect(result.params).toEqual(['runner', 101]);
+	it('changes nothing when a format or side already restricts the search', () => {
+		expect(compileExpression('', { matchAllWhenBlank: true, format: 'startup' })).toEqual(
+			compileExpression('', { format: 'startup' })
+		);
+		expect(compileExpression('', { matchAllWhenBlank: true, side: 'corp' })).toEqual(
+			compileExpression('', { side: 'corp' })
+		);
 	});
 });
 

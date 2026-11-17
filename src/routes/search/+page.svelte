@@ -29,7 +29,6 @@
 
 	type View = 'grid' | 'table';
 
-	const MATCH_ALL = { clause: '1 = 1', params: [] };
 	const ERROR_DELAY_MS = 300;
 
 	let view = $state<View>('grid');
@@ -87,7 +86,7 @@
 		const options = {
 			mode: $search_mode,
 			format: $search_format,
-			constraint: input ? undefined : MATCH_ALL
+			matchAllWhenBlank: true
 		};
 		const request_id = ++search_request_id;
 		let error_timer: ReturnType<typeof setTimeout> | undefined;
