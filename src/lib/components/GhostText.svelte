@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getGhostRemainder, getWordRangeAtCursor } from '$lib/search/ghost';
+	import { getCompletionRemainder, getWordRangeAtCursor } from '$lib/search/completion';
 	import Icon from '$lib/components/Icon.svelte';
 
 	let {
@@ -31,7 +31,7 @@
 	const typed = $derived(value.slice(0, wordEnd));
 	// Completion suffix shown after the typed text, empty when the caret is not at the end
 	const remainder = $derived(
-		wordEnd === value.length ? getGhostRemainder(value, caretPosition) : ''
+		wordEnd === value.length ? getCompletionRemainder(value, caretPosition) : ''
 	);
 
 	// Input events can move the caret, change the selection, or scroll, so re-read all three
