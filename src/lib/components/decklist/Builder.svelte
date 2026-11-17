@@ -333,7 +333,7 @@
 <style>
 	.builder {
 		display: grid;
-		margin-block: 1rem 3rem;
+		margin-block: var(--page-top) var(--page-bottom);
 		gap: var(--space-8);
 		grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
 	}

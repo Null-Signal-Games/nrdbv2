@@ -263,7 +263,6 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 		gap: var(--space-4);
-		margin-block: 2rem;
 	}
 
 	.visually-hidden {

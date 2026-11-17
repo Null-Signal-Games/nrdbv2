@@ -54,6 +54,9 @@
 		--space-8: 2rem;
 		--space-12: 3rem;
 
+		--page-top: var(--space-8);
+		--page-bottom: var(--space-12);
+
 		--background: light-dark(#f4f4f6, #101010);
 		--foreground: light-dark(#ffffff, #141414);
 		--text: light-dark(#000000, #ffffff);
@@ -356,7 +359,7 @@
 	}
 
 	.root:has(header[data-id='page-header'] + article) > article {
-		margin-block: 3rem;
+		margin-block: var(--page-top) var(--page-bottom);
 	}
 
 	.skip-link {

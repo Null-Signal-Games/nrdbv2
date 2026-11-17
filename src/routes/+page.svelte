@@ -76,7 +76,7 @@
 <style>
 	.home__search {
 		max-width: 40rem;
-		margin-block-start: 2rem;
+		margin-block-start: var(--page-top);
 		margin-inline: auto;
 	}
 
@@ -88,7 +88,7 @@
 		display: grid;
 		grid-template-columns: 5fr 2fr;
 		gap: var(--space-8);
-		margin-block: 2rem;
+		margin-block: var(--space-8) var(--page-bottom);
 	}
 
 	.home__heading {
