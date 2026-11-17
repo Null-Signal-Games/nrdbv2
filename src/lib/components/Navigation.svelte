@@ -61,14 +61,14 @@
 		display: grid;
 		grid-template-columns: minmax(min-content, 1fr) minmax(0, 40rem) minmax(min-content, 1fr);
 		align-items: center;
-		gap: 1rem;
+		gap: var(--space-4);
 		padding-block: 0.5rem;
 	}
 
 	.navigation__left {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.navigation__account {
@@ -77,7 +77,7 @@
 
 	.navigation__nav-list {
 		display: flex;
-		gap: 1.25rem;
+		gap: var(--space-4);
 		margin: unset;
 		padding: unset;
 		list-style: none;
@@ -116,7 +116,7 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		text-decoration: none;
 		white-space: nowrap;
 	}

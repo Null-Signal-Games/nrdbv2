@@ -49,7 +49,7 @@
 <style>
 	:global(.deck) {
 		display: grid;
-		gap: 1.5rem;
+		gap: var(--space-6);
 		padding-block: 2rem 3rem;
 	}
 

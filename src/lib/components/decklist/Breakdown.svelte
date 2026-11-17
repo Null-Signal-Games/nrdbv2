@@ -58,7 +58,7 @@
 <style>
 	.decklist-breakdown {
 		columns: 2;
-		column-gap: 2rem;
+		column-gap: var(--space-8);
 	}
 
 	.decklist-breakdown > div {
@@ -68,7 +68,7 @@
 
 	.decklist-breakdown header {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		grid-template-columns: auto 1fr;
 		align-items: center;
 		margin-bottom: 0.5rem;
@@ -80,13 +80,13 @@
 		margin: unset;
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: var(--space-1);
 	}
 
 	.decklist-breakdown li a {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.375rem;
+		gap: var(--space-2);
 		text-decoration: none;
 	}
 

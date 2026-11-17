@@ -21,7 +21,7 @@
 		display: inline-flex;
 		flex-direction: row;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		padding: 0.25rem 0.75rem;
 		border-radius: 9999px;
 		border: #fff solid 1px;

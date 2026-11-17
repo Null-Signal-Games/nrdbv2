@@ -46,13 +46,13 @@
 <style>
 	.illustrators {
 		display: grid;
-		gap: 1.25rem;
+		gap: var(--space-4);
 		grid-template-columns: repeat(3, 1fr);
 	}
 
 	.illustrator-card {
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 		padding: 1rem;
 		border: 1px solid var(--border);
 		background: var(--foreground);
@@ -61,7 +61,7 @@
 
 	.illustrator-card__heading {
 		display: grid;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		color: inherit;
 		text-decoration: none;
 	}
@@ -77,7 +77,7 @@
 
 	.illustrator-card__printings {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 </style>

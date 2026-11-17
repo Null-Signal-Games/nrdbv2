@@ -42,14 +42,14 @@
 	.summary {
 		display: grid;
 		grid-template-columns: 1fr 3fr;
-		gap: 1.5rem;
+		gap: var(--space-6);
 		align-items: start;
 	}
 
 	.summary__details {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.summary__title a {
@@ -63,7 +63,7 @@
 	.summary__identity {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		margin: 0;
 	}
 

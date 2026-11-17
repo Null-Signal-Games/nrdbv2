@@ -29,6 +29,6 @@
 	/* Temporary styles */
 	ul {
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 </style>

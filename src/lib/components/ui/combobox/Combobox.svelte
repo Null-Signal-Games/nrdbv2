@@ -130,7 +130,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		box-sizing: border-box;
 		width: 100%;
 		min-height: 2.25rem;

@@ -29,7 +29,7 @@
 <style>
 	.preview-card {
 		display: flex;
-		gap: 8px;
+		gap: var(--space-2);
 		align-items: center;
 		padding: 16px;
 		background: var(--foreground);
@@ -49,7 +49,7 @@
 	.preview-card__content {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
+		gap: var(--space-1);
 		min-width: 0;
 	}
 

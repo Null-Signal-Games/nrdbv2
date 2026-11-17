@@ -338,7 +338,7 @@
 	.builder {
 		display: grid;
 		margin-block: 1rem 3rem;
-		gap: 2rem;
+		gap: var(--space-8);
 		grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
 	}
 
@@ -346,7 +346,7 @@
 	.builder__search {
 		display: grid;
 		align-content: start;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.builder__summary {
@@ -361,7 +361,7 @@
 	.builder__identity-row {
 		display: flex;
 		align-items: center;
-		gap: 1rem 1.5rem;
+		gap: var(--space-4) var(--space-6);
 	}
 
 	.builder__identity-card {
@@ -381,7 +381,7 @@
 
 	.builder__identity {
 		display: grid;
-		gap: 0.75rem;
+		gap: var(--space-3);
 		min-inline-size: 0;
 	}
 
@@ -403,7 +403,7 @@
 
 	.builder__search-form {
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.builder__search-controls {
@@ -411,7 +411,7 @@
 		top: 0;
 		z-index: 1;
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 		padding-block: 0.5rem;
 		margin-block: -0.5rem;
 		background-color: var(--background);
@@ -432,7 +432,7 @@
 
 	.builder__tabs {
 		display: flex;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		flex-wrap: wrap;
 	}
 
@@ -450,12 +450,12 @@
 
 	.builder__notes {
 		display: grid;
-		gap: 0.75rem;
+		gap: var(--space-3);
 	}
 
 	.builder__notes label {
 		display: grid;
-		gap: 0.25rem;
+		gap: var(--space-1);
 	}
 
 	.builder__textarea {

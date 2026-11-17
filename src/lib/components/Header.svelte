@@ -45,7 +45,7 @@
 		display: grid;
 		grid-template-columns: 1fr auto;
 		align-items: center;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.content {
@@ -53,6 +53,6 @@
 		align-items: center;
 		justify-items: center;
 		flex-direction: row;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 </style>

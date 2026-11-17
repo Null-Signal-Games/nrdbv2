@@ -187,12 +187,12 @@
 	.wrapper {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr);
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.panel {
 		display: grid;
-		gap: 2rem;
+		gap: var(--space-8);
 	}
 
 	/* `display: grid` above would otherwise override the UA `[hidden]` style */
@@ -211,18 +211,18 @@
 
 	.group {
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.packs {
 		display: grid;
-		gap: 1.25rem;
+		gap: var(--space-4);
 		grid-template-columns: repeat(3, 1fr);
 	}
 
 	.pack {
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 		padding: 1rem;
 		border: 1px solid var(--border);
 		background: var(--foreground);
@@ -231,7 +231,7 @@
 
 	.pack__heading {
 		display: grid;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		color: inherit;
 		text-decoration: none;
 	}
@@ -247,7 +247,7 @@
 
 	.pack__cards {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 

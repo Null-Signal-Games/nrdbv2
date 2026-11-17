@@ -58,7 +58,7 @@
 	.deck-stats {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem 1.5rem;
+		gap: var(--space-2) var(--space-6);
 		margin: 0;
 	}
 

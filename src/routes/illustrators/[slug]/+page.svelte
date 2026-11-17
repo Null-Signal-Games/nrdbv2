@@ -36,7 +36,7 @@
 	ul {
 		display: grid;
 		grid-template-columns: repeat(5, 1fr);
-		gap: 1rem;
+		gap: var(--space-4);
 		padding-inline: unset;
 		list-style: none;
 	}

@@ -46,7 +46,7 @@
 	/* Temporary styles */
 	.review {
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 		align-items: start;
 		/* auto should potentially be a fixed width or the like icon and quality need to be fixed sizing */
 		grid-template-columns: auto 1fr;
@@ -62,6 +62,6 @@
         padding-left: 1rem; */
 		padding-top: 1rem;
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 </style>

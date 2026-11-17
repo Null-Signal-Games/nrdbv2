@@ -42,11 +42,11 @@
 	}
 
 	.meta {
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.meta__content {
-		gap: 0.25rem;
+		gap: var(--space-1);
 
 		& .meta__title {
 			margin: unset;

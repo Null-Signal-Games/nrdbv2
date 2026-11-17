@@ -36,7 +36,7 @@
 <style>
     .decklist-preview {
         display: flex;
-        gap: 1rem;
+        gap: var(--space-4);
         padding: 1rem;
     }
 
