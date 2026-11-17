@@ -38,42 +38,40 @@ function extractQuotedTerms(input: string): { remainder: string; terms: Semantic
 	return { remainder, terms };
 }
 
-export type QueryFilter =
-	| { kind: 'faction'; id: FactionIds }
-	| { kind: 'cardType'; id: CardTypeIds };
+export type Filter = { kind: 'faction'; id: FactionIds } | { kind: 'cardType'; id: CardTypeIds };
 
 interface SourceRange {
 	start: number;
 	end: number;
 }
 
-interface QueryFilterOccurrence {
+interface FilterOccurrence {
 	source: SourceRange;
-	filters: QueryFilter[];
+	filters: Filter[];
 }
 
-export interface QueryInterpretation {
+export interface Interpretation {
 	input: string;
 	expression: string;
-	occurrences: QueryFilterOccurrence[];
+	occurrences: FilterOccurrence[];
 }
 
 function toArray<T>(value: T | T[]): T[] {
 	return Array.isArray(value) ? value : [value];
 }
 
-function areFiltersEqual(left: QueryFilter, right: QueryFilter): boolean {
+function areFiltersEqual(left: Filter, right: Filter): boolean {
 	return left.kind === right.kind && left.id === right.id;
 }
 
-function deduplicateFilters(filters: QueryFilter[]): QueryFilter[] {
+function deduplicateFilters(filters: Filter[]): Filter[] {
 	return filters.filter(
 		(filter, index) =>
 			filters.findIndex((candidate) => areFiltersEqual(candidate, filter)) === index
 	);
 }
 
-export function collectActiveFilters(interpretation: QueryInterpretation): QueryFilter[] {
+export function collectActiveFilters(interpretation: Interpretation): Filter[] {
 	return deduplicateFilters(interpretation.occurrences.flatMap(({ filters }) => filters));
 }
 
@@ -97,8 +95,8 @@ function findPhraseRange(input: string, phrase: string, from: number): SourceRan
 function collectNaturalFilterOccurrences(
 	input: string,
 	matches: IntentMatch[]
-): QueryFilterOccurrence[] {
-	const occurrences: QueryFilterOccurrence[] = [];
+): FilterOccurrence[] {
+	const occurrences: FilterOccurrence[] = [];
 	let cursor = 0;
 
 	for (const match of matches) {
@@ -108,7 +106,7 @@ function collectNaturalFilterOccurrences(
 		cursor = source.end;
 		if (match.intent.negated) continue;
 
-		const filters: QueryFilter[] =
+		const filters: Filter[] =
 			match.intent.kind === 'faction'
 				? toArray(match.intent.value).map((id) => ({ kind: 'faction', id }))
 				: toArray(match.intent.value).map((id) => ({ kind: 'cardType', id }));
@@ -118,8 +116,9 @@ function collectNaturalFilterOccurrences(
 	return occurrences;
 }
 
-// Interpret the query and retain the source ranges needed to toggle its filters.
-export function interpretQuery(input: string): QueryInterpretation {
+// Interpret typed input as an NRDB search expression, keeping the source ranges needed to
+// toggle its filters.
+export function interpret(input: string): Interpretation {
 	const { remainder, terms } = extractQuotedTerms(input);
 	const normalized = normalizeInput(remainder);
 	const { intents: numericIntents, remainder: afterNumeric } = extractNumericIntents(normalized);
@@ -140,11 +139,7 @@ export function interpretQuery(input: string): QueryInterpretation {
 	};
 }
 
-export function interpretSearch(input: string): string {
-	return interpretQuery(input).expression;
-}
-
-function formatFilterPhrase(filter: QueryFilter): string {
+function formatFilterPhrase(filter: Filter): string {
 	if (
 		filter.kind === 'faction' &&
 		(filter.id === 'neutral_corp' || filter.id === 'neutral_runner')
@@ -154,15 +149,12 @@ function formatFilterPhrase(filter: QueryFilter): string {
 	return filter.id.replaceAll('_', ' ');
 }
 
-function normalizeQueryAfterFilterRemoval(input: string): string {
+function collapseWhitespace(input: string): string {
 	return input.replace(/\s+/g, ' ').trim();
 }
 
 // Remove every occurrence of an active filter, or append an inactive filter as plain text.
-export function toggleFilterInQuery(
-	interpretation: QueryInterpretation,
-	filter: QueryFilter
-): string {
+export function toggleFilterInInput(interpretation: Interpretation, filter: Filter): string {
 	const occurrences = interpretation.occurrences.filter((occurrence) =>
 		occurrence.filters.some((active) => areFiltersEqual(active, filter))
 	);
@@ -174,8 +166,8 @@ export function toggleFilterInQuery(
 		.map(({ source }) => source)
 		.sort((left, right) => right.start - left.start);
 	const edited = sources.reduce(
-		(query, source) => `${query.slice(0, source.start)}${query.slice(source.end)}`,
+		(input, source) => `${input.slice(0, source.start)}${input.slice(source.end)}`,
 		interpretation.input
 	);
-	return normalizeQueryAfterFilterRemoval(edited);
+	return collapseWhitespace(edited);
 }

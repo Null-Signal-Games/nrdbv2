@@ -2,32 +2,33 @@ import { CardSearchQueryBuilder } from '$lib/search_grammar_and_builder';
 import type { DeckFormat } from '$lib/deck_formats';
 import type { SidesIds } from '$lib/types';
 
-export interface CardQuery {
+export interface CompileResult {
 	sql: string | null;
 	params: unknown[];
 	error: Error | null;
 }
 
-export interface TranslateOptions {
+export interface CompileOptions {
 	limit?: number;
 	format?: DeckFormat;
 	side?: SidesIds;
 	constraint?: { clause: string; params: readonly unknown[] };
 }
 
-// Translate an NRDB search expression into SQL.
-export function translateToQuery(
-	query: string,
-	{ limit, format = 'all', side, constraint }: TranslateOptions = {}
-): CardQuery {
+// Compile an NRDB search expression into SQL.
+export function compileExpression(
+	expression: string,
+	{ limit, format = 'all', side, constraint }: CompileOptions = {}
+): CompileResult {
 	const clauses: string[] = [];
 	const params: unknown[] = [];
 
-	for (const expression of [query, format === 'all' ? '' : `format:${format}`]) {
-		if (!expression.trim()) continue;
+	const formatExpression = format === 'all' ? '' : `format:${format}`;
+	for (const part of [expression, formatExpression]) {
+		if (!part.trim()) continue;
 		let builder: CardSearchQueryBuilder;
 		try {
-			builder = new CardSearchQueryBuilder(expression);
+			builder = new CardSearchQueryBuilder(part);
 		} catch (e) {
 			return {
 				sql: null,
@@ -57,12 +58,12 @@ export function translateToQuery(
 
 	const where =
 		clauses.length > 1 ? clauses.map((clause) => `(${clause})`).join(' AND ') : clauses[0];
-	let text = `SELECT * FROM unified_cards WHERE ${where} ORDER BY title ASC`;
+	let sql = `SELECT * FROM unified_cards WHERE ${where} ORDER BY title ASC`;
 
 	if (limit !== undefined) {
-		text += ' LIMIT ?';
+		sql += ' LIMIT ?';
 		params.push(limit);
 	}
 
-	return { sql: text, params, error: null };
+	return { sql, params, error: null };
 }

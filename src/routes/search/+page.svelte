@@ -5,7 +5,7 @@
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import {
 		db_ready,
-		search_query,
+		search_input,
 		search_mode,
 		search_format,
 		DEFAULT_SEARCH_FORMAT,
@@ -34,7 +34,7 @@
 
 	let view = $state<View>('grid');
 
-	const query = $derived($search_query.trim());
+	const input = $derived($search_input.trim());
 
 	let input_element = $state<HTMLInputElement | null>(null);
 	let cards = $state<Card[]>([]);
@@ -45,7 +45,7 @@
 	const read_url = () => {
 		const params = page.url.searchParams;
 		const format_param = params.get('format') ?? '';
-		$search_query = params.get('q') ?? '';
+		$search_input = params.get('q') ?? '';
 		if (isDeckFormat(format_param)) {
 			$search_format = format_param;
 		}
@@ -61,7 +61,7 @@
 	$effect(() => {
 		const url = new URL(location.href);
 
-		if (query) url.searchParams.set('q', query);
+		if (input) url.searchParams.set('q', input);
 		else url.searchParams.delete('q');
 
 		if ($search_format !== DEFAULT_SEARCH_FORMAT)
@@ -87,14 +87,14 @@
 		const options = {
 			mode: $search_mode,
 			format: $search_format,
-			constraint: query ? undefined : MATCH_ALL
+			constraint: input ? undefined : MATCH_ALL
 		};
 		const request_id = ++search_request_id;
 		let error_timer: ReturnType<typeof setTimeout> | undefined;
 
 		(async () => {
 			try {
-				const { cards: results, error } = await searchCards(query, options);
+				const { cards: results, error } = await searchCards(input, options);
 
 				if (request_id !== search_request_id) {
 					return;
@@ -140,7 +140,7 @@
 	});
 </script>
 
-<Meta title={query ? `Search: ${query}` : 'Search'} />
+<Meta title={input ? `Search: ${input}` : 'Search'} />
 
 <svelte:window onkeydown={on_key_down} />
 
@@ -169,7 +169,7 @@
 	{/snippet}
 
 	<div class="search-form" role="search">
-		<GhostText bind:value={$search_query} bind:inputElement={input_element} />
+		<GhostText bind:value={$search_input} bind:inputElement={input_element} />
 	</div>
 
 	<div class="search-options">

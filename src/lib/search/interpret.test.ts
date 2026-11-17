@@ -1,11 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import {
-	collectActiveFilters,
-	interpretQuery,
-	interpretSearch,
-	toggleFilterInQuery
-} from './interpret';
-import { translateToQuery } from './translate';
+import { collectActiveFilters, interpret, toggleFilterInInput } from './interpret';
+import { compileExpression } from './compile';
 import { populateSubtypeMap } from './vocabulary';
 import { SUBTYPE_FIXTURE } from './subtypes.fixture';
 
@@ -13,7 +8,7 @@ beforeAll(() => populateSubtypeMap(SUBTYPE_FIXTURE));
 
 describe('natural-language filter synchronization', () => {
 	it('derives positive filters from natural language', () => {
-		const interpretation = interpretQuery('hb ice');
+		const interpretation = interpret('hb ice');
 		expect(interpretation.expression).toBe('f:haas_bioroid t:ice');
 		expect(collectActiveFilters(interpretation)).toEqual([
 			{ kind: 'faction', id: 'haas_bioroid' },
@@ -22,18 +17,18 @@ describe('natural-language filter synchronization', () => {
 	});
 
 	it('does not treat explicit syntax as a natural filter occurrence', () => {
-		expect(collectActiveFilters(interpretQuery('f:anarch t:ice'))).toEqual([]);
+		expect(collectActiveFilters(interpret('f:anarch t:ice'))).toEqual([]);
 	});
 
-	it('adds and removes filters without canonicalizing the visible query', () => {
-		const withoutFaction = toggleFilterInQuery(interpretQuery('hb ice'), {
+	it('adds and removes filters without canonicalizing the visible input', () => {
+		const withoutFaction = toggleFilterInInput(interpret('hb ice'), {
 			kind: 'faction',
 			id: 'haas_bioroid'
 		});
 		expect(withoutFaction).toBe('ice');
 
 		expect(
-			toggleFilterInQuery(interpretQuery(withoutFaction), {
+			toggleFilterInInput(interpret(withoutFaction), {
 				kind: 'faction',
 				id: 'anarch'
 			})
@@ -42,23 +37,23 @@ describe('natural-language filter synchronization', () => {
 
 	it('removes a shared neutral occurrence as one unit', () => {
 		expect(
-			toggleFilterInQuery(interpretQuery('neutral'), {
+			toggleFilterInInput(interpret('neutral'), {
 				kind: 'faction',
 				id: 'neutral_runner'
 			})
 		).toBe('');
 
-		const added = toggleFilterInQuery(interpretQuery(''), {
+		const added = toggleFilterInInput(interpret(''), {
 			kind: 'faction',
 			id: 'neutral_runner'
 		});
 		expect(added).toBe('neutral');
-		expect(interpretSearch(added)).toBe('(f:neutral_corp or f:neutral_runner)');
+		expect(interpret(added).expression).toBe('(f:neutral_corp or f:neutral_runner)');
 	});
 
 	it('preserves numeric wording', () => {
 		expect(
-			toggleFilterInQuery(interpretQuery('cost greater than 3 criminal events'), {
+			toggleFilterInInput(interpret('cost greater than 3 criminal events'), {
 				kind: 'faction',
 				id: 'criminal'
 			})
@@ -66,22 +61,21 @@ describe('natural-language filter synchronization', () => {
 	});
 });
 
-// Pins the interpreted output (snapshot) AND proves that output is valid input for
-// the query builder, not just an unchanged string. translateToQuery feeds the expression
-// to CardSearchQueryBuilder, so an interpretation the grammar rejects fails here
-// even if the snapshot still matches.
+// Pins the interpreted expression (snapshot) AND proves that expression compiles, not
+// just that the string is unchanged. compileExpression feeds it to CardSearchQueryBuilder,
+// so an interpretation the grammar rejects fails here even if the snapshot still matches.
 function expectTransform(input: string, expected: string) {
-	const expression = interpretSearch(input);
+	const { expression } = interpret(input);
 	expect(expression).toBe(expected);
-	const { sql, error } = translateToQuery(expression);
+	const { sql, error } = compileExpression(expression);
 	expect(error).toBeNull();
 	expect(sql).not.toBeNull();
 }
 
-// Characterization tests pinning interpretSearch output for a set of
-// representative natural-language inputs. Token ordering is not significant:
+// Characterization tests pinning the interpreted expression for a set of
+// representative inputs. Token ordering is not significant:
 // the NRDB API ANDs all conditions, so reordered tokens are equivalent.
-describe('interpretSearch - representative queries', () => {
+describe('interpret - representative queries', () => {
 	it('shaper consoles', () => {
 		expectTransform('shaper consoles', 'f:shaper s:console');
 	});
@@ -177,7 +171,7 @@ describe('interpretSearch - representative queries', () => {
 	});
 });
 
-describe('interpretSearch - numeric or-more patterns', () => {
+describe('interpret - numeric or-more patterns', () => {
 	it('N or more strength', () => {
 		expectTransform('sentries 2 or more strength', 's:sentry p>=2');
 	});
@@ -195,7 +189,7 @@ describe('interpretSearch - numeric or-more patterns', () => {
 	});
 });
 
-describe('interpretSearch - or handling', () => {
+describe('interpret - or handling', () => {
 	it('two factions joined by or', () => {
 		expectTransform('shaper or criminal events', '(f:shaper or f:criminal) t:event');
 	});
@@ -224,20 +218,20 @@ describe('interpretSearch - or handling', () => {
 	});
 });
 
-describe('interpretSearch - explicit NRDB syntax (quoted field values)', () => {
-	it('preserves a quoted card-text field query', () => {
+describe('interpret - literal NRDB syntax (quoted field values)', () => {
+	it('preserves a quoted card-text field term', () => {
 		expectTransform('x:"end the run"', 'x:"end the run"');
 	});
 
-	it('preserves a quoted subtype field query', () => {
+	it('preserves a quoted subtype field term', () => {
 		expectTransform('s:"code gate"', 's:"code gate"');
 	});
 
-	it('preserves a quoted title field query', () => {
+	it('preserves a quoted title field term', () => {
 		expectTransform('title:"sure gamble"', 'title:"sure gamble"');
 	});
 
-	it('keeps an explicit field query intact alongside natural language', () => {
+	it('keeps a literal field term intact alongside interpreted words', () => {
 		expectTransform('shaper x:"end the run"', 'f:shaper x:"end the run"');
 	});
 
@@ -249,7 +243,7 @@ describe('interpretSearch - explicit NRDB syntax (quoted field values)', () => {
 		expectTransform('x:"tag" or x:"damage"', '(x:"tag" or x:"damage")');
 	});
 
-	it('preserves OR between a quoted field term and a natural-language token', () => {
+	it('preserves OR between a quoted field term and an interpreted word', () => {
 		expectTransform('x:"tag" or shaper', '(x:"tag" or f:shaper)');
 	});
 
@@ -265,12 +259,12 @@ describe('interpretSearch - explicit NRDB syntax (quoted field values)', () => {
 		expectTransform('!(x:"tag" or x:"damage")', '!(x:"tag" or x:"damage")');
 	});
 
-	it('keeps parenthesized explicit OR intact alongside natural language', () => {
+	it('keeps parenthesized literal OR intact alongside interpreted words', () => {
 		expectTransform('shaper (x:"tag" or x:"damage")', 'f:shaper (x:"tag" or x:"damage")');
 	});
 });
 
-describe('interpretSearch - additional cases', () => {
+describe('interpret - additional cases', () => {
 	it('single word card name search passes through unchanged', () => {
 		expectTransform('corroder', 'corroder');
 	});

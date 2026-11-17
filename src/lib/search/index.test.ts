@@ -3,15 +3,15 @@ import type { Card } from '$lib/api.types';
 import type { UnifiedCardRow } from '$lib/sqlite.types';
 
 // Mock the DB layer so the vocabulary-loading queries in initSearchVocab are controllable.
-const { sqlMock, interpretSearchMock, translateToQueryMock, adaptCardMock } = vi.hoisted(() => ({
+const { sqlMock, interpretMock, compileExpressionMock, adaptCardMock } = vi.hoisted(() => ({
 	sqlMock: vi.fn(),
-	interpretSearchMock: vi.fn(),
-	translateToQueryMock: vi.fn(),
+	interpretMock: vi.fn(),
+	compileExpressionMock: vi.fn(),
 	adaptCardMock: vi.fn()
 }));
 vi.mock('$lib/sqlite', () => ({ sql: sqlMock }));
-vi.mock('$lib/search/interpret', () => ({ interpretSearch: interpretSearchMock }));
-vi.mock('$lib/search/translate', () => ({ translateToQuery: translateToQueryMock }));
+vi.mock('$lib/search/interpret', () => ({ interpret: interpretMock }));
+vi.mock('$lib/search/compile', () => ({ compileExpression: compileExpressionMock }));
 vi.mock('$lib/adapter', () => ({ adaptCard: adaptCardMock }));
 
 import { prepareSearch, searchCards } from './index';
@@ -20,9 +20,9 @@ function mockSuccessfulSearch() {
 	const row = { id: 'row-1' } as UnifiedCardRow;
 	const card = { id: 'card-1' } as Card;
 
-	translateToQueryMock.mockReturnValue({
+	compileExpressionMock.mockReturnValue({
 		sql: 'SELECT * FROM unified_cards LIMIT ?',
-		params: ['translated-param', 5],
+		params: ['compiled-param', 5],
 		error: null
 	});
 	sqlMock.mockResolvedValue([row]);
@@ -38,40 +38,40 @@ afterEach(() => {
 describe('searchCards', () => {
 	beforeEach(() => {
 		sqlMock.mockReset();
-		interpretSearchMock.mockReset();
-		translateToQueryMock.mockReset();
+		interpretMock.mockReset();
+		compileExpressionMock.mockReset();
 		adaptCardMock.mockReset();
 	});
 
-	it('defaults to literal mode and bypasses interpretSearch', async () => {
+	it('defaults to literal mode and bypasses interpret', async () => {
 		const { row, card } = mockSuccessfulSearch();
 
 		const result = await searchCards('f:shaper s:console');
 
-		expect(interpretSearchMock).not.toHaveBeenCalled();
-		expect(translateToQueryMock).toHaveBeenCalledWith('f:shaper s:console', {});
+		expect(interpretMock).not.toHaveBeenCalled();
+		expect(compileExpressionMock).toHaveBeenCalledWith('f:shaper s:console', {});
 		expect(sqlMock).toHaveBeenCalledWith(
 			'SELECT * FROM unified_cards LIMIT ?',
-			'translated-param',
+			'compiled-param',
 			5
 		);
 		expect(adaptCardMock.mock.calls[0][0]).toBe(row);
 		expect(result).toEqual({ cards: [card], error: null });
 	});
 
-	it('interpreted mode calls interpretSearch before translation', async () => {
+	it('interpreted mode calls interpret before compiling', async () => {
 		mockSuccessfulSearch();
-		interpretSearchMock.mockReturnValue('f:shaper s:console');
+		interpretMock.mockReturnValue({ expression: 'f:shaper s:console' });
 
 		await searchCards('shaper consoles', { mode: 'interpreted' });
 
-		expect(interpretSearchMock).toHaveBeenCalledWith('shaper consoles');
-		expect(translateToQueryMock).toHaveBeenCalledWith('f:shaper s:console', {});
+		expect(interpretMock).toHaveBeenCalledWith('shaper consoles');
+		expect(compileExpressionMock).toHaveBeenCalledWith('f:shaper s:console', {});
 	});
 
 	it('returns empty cards and the internal error for invalid literal syntax', async () => {
 		const error = new Error('Unknown keyword: zzz');
-		translateToQueryMock.mockReturnValue({ sql: null, params: [], error });
+		compileExpressionMock.mockReturnValue({ sql: null, params: [], error });
 
 		const result = await searchCards('zzz:foo');
 
@@ -85,15 +85,15 @@ describe('searchCards', () => {
 
 		await searchCards('corroder', { limit: 25 });
 
-		expect(translateToQueryMock).toHaveBeenCalledWith('corroder', { limit: 25 });
+		expect(compileExpressionMock).toHaveBeenCalledWith('corroder', { limit: 25 });
 	});
 
-	it('passes the format to the translator', async () => {
+	it('passes the format to the compiler', async () => {
 		mockSuccessfulSearch();
 
 		await searchCards('corp', { format: 'startup' });
 
-		expect(translateToQueryMock).toHaveBeenCalledWith('corp', { format: 'startup' });
+		expect(compileExpressionMock).toHaveBeenCalledWith('corp', { format: 'startup' });
 	});
 });
 
