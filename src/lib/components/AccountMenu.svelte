@@ -46,7 +46,9 @@
 		class="account-menu__signout-form"
 	></form>
 {:else}
-	<Button onclick={() => signIn('nsg-keycloak')}>{m.login()}/{m.register()}</Button>
+	<Button color="secondary" onclick={() => signIn('nsg-keycloak')}
+		>{m.login()}/{m.register()}</Button
+	>
 {/if}
 
 <style>

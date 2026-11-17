@@ -265,6 +265,10 @@
 		text-decoration: none;
 	}
 
+	table a:hover {
+		text-decoration: underline;
+	}
+
 	.table-cell {
 		display: inline-flex;
 		flex-direction: row;

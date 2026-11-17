@@ -10,7 +10,7 @@
 
 <style>
 	.ghost {
-		background-color: var(--foreground);
+		background-color: var(--field);
 		animation: bounce 3s infinite alternate;
 		/* TODO: make aspect ratio dynamic (via props?) */
 		aspect-ratio: var(--ratio, 8/1);
