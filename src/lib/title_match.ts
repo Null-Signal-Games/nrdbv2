@@ -30,7 +30,3 @@ export const rankCards = (cards: Card[], search: string) => {
 
 	return cardsCopy;
 };
-
-export const filterAndRankCards = (cards: Card[], search: string) => {
-	return rankCards(filterCards(cards, search), search);
-};

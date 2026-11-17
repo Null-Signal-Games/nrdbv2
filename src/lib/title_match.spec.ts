@@ -1,15 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import {
-	normalize,
-	normalizedIncludes,
-	filterCards,
-	rankCards,
-	filterAndRankCards
-} from './title_match';
+import { normalize, normalizedIncludes, filterCards, rankCards } from './title_match';
 import { createMockCard } from './test-helpers';
 import type { Card } from './types';
 
-// Realistic mock card data based on NetrunnerDB API
 const mockCards: Card[] = [
 	createMockCard('15_minutes', '15 Minutes', ['data_and_destiny']),
 	createMockCard('24_7_news_cycle', '24/7 News Cycle', ['data_and_destiny']),
@@ -18,89 +11,89 @@ const mockCards: Card[] = [
 ];
 
 describe('normalize', () => {
-	it('should convert to lowercase', () => {
+	it('converts to lowercase', () => {
 		expect(normalize('HELLO')).toBe('hello');
 	});
 
-	it('should trim whitespace', () => {
+	it('trims whitespace', () => {
 		expect(normalize('  hello  ')).toBe('hello');
 	});
 
-	it('should remove diacritics', () => {
+	it('removes diacritics', () => {
 		expect(normalize('café')).toBe('cafe');
 		expect(normalize('naïve')).toBe('naive');
 		expect(normalize('señor')).toBe('senor');
 	});
 
-	it('should handle empty string', () => {
+	it('handles an empty string', () => {
 		expect(normalize('')).toBe('');
 	});
 
-	it('should handle unicode normalization', () => {
+	it('handles unicode normalization', () => {
 		expect(normalize('é')).toBe('e');
 		expect(normalize('ñ')).toBe('n');
 	});
 });
 
 describe('normalizedIncludes', () => {
-	it('should find matches ignoring case', () => {
+	it('finds matches ignoring case', () => {
 		expect(normalizedIncludes('Hello World', 'hello')).toBe(true);
 		expect(normalizedIncludes('Hello World', 'WORLD')).toBe(true);
 	});
 
-	it('should find matches ignoring diacritics', () => {
+	it('finds matches ignoring diacritics', () => {
 		expect(normalizedIncludes('café', 'cafe')).toBe(true);
 		expect(normalizedIncludes('señor', 'senor')).toBe(true);
 	});
 
-	it('should return false for non-matches', () => {
+	it('returns false for non-matches', () => {
 		expect(normalizedIncludes('hello', 'world')).toBe(false);
 	});
 
-	it('should handle empty search string', () => {
+	it('handles an empty search string', () => {
 		expect(normalizedIncludes('hello', '')).toBe(true);
 	});
 
-	it('should handle whitespace in both strings', () => {
+	it('handles whitespace in both strings', () => {
 		expect(normalizedIncludes('  hello world  ', ' world ')).toBe(true);
 	});
 });
 
 describe('filterCards', () => {
-	it('should filter cards by title match', () => {
+	it('filters cards by title match', () => {
 		const result = filterCards(mockCards, 'lightning');
 		expect(result).toHaveLength(1);
 		expect(result[0].attributes.title).toBe('Lightning Laboratory');
 	});
 
-	it('should be case insensitive', () => {
+	it('is case insensitive', () => {
 		const result = filterCards(mockCards, 'LIGHTNING');
 		expect(result).toHaveLength(1);
 		expect(result[0].attributes.title).toBe('Lightning Laboratory');
 	});
 
-	it('should handle special characters and numbers', () => {
+	it('handles special characters and numbers', () => {
 		const result = filterCards(mockCards, '24/7');
 		expect(result).toHaveLength(1);
 		expect(result[0].attributes.title).toBe('24/7 News Cycle');
 	});
 
-	it('should find partial matches', () => {
+	it('finds partial matches', () => {
 		const result = filterCards(mockCards, 'light');
 		expect(result).toHaveLength(2); // "Light the Fire" and "Lightning Laboratory"
 	});
 
-	it('should return empty array for no matches', () => {
+	it('returns an empty array for no matches', () => {
 		const result = filterCards(mockCards, 'nonexistent');
 		expect(result).toHaveLength(0);
 	});
 
-	it('should return all cards for empty search', () => {
+	it('returns all cards for an empty search', () => {
 		const result = filterCards(mockCards, '');
 		expect(result).toHaveLength(4);
 	});
 
-	it('should handle multiple word search', () => {
+	it('handles a multiple-word search', () => {
 		const result = filterCards(mockCards, 'news cycle');
 		expect(result).toHaveLength(1);
 		expect(result[0].attributes.title).toBe('24/7 News Cycle');
@@ -108,7 +101,7 @@ describe('filterCards', () => {
 });
 
 describe('rankCards', () => {
-	it('should prioritize cards that start with search term', () => {
+	it('puts cards that start with the search term first', () => {
 		const cards = [
 			{
 				...mockCards[0],
@@ -122,7 +115,7 @@ describe('rankCards', () => {
 		expect(result[1].attributes.title).toBe('Another Light');
 	});
 
-	it('should handle case insensitive ranking', () => {
+	it('ranks case-insensitively', () => {
 		const cards = [
 			{
 				...mockCards[0],
@@ -136,12 +129,12 @@ describe('rankCards', () => {
 		expect(result[1].attributes.title).toBe('Some Lightning');
 	});
 
-	it('should maintain order when no cards start with search term', () => {
+	it('keeps the order when no card starts with the search term', () => {
 		const result = rankCards([...mockCards], 'xyz');
 		expect(result).toEqual(mockCards);
 	});
 
-	it('should handle numbers and special chars in ranking', () => {
+	it('handles numbers and special characters when ranking', () => {
 		const cards = [
 			{ ...mockCards[0], attributes: { ...mockCards[0].attributes, title: 'Some 24/7' } },
 			{ ...mockCards[1], attributes: { ...mockCards[1].attributes, title: '24/7 First' } }
@@ -152,44 +145,9 @@ describe('rankCards', () => {
 		expect(result[1].attributes.title).toBe('Some 24/7');
 	});
 
-	it('should not modify original array', () => {
+	it('does not modify the original array', () => {
 		const originalCards = [...mockCards];
 		rankCards(mockCards, 'lightning');
 		expect(mockCards).toEqual(originalCards);
-	});
-});
-
-describe('filterAndRankCards', () => {
-	it('should filter and rank cards together', () => {
-		const result = filterAndRankCards(mockCards, 'light');
-		expect(result).toHaveLength(2); // "Light the Fire" and "Lightning Laboratory"
-		// Should prioritize cards starting with "light"
-		expect(result[0].attributes.title).toBe('Light the Fire');
-		expect(result[1].attributes.title).toBe('Lightning Laboratory');
-	});
-
-	it('should return empty array when no matches', () => {
-		const result = filterAndRankCards(mockCards, 'nonexistent');
-		expect(result).toHaveLength(0);
-	});
-
-	it('should handle complex search with filtering and ranking', () => {
-		const result = filterAndRankCards(mockCards, 'lightning');
-		expect(result).toHaveLength(1);
-		expect(result[0].attributes.title).toBe('Lightning Laboratory');
-	});
-
-	it('should work with empty search', () => {
-		const result = filterAndRankCards(mockCards, '');
-		expect(result).toHaveLength(4);
-	});
-
-	it('should prioritize exact start matches after filtering', () => {
-		const cards = [...mockCards, createMockCard('fire_something', 'Fire Card', ['test'])];
-
-		const result = filterAndRankCards(cards, 'fire');
-		expect(result).toHaveLength(2); // "Light the Fire" and "Fire Card"
-		expect(result[0].attributes.title).toBe('Fire Card'); // Starts with "fire"
-		expect(result[1].attributes.title).toBe('Light the Fire'); // Contains "fire"
 	});
 });
