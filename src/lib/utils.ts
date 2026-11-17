@@ -7,7 +7,7 @@ import type {
 	Printing
 } from '$lib/types';
 
-import { NRDB_API_URL } from '$lib/constants';
+import { CARD_TYPE_ORDER, NRDB_API_URL } from '$lib/constants';
 
 export const isCurrentPath = (pathname: string, url: string): boolean => {
 	const normalize = (path: string) => path.replace(/\/$/, '') || '/';
@@ -69,7 +69,10 @@ export const group_cards_by_type = (cards: Card[]): CardGroup[] => {
 		return accumulator;
 	}, []);
 
-	return groups;
+	return groups.sort(
+		(left: CardGroup, right: CardGroup) =>
+			CARD_TYPE_ORDER[left.type] - CARD_TYPE_ORDER[right.type]
+	);
 };
 
 export const card_quantity = (decklist: Decklist, cards: CardGroup[]) => {

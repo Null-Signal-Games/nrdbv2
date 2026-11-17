@@ -2,8 +2,10 @@ import { describe, it, expect /* vi */ } from 'vitest';
 import {
 	getHighResImage,
 	export_format,
+	group_cards_by_type,
 	/* print, download_file, */ validate_markdown
 } from './utils';
+import { CARNIVORE, CONDUIT, COOKBOOK, SURE_GAMBLE } from './cards.fixture';
 import { createMockCard, createMockPrinting, create_mock_deck } from './test-helpers';
 import type { FileFormat } from './types';
 // import { format } from './paraglide/messages';
@@ -89,6 +91,19 @@ describe('getHighResImage', () => {
 		});
 
 		expect(getHighResImage(printing)).toBe('printing-large');
+	});
+});
+
+describe('group_cards_by_type', () => {
+	it('orders groups by the canonical card type order, not input order', () => {
+		const groups = group_cards_by_type([COOKBOOK, CONDUIT, CARNIVORE, SURE_GAMBLE]);
+
+		expect(groups.map((group) => group.type)).toEqual([
+			'event',
+			'hardware',
+			'program',
+			'resource'
+		]);
 	});
 });
 

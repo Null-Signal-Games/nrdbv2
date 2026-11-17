@@ -1,21 +1,8 @@
+import { CARD_TYPE_ORDER } from '$lib/constants';
 import type { Card, CardGroup, CardTypeIds } from '$lib/types';
 import type { CardSlots } from './card_slots';
 
 type DeckGridCardType = Exclude<CardTypeIds, 'corp_identity' | 'runner_identity'>;
-
-const CARD_TYPE_ORDER = {
-	runner_identity: 0,
-	corp_identity: 1,
-	event: 2,
-	hardware: 3,
-	program: 4,
-	resource: 5,
-	agenda: 6,
-	asset: 7,
-	operation: 8,
-	upgrade: 9,
-	ice: 10
-} satisfies Record<CardTypeIds, number>;
 
 export interface DeckGridItem {
 	readonly card: Card;
