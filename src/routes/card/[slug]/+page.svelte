@@ -107,12 +107,18 @@
 						</h1>
 
 						{#if data.card_prev}
-							<Button href={localizeHref(`/card/${data.card_prev.id}`)}>
+							<Button
+								href={localizeHref(`/card/${data.card_prev.id}`)}
+								color="secondary"
+							>
 								{previous()}
 							</Button>
 						{/if}
 						{#if data.card_next}
-							<Button href={localizeHref(`/card/${data.card_next.id}`)}>
+							<Button
+								href={localizeHref(`/card/${data.card_next.id}`)}
+								color="secondary"
+							>
 								{next()}
 							</Button>
 						{/if}

@@ -36,8 +36,10 @@
 							{@const influence = influenceFor(identity!, card)}
 							<li>
 								<a href={localizeHref(`/card/${card.id}`)} use:tooltip={card}>
-									{decklist.attributes.card_slots[card.id]}&times; {card
-										.attributes.title}
+									<span class="decklist-breakdown__copies"
+										>{decklist.attributes.card_slots[card.id]}&times;</span
+									>
+									{card.attributes.title}
 									{#if influence > 0}
 										<Influence
 											count={influence *
@@ -92,6 +94,17 @@
 
 	.decklist-breakdown li a:hover {
 		text-decoration: underline;
+	}
+
+	.decklist-breakdown__copies {
+		flex: none;
+		inline-size: 2.5ch;
+		color: var(--text-muted);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.decklist-breakdown :global(.influence) {
+		font-size: var(--font-size-sm);
 	}
 
 	@media (max-width: 480px) {
