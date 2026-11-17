@@ -3,6 +3,7 @@ import type { DeckFormat } from '$lib/deck_formats';
 import type { SidesIds } from '$lib/types';
 
 export interface CompileResult {
+	// Null when there is nothing to search for, or when compiling failed.
 	sql: string | null;
 	params: unknown[];
 	error: Error | null;
@@ -12,13 +13,13 @@ export interface CompileOptions {
 	limit?: number;
 	format?: DeckFormat;
 	side?: SidesIds;
-	constraint?: { clause: string; params: readonly unknown[] };
+	matchAllWhenBlank?: boolean;
 }
 
 // Compile an NRDB search expression into SQL.
 export function compileExpression(
 	expression: string,
-	{ limit, format = 'all', side, constraint }: CompileOptions = {}
+	{ limit, format = 'all', side, matchAllWhenBlank = false }: CompileOptions = {}
 ): CompileResult {
 	const clauses: string[] = [];
 	const params: unknown[] = [];
@@ -43,22 +44,20 @@ export function compileExpression(
 		params.push(...builder.where_values);
 	}
 
-	if (clauses.length === 0 && !side && !constraint) {
-		return { sql: null, params: [], error: null };
-	}
-
 	if (side) {
 		clauses.push('unified_cards.side_id = ?');
 		params.push(side);
 	}
-	if (constraint) {
-		clauses.push(constraint.clause);
-		params.push(...constraint.params);
+
+	if (clauses.length === 0 && !matchAllWhenBlank) {
+		return { sql: null, params: [], error: null };
 	}
 
 	const where =
 		clauses.length > 1 ? clauses.map((clause) => `(${clause})`).join(' AND ') : clauses[0];
-	let sql = `SELECT * FROM unified_cards WHERE ${where} ORDER BY title ASC`;
+	let sql = 'SELECT * FROM unified_cards';
+	if (where) sql += ` WHERE ${where}`;
+	sql += ' ORDER BY title ASC';
 
 	if (limit !== undefined) {
 		sql += ' LIMIT ?';
