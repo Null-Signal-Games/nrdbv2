@@ -1,7 +1,7 @@
 import { FACTIONS } from './constants';
 import type { ActiveCardPoolIds, DeckFormat } from './deck_formats';
 import { faction_name } from './i18n';
-import { normalizedIncludes } from './title_match';
+import { filterCards } from './title_match';
 import type { Card, Faction, FactionIds, SidesIds } from './types';
 
 export interface DecklistCatalog {
@@ -88,9 +88,7 @@ export const filterFactionGroups = (
 		.filter((group) => factionFilter.length === 0 || factionFilter.includes(group.faction_id))
 		.map((group) => ({
 			...group,
-			cards: needle
-				? group.cards.filter((card) => normalizedIncludes(card.attributes.title, needle))
-				: group.cards
+			cards: needle ? filterCards(group.cards, needle) : group.cards
 		}))
 		.filter((group) => group.cards.length > 0);
 };
