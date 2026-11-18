@@ -6,7 +6,8 @@
 	import { collectFactionsInActiveCardPool } from '$lib/identities';
 	import { group_cards_by_type } from '$lib/utils';
 	import { searchCards } from '$lib/search';
-	import { interpret, collectActiveFilters, toggleFilterInInput } from '$lib/search/interpret';
+	import { interpret } from '$lib/search/interpret';
+	import { collectActiveFilters, toggleFilterInInput } from '$lib/search/filters';
 	import { onDestroy } from 'svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { closeCardModal, openCardModal } from '$lib/store';
