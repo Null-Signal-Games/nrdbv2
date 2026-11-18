@@ -11,18 +11,24 @@ const cards = fixture_cards.map((card) => ({
 
 const sets = [{ id: 'system_gateway' }];
 const response = (data: unknown) => new Response(JSON.stringify({ data }));
-const event = (fetcher: typeof fetch) =>
+const event = (fetcher: typeof fetch, { cached = false } = {}) =>
 	({
 		fetch: fetcher,
 		cookies: {
-			get: (name: string) => (name === NRDB_CACHE_COOKIE ? '1' : undefined)
+			get: (name: string) => (name === NRDB_CACHE_COOKIE && cached ? '1' : undefined)
 		},
 		locals: { auth: async () => ({ accessToken: 'test-token' }) },
 		params: { id: deck.id }
 	}) as unknown as Parameters<PageServerLoad>[0];
 
 describe('saved deck detail', () => {
-	it('loads the deck and its cards with the cache cookie set', async () => {
+	it('loads only the deck when the local database is ready', async () => {
+		const fetcher = vi.fn().mockResolvedValueOnce(response(deck));
+		expect(await load(event(fetcher, { cached: true }))).toEqual({ deck });
+		expect(fetcher).toHaveBeenCalledTimes(1);
+	});
+
+	it('loads the deck and its cards without the local database', async () => {
 		const fetcher = vi
 			.fn()
 			.mockResolvedValueOnce(response(deck))
