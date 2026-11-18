@@ -43,3 +43,14 @@ export const RE_BARE_NUMBER_FIELD = new RegExp(`\\b(\\d+)\\s+(${NUMERIC_FIELD_PA
 // part of explicit NRDB syntax); when absent the quote is a bare title/text phrase.
 // Group 2 is the quoted value.
 export const RE_QUOTED_TERM = /([A-Za-z_]+(?:<=|>=|[:!<>]))?"([^"]+)"/g;
+
+// A quoted group in literal syntax, optionally negated: (x:"tag" or x:"damage").
+export const RE_QUOTED_GROUP = /!?\([^()]*"[^"]+"[^()]*\)/g;
+
+// A quoted term swapped out for a positional placeholder. The placeholder is delimited by
+// NULL so it survives lowercasing/normalization and the numeric pre-pass untouched, and is a
+// single whitespace-free token so recognizeIntents keeps it whole. Restoring it in place
+// (rather than extracting and re-appending) preserves its position relative to `or` - pulling
+// quoted terms out would orphan the or-marker and turn `x:"tag" or x:"damage"` into an AND.
+// oxlint-disable-next-line no-control-regex -- NULL is an intentional, collision-proof delimiter
+export const RE_PLACEHOLDER = /^\x00(\d+)\x00$/;
