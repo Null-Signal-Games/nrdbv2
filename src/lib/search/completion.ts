@@ -23,8 +23,8 @@ function dropPluralVariants(keys: string[]): string[] {
 // when we've already typed `weyland`.
 const BLOCKLIST = new Set(['weyland consortium']);
 
-function keepCompletablePhrases(map: Record<string, unknown>): string[] {
-	return Object.keys(map).filter((k) => !k.includes('-') && k.length >= 3 && !BLOCKLIST.has(k));
+function keepCompletablePhrases(map: Map<string, unknown>): string[] {
+	return [...map.keys()].filter((k) => !k.includes('-') && k.length >= 3 && !BLOCKLIST.has(k));
 }
 
 // `sentry` should come before `security` and `sensie`
@@ -37,7 +37,7 @@ let completionTierCacheKey = -1;
 
 // Tiers in priority order: card types, factions, subtypes, sets+cycles, booleans.
 export function buildCompletionTiers(): string[][] {
-	const key = Object.keys(SUBTYPE_MAP).length;
+	const key = SUBTYPE_MAP.size;
 	if (completionTierCache && key === completionTierCacheKey) return completionTierCache;
 
 	completionTierCache = [

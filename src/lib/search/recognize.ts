@@ -15,7 +15,7 @@ import {
 	CYCLE_MAP,
 	BOOLEAN_MAP,
 	SEMANTIC_MAP,
-	MAX_PHRASE_WORDS,
+	getMaxPhraseWords,
 	wordToField
 } from './vocabulary';
 import {
@@ -208,7 +208,7 @@ export function recognizeIntents(remainder: string): IntentMatch[] {
 // lookup order is semantic > boolean > faction > type > subtype > set > cycle > side.
 // Side comes last and only matches single words, so "corp identity" stays a card type.
 function matchAt(words: string[], i: number, negated: boolean, intents: Intent[]): number {
-	const maxLen = Math.min(MAX_PHRASE_WORDS, words.length - i);
+	const maxLen = Math.min(getMaxPhraseWords(), words.length - i);
 
 	for (let len = maxLen; len >= 1; len--) {
 		const phrase = words.slice(i, i + len).join(' ');
@@ -219,40 +219,46 @@ function matchAt(words: string[], i: number, negated: boolean, intents: Intent[]
 			return len;
 		}
 
-		if (phrase in BOOLEAN_MAP) {
-			const { field, onValue } = BOOLEAN_MAP[phrase];
-			const value: 0 | 1 = negated ? ((1 - onValue) as 0 | 1) : onValue;
-			intents.push({ kind: 'boolean', field, value });
+		const boolean = BOOLEAN_MAP.get(phrase);
+		if (boolean) {
+			const value: 0 | 1 = negated ? ((1 - boolean.onValue) as 0 | 1) : boolean.onValue;
+			intents.push({ kind: 'boolean', field: boolean.field, value });
 			return len;
 		}
 
-		if (phrase in FACTION_MAP) {
-			intents.push({ kind: 'faction', value: FACTION_MAP[phrase], negated });
+		const faction = FACTION_MAP.get(phrase);
+		if (faction) {
+			intents.push({ kind: 'faction', value: faction, negated });
 			return len;
 		}
 
-		if (phrase in CARD_TYPE_MAP) {
-			intents.push({ kind: 'type', value: CARD_TYPE_MAP[phrase], negated });
+		const cardType = CARD_TYPE_MAP.get(phrase);
+		if (cardType) {
+			intents.push({ kind: 'type', value: cardType, negated });
 			return len;
 		}
 
-		if (phrase in SUBTYPE_MAP) {
-			intents.push({ kind: 'subtype', value: SUBTYPE_MAP[phrase], negated });
+		const subtype = SUBTYPE_MAP.get(phrase);
+		if (subtype) {
+			intents.push({ kind: 'subtype', value: subtype, negated });
 			return len;
 		}
 
-		if (phrase in SET_MAP) {
-			intents.push({ kind: 'set', value: SET_MAP[phrase], negated });
+		const set = SET_MAP.get(phrase);
+		if (set) {
+			intents.push({ kind: 'set', value: set, negated });
 			return len;
 		}
 
-		if (phrase in CYCLE_MAP) {
-			intents.push({ kind: 'cycle', value: CYCLE_MAP[phrase], negated });
+		const cycle = CYCLE_MAP.get(phrase);
+		if (cycle) {
+			intents.push({ kind: 'cycle', value: cycle, negated });
 			return len;
 		}
 
-		if (len === 1 && phrase in SIDE_MAP) {
-			intents.push({ kind: 'side', value: SIDE_MAP[phrase], negated });
+		const side = len === 1 ? SIDE_MAP.get(phrase) : undefined;
+		if (side) {
+			intents.push({ kind: 'side', value: side, negated });
 			return 1;
 		}
 	}

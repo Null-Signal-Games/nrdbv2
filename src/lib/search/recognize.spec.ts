@@ -306,6 +306,13 @@ describe('recognizeIntents', () => {
 		});
 	});
 
+	it('treats object prototype keys as freeform words', () => {
+		expect(recognizedIntents('constructor __proto__')).toEqual([
+			{ kind: 'freeform', word: 'constructor' },
+			{ kind: 'freeform', word: '__proto__' }
+		]);
+	});
+
 	it('negates boolean: non_unique produces value 0', () => {
 		const intents = recognizedIntents('non_unique');
 		expect(intents[0]).toMatchObject({ kind: 'boolean', field: 'u', value: 0 });
