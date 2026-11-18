@@ -50,7 +50,7 @@
 	:global(.deck) {
 		display: grid;
 		gap: var(--space-6);
-		padding-block: 2rem 3rem;
+		padding-block: var(--page-top) var(--page-bottom);
 	}
 
 	.deck__byline {

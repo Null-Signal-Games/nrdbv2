@@ -276,12 +276,12 @@
 		grid-template-columns: 340px minmax(0, 1fr);
 		gap: var(--space-6);
 		align-items: start;
-		padding-block: 1.5rem 3rem;
+		padding-block: var(--page-top) var(--page-bottom);
 	}
 
 	.rail {
 		position: sticky;
-		top: 1.5rem;
+		top: var(--page-top);
 		display: grid;
 		gap: var(--space-4);
 	}
