@@ -11,7 +11,7 @@
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import CardModalHost from '$lib/components/card/CardModalHost.svelte';
 	import { ensure_db_ready } from '$lib/sqlite';
-	import { prepareSearch } from '$lib/search';
+	import { prepareSearch } from '$lib/search/vocabulary_loader';
 	import { NRDB_CACHE_COOKIE } from '$lib/constants';
 
 	interface Props {
