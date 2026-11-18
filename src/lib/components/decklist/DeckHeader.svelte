@@ -125,7 +125,7 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: var(--space-3);
 	}
 
 	.deck-header__details hr {
@@ -137,7 +137,7 @@
 
 	.deck-header__heading {
 		display: grid;
-		gap: 0.25rem;
+		gap: var(--space-1);
 	}
 
 	.deck-header__title {
@@ -151,7 +151,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: baseline;
-		gap: 0.25rem 0.375rem;
+		gap: var(--space-1) var(--space-2);
 		margin: 0;
 		font-size: var(--font-size-lg);
 		font-weight: var(--font-weight-semibold);
@@ -172,7 +172,7 @@
 	.deck-header__actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.deck-header--compact {
@@ -189,7 +189,7 @@
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.5rem 1rem;
+		gap: var(--space-2) var(--space-4);
 	}
 
 	.deck-header--compact .deck-header__heading {

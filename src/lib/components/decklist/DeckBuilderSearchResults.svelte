@@ -137,7 +137,7 @@
 		display: inline-grid;
 		grid-template-columns: 1.75rem 1.5rem 1.75rem;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 	}
 
 	.builder__quantity :global(.button) {

@@ -133,7 +133,7 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		box-sizing: border-box;
 		min-height: 2.25rem;
 		padding: 0.375rem 1rem;

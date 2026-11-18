@@ -249,7 +249,7 @@
 	.search-input-container {
 		display: flex;
 		flex-direction: row;
-		gap: 1rem;
+		gap: var(--space-4);
 		margin: unset;
 		position: relative;
 		z-index: 30;
@@ -293,7 +293,7 @@
 	.search-options {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem;
+		gap: var(--space-4);
 		margin-bottom: 1rem;
 	}
 
@@ -309,7 +309,7 @@
 	.card-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.inline .card-grid {

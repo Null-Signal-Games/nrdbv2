@@ -53,18 +53,18 @@
 		--grid-card-width: 120px;
 
 		display: grid;
-		gap: 1.1rem;
+		gap: var(--space-4);
 	}
 
 	.deck-grid__group {
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.deck-grid__header {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.deck-grid__header h4 {
@@ -74,8 +74,8 @@
 	.deck-grid__track {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, var(--grid-card-width));
-		row-gap: 1.6rem;
-		column-gap: 1.1rem;
+		row-gap: var(--space-6);
+		column-gap: var(--space-4);
 		justify-content: start;
 		margin: 0;
 		padding: 0;

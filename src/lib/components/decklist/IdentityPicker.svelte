@@ -122,7 +122,7 @@
 		display: flex;
 		align-items: center;
 		flex-wrap: wrap;
-		gap: 0.5rem 0.75rem;
+		gap: var(--space-2) var(--space-3);
 		margin-block-end: 2rem;
 	}
 
@@ -145,13 +145,13 @@
 	.picker__groups {
 		display: flex;
 		flex-direction: column;
-		gap: 2.5rem;
+		gap: var(--space-8);
 	}
 
 	.picker__group-title {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		color: var(--text-muted);
 		margin: 0 0 1rem;
 		padding-block-end: 0.5rem;
@@ -161,7 +161,7 @@
 	.picker__grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-		gap: 1.25rem 1rem;
+		gap: var(--space-4) var(--space-4);
 		list-style: none;
 		margin: 0;
 		padding: 0;
@@ -171,7 +171,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		width: 100%;
 		padding: 0;
 		font: inherit;

@@ -71,6 +71,6 @@
 	.item {
 		display: grid;
 		grid-template-columns: 1fr auto;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 </style>

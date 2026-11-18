@@ -233,7 +233,7 @@
 	.view-toggle {
 		display: flex;
 		flex-direction: row;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.search-options {
@@ -241,14 +241,14 @@
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 1rem;
+		gap: var(--space-4);
 		margin-block: 1rem 0;
 	}
 
 	.search-toggles {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.result-count {
@@ -262,7 +262,7 @@
 	.card-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-		gap: 1rem;
+		gap: var(--space-4);
 		margin-block: 2rem;
 	}
 

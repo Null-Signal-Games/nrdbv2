@@ -44,7 +44,7 @@
 	.influence {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		font-size: var(--font-size-base);
 	}
 

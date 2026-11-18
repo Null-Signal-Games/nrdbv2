@@ -80,7 +80,7 @@
 		position: relative;
 		isolation: isolate;
 		display: flex;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		align-items: stretch;
 		padding: 0.75rem 1rem;
 		background: var(--foreground);
@@ -112,7 +112,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		min-width: 0;
 	}
 
@@ -126,6 +126,6 @@
 	.tile__author {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 	}
 </style>

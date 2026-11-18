@@ -88,7 +88,7 @@
 	.site-footer__inner {
 		display: grid;
 		grid-template-columns: 2fr 1fr 1fr 1fr;
-		gap: 2rem;
+		gap: var(--space-8);
 	}
 
 	.site-footer__factions {
@@ -101,14 +101,14 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		text-decoration: none;
 	}
 
 	.site-footer__settings {
 		display: flex;
 		flex-direction: row;
-		gap: 2rem;
+		gap: var(--space-8);
 		margin-block-start: 1rem;
 	}
 
@@ -116,7 +116,7 @@
 		grid-column: span 3;
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 2rem;
+		gap: var(--space-8);
 	}
 
 	.site-footer__heading {
@@ -134,7 +134,7 @@
 		list-style: none;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.site-footer__list a {

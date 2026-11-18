@@ -32,14 +32,14 @@
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.75rem 1.25rem;
+		gap: var(--space-3) var(--space-4);
 		padding-block: 0.75rem;
 	}
 
 	.deck-bar__actions {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	h1 {

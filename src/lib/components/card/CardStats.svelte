@@ -53,7 +53,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.5rem 0.75rem;
+		gap: var(--space-2) var(--space-3);
 	}
 
 	.card-stats--spread {
@@ -63,7 +63,7 @@
 	.card-stats__faction {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.card-stats__faction a {
@@ -73,6 +73,6 @@
 	.card-stats__values {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: var(--space-3);
 	}
 </style>

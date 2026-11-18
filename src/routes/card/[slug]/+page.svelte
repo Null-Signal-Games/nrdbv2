@@ -274,7 +274,7 @@
 	.card-page {
 		display: grid;
 		grid-template-columns: 340px minmax(0, 1fr);
-		gap: 1.5rem;
+		gap: var(--space-6);
 		align-items: start;
 		padding-block: 1.5rem 3rem;
 	}
@@ -283,12 +283,12 @@
 		position: sticky;
 		top: 1.5rem;
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.actions {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.actions :global(.button) {
@@ -297,7 +297,7 @@
 
 	.main {
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 		min-width: 0;
 	}
 
@@ -305,7 +305,7 @@
 	.info-body {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: var(--space-3);
 		background-color: var(--foreground);
 		border: 1px solid var(--border);
 	}
@@ -332,7 +332,7 @@
 		--card-cost-size: 2.5rem;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.title {
@@ -355,7 +355,7 @@
 	.card-text :global(.formatted-text) {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.card-text :global(p) {
@@ -372,19 +372,19 @@
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.stats-row {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.5rem 0.75rem;
+		gap: var(--space-2) var(--space-3);
 	}
 
 	.reviews {
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	.box {

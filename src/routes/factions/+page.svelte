@@ -35,6 +35,6 @@
 		list-style: none;
 		padding: 0;
 		display: grid;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 </style>

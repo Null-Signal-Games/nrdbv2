@@ -111,7 +111,7 @@
 	:global(.toolbar) {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem;
+		gap: var(--space-4);
 	}
 
 	:global(.toolbar__group) {
@@ -122,7 +122,7 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		box-sizing: border-box;
 		min-height: 2rem;
 		padding: 0.25rem 0.75rem;

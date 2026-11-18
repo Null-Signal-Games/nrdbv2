@@ -67,7 +67,7 @@
 	/* Temporary styles */
 	:global(.wrapper) {
 		display: grid;
-		gap: 2rem;
+		gap: var(--space-8);
 		grid-template-columns: 1fr 3fr;
 	}
 
@@ -76,7 +76,7 @@
 		margin: unset;
 		padding: unset;
 		display: grid;
-		gap: 0.75rem;
+		gap: var(--space-3);
 	}
 
 	aside a {

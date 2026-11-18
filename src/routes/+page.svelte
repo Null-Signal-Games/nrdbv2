@@ -87,7 +87,7 @@
 	.home {
 		display: grid;
 		grid-template-columns: 5fr 2fr;
-		gap: 2rem;
+		gap: var(--space-8);
 		margin-block: 2rem;
 	}
 
@@ -101,7 +101,7 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.home__error {
