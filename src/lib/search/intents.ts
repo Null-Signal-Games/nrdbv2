@@ -1,5 +1,32 @@
 import type { CardTypeIds, FactionIds } from '$lib/types';
 
+// An intent is one thing the typed input asks for, in domain terms.
+
+// Named as the search grammar names them.
+export type NumericField =
+	| 'advancement_cost'
+	| 'agenda_points'
+	| 'base_link'
+	| 'cost'
+	| 'influence_cost'
+	| 'memory_usage'
+	| 'num_printed_subroutines'
+	| 'strength'
+	| 'trash_cost';
+
+// Named as the search grammar names them.
+export type BooleanField =
+	| 'additional_cost'
+	| 'advanceable'
+	| 'gains_subroutines'
+	| 'interrupt'
+	| 'is_unique'
+	| 'on_encounter_effect'
+	| 'performs_trace'
+	| 'trash_ability';
+
+export type ComparisonOperator = '=' | '<' | '<=' | '>' | '>=';
+
 export interface SideIntent {
 	kind: 'side';
 	value: string;
@@ -15,6 +42,7 @@ export interface CardTypeIntent {
 	value: CardTypeIds | CardTypeIds[];
 	negated: boolean;
 }
+// The value is the subtype's lowercased name.
 export interface SubtypeIntent {
 	kind: 'subtype';
 	value: string;
@@ -32,8 +60,8 @@ export interface CycleIntent {
 }
 export interface NumericIntent {
 	kind: 'numeric';
-	field: string;
-	operator: string;
+	field: NumericField;
+	operator: ComparisonOperator;
 	value: number;
 }
 export interface AgendaRatioIntent {
@@ -43,12 +71,18 @@ export interface AgendaRatioIntent {
 }
 export interface BooleanIntent {
 	kind: 'boolean';
-	field: string;
-	value: 0 | 1;
+	field: BooleanField;
+	negated: boolean;
 }
-export interface SemanticIntent {
-	kind: 'semantic';
-	tokens: string[];
+// Card text containing every one of the phrases.
+export interface TextIntent {
+	kind: 'text';
+	phrases: string[];
+}
+// Literal search syntax, passed through untouched.
+export interface VerbatimIntent {
+	kind: 'verbatim';
+	expression: string;
 }
 export interface FreeformIntent {
 	kind: 'freeform';
@@ -65,7 +99,8 @@ export type Intent =
 	| NumericIntent
 	| AgendaRatioIntent
 	| BooleanIntent
-	| SemanticIntent
+	| TextIntent
+	| VerbatimIntent
 	| FreeformIntent;
 
 // The word "or" between two intents. Intents without one between them are ANDed.

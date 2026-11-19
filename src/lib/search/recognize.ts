@@ -1,10 +1,11 @@
 import type {
 	AgendaRatioIntent,
+	ComparisonOperator,
 	IntentMatch,
 	IntentOrConnective,
 	NumericIntent,
 	Connective,
-	SemanticIntent
+	VerbatimIntent
 } from './intents';
 import {
 	FACTION_MAP,
@@ -14,7 +15,7 @@ import {
 	SET_MAP,
 	CYCLE_MAP,
 	BOOLEAN_MAP,
-	SEMANTIC_MAP,
+	TEXT_MAP,
 	getMaxPhraseWords,
 	findNumericField
 } from './vocabulary';
@@ -43,14 +44,14 @@ import {
 	RE_QUOTED_TERM
 } from './patterns';
 
-function pushTerm(terms: SemanticIntent[], token: string): string {
+function pushTerm(terms: VerbatimIntent[], expression: string): string {
 	const i = terms.length;
-	terms.push({ kind: 'semantic', tokens: [token] });
+	terms.push({ kind: 'verbatim', expression });
 	return ` \x00${i}\x00 `;
 }
 
-export function extractQuotedTerms(input: string): { remainder: string; terms: SemanticIntent[] } {
-	const terms: SemanticIntent[] = [];
+export function extractQuotedTerms(input: string): { remainder: string; terms: VerbatimIntent[] } {
+	const terms: VerbatimIntent[] = [];
 	const withQuotedGroups = input.replace(RE_QUOTED_GROUP, (match) => pushTerm(terms, match));
 	const remainder = withQuotedGroups.replace(
 		RE_QUOTED_TERM,
@@ -63,7 +64,7 @@ export function extractQuotedTerms(input: string): { remainder: string; terms: S
 	return { remainder, terms };
 }
 
-export function restoreQuotedTerms(matches: IntentMatch[], terms: SemanticIntent[]): IntentMatch[] {
+export function restoreQuotedTerms(matches: IntentMatch[], terms: VerbatimIntent[]): IntentMatch[] {
 	return matches.map((match) => {
 		const { intent } = match;
 		if (intent.kind === 'freeform') {
@@ -102,15 +103,15 @@ export function extractNumericIntents(normalized: string): {
 	const intents: (NumericIntent | AgendaRatioIntent | Connective)[] = [];
 	const or: Connective = { kind: 'or' };
 
-	const pushNumeric = (fieldPhrase: string, operator: string, n: string) => {
+	const pushNumeric = (fieldPhrase: string, operator: ComparisonOperator, n: string) => {
 		const field = findNumericField(fieldPhrase);
 		if (field) intents.push({ kind: 'numeric', field, operator, value: parseInt(n, 10) });
 	};
 	const pushCompoundOr = (
 		fieldPhrase: string,
-		op1: string,
+		op1: ComparisonOperator,
 		n1: string,
-		op2: string,
+		op2: ComparisonOperator,
 		n2: string
 	) => {
 		const field = findNumericField(fieldPhrase);
@@ -158,13 +159,13 @@ export function extractNumericIntents(normalized: string): {
 
 	// "1 or 2 trash"
 	remainder = remainder.replace(RE_BARE_NUMBER_OR_FIELD, (_, n1, n2, field) => {
-		pushCompoundOr(field, ':', n1, ':', n2);
+		pushCompoundOr(field, '=', n1, '=', n2);
 		return ' ';
 	});
 
 	// "0 cost", "3 strength"
 	remainder = remainder.replace(RE_BARE_NUMBER_FIELD, (_, n, field) => {
-		pushNumeric(field, ':', n);
+		pushNumeric(field, '=', n);
 		return ' ';
 	});
 
@@ -205,7 +206,7 @@ export function recognizeIntents(remainder: string): IntentMatch[] {
 }
 
 // Matches the longest phrase at index i and returns words consumed. At each length the
-// lookup order is semantic > boolean > faction > card type > subtype > set > cycle > side.
+// lookup order is text > boolean > faction > card type > subtype > set > cycle > side.
 // Side comes last and only matches single words, so "corp identity" stays a card type.
 function matchAt(
 	words: string[],
@@ -218,16 +219,15 @@ function matchAt(
 	for (let len = maxLen; len >= 1; len--) {
 		const phrase = words.slice(i, i + len).join(' ');
 
-		const sem = SEMANTIC_MAP.get(phrase);
-		if (sem) {
-			intents.push({ kind: 'semantic', tokens: sem });
+		const phrases = TEXT_MAP.get(phrase);
+		if (phrases) {
+			intents.push({ kind: 'text', phrases });
 			return len;
 		}
 
 		const boolean = BOOLEAN_MAP.get(phrase);
 		if (boolean) {
-			const value: 0 | 1 = negated ? ((1 - boolean.onValue) as 0 | 1) : boolean.onValue;
-			intents.push({ kind: 'boolean', field: boolean.field, value });
+			intents.push({ kind: 'boolean', field: boolean, negated });
 			return len;
 		}
 

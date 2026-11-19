@@ -1,4 +1,34 @@
-import type { Intent, IntentOrConnective } from './intents';
+import type { BooleanField, Intent, IntentOrConnective, NumericField } from './intents';
+
+// Assembly writes intents out as an NRDB search expression. This is the only step that
+// knows the search syntax: field keywords, operators, quoting and grouping.
+
+const KIND_KEYWORD = {
+	side: 'd',
+	faction: 'f',
+	card_type: 't',
+	subtype: 's',
+	set: 'e',
+	cycle: 'c',
+	text: 'x'
+} as const;
+
+// Short keywords for numeric and boolean fields. A field missing here is written by name.
+const SHORT_KEYWORD: Partial<Record<NumericField | BooleanField, string>> = {
+	advancement_cost: 'g',
+	agenda_points: 'v',
+	base_link: 'l',
+	cost: 'o',
+	influence_cost: 'n',
+	is_unique: 'u',
+	memory_usage: 'm',
+	strength: 'p',
+	trash_cost: 'h'
+};
+
+function fieldKeyword(field: NumericField | BooleanField): string {
+	return SHORT_KEYWORD[field] ?? field;
+}
 
 const KIND_PRIORITY: Record<Intent['kind'], number> = {
 	side: 0,
@@ -10,7 +40,8 @@ const KIND_PRIORITY: Record<Intent['kind'], number> = {
 	agenda_ratio: 6,
 	numeric: 7,
 	boolean: 8,
-	semantic: 9,
+	text: 9,
+	verbatim: 9,
 	freeform: 10
 };
 
@@ -84,28 +115,35 @@ function valueTerms(prefix: string, v: string | string[], negated: boolean): str
 	return negated ? `${prefix}!${v}` : `${prefix}:${v}`;
 }
 
+function quote(value: string): string {
+	return /[\s-]/.test(value) ? `"${value}"` : value;
+}
+
 export function writeIntent(intent: Intent): string {
 	switch (intent.kind) {
 		case 'side':
-			return intent.negated ? `d!${intent.value}` : `d:${intent.value}`;
 		case 'faction':
-			return valueTerms('f', intent.value, intent.negated);
 		case 'card_type':
-			return valueTerms('t', intent.value, intent.negated);
-		case 'subtype':
-			return intent.negated ? `s!${intent.value}` : `s:${intent.value}`;
 		case 'set':
-			return intent.negated ? `e!${intent.value}` : `e:${intent.value}`;
 		case 'cycle':
-			return intent.negated ? `c!${intent.value}` : `c:${intent.value}`;
-		case 'numeric':
-			return `${intent.field}${intent.operator}${intent.value}`;
-		case 'agenda_ratio':
-			return `g:${intent.advancement} v:${intent.points}`;
+			return valueTerms(KIND_KEYWORD[intent.kind], intent.value, intent.negated);
+		case 'subtype':
+			return valueTerms(KIND_KEYWORD.subtype, quote(intent.value), intent.negated);
 		case 'boolean':
-			return `${intent.field}:${intent.value}`;
-		case 'semantic':
-			return intent.tokens.join(' ');
+			return `${fieldKeyword(intent.field)}:${intent.negated ? 0 : 1}`;
+		case 'numeric': {
+			const operator = intent.operator === '=' ? ':' : intent.operator;
+			return `${fieldKeyword(intent.field)}${operator}${intent.value}`;
+		}
+		case 'agenda_ratio':
+			return [
+				`${fieldKeyword('advancement_cost')}:${intent.advancement}`,
+				`${fieldKeyword('agenda_points')}:${intent.points}`
+			].join(' ');
+		case 'text':
+			return intent.phrases.map((phrase) => `${KIND_KEYWORD.text}:"${phrase}"`).join(' ');
+		case 'verbatim':
+			return intent.expression;
 		case 'freeform':
 			// bare word: matched against both title and text
 			return intent.word;

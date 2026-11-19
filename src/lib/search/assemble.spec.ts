@@ -26,17 +26,17 @@ describe('assembleExpression', () => {
 
 	it('emits OR group when numeric intents are separated by or', () => {
 		const intents: IntentOrConnective[] = [
-			{ kind: 'numeric', field: 'p', operator: '>', value: 5 },
+			{ kind: 'numeric', field: 'strength', operator: '>', value: 5 },
 			{ kind: 'or' },
-			{ kind: 'numeric', field: 'p', operator: '<', value: 2 }
+			{ kind: 'numeric', field: 'strength', operator: '<', value: 2 }
 		];
 		expect(assembleExpression(intents)).toBe('(p>5 or p<2)');
 	});
 
 	it('emits two separate tokens when same-field numerics have no or between them', () => {
 		const intents: IntentOrConnective[] = [
-			{ kind: 'numeric', field: 'p', operator: '>', value: 5 },
-			{ kind: 'numeric', field: 'p', operator: '<', value: 2 }
+			{ kind: 'numeric', field: 'strength', operator: '>', value: 5 },
+			{ kind: 'numeric', field: 'strength', operator: '<', value: 2 }
 		];
 		expect(assembleExpression(intents)).toBe('p>5 p<2');
 	});
@@ -57,16 +57,55 @@ describe('assembleExpression', () => {
 		expect(assembleExpression(intents)).toBe('g:5 v:3');
 	});
 
-	it('emits semantic tokens joined by spaces', () => {
-		const intents: IntentOrConnective[] = [{ kind: 'semantic', tokens: ['x:"tag"'] }];
+	it('emits a text phrase as a quoted card-text term', () => {
+		const intents: IntentOrConnective[] = [{ kind: 'text', phrases: ['tag'] }];
 		expect(assembleExpression(intents)).toBe('x:"tag"');
 	});
 
-	it('emits multi-token semantic as space-separated', () => {
-		const intents: IntentOrConnective[] = [
-			{ kind: 'semantic', tokens: ['x:"lose"', 'x:"credit"'] }
-		];
+	it('emits one card-text term per text phrase', () => {
+		const intents: IntentOrConnective[] = [{ kind: 'text', phrases: ['lose', 'credit'] }];
 		expect(assembleExpression(intents)).toBe('x:"lose" x:"credit"');
+	});
+
+	it('emits verbatim expressions untouched', () => {
+		const intents: IntentOrConnective[] = [{ kind: 'verbatim', expression: 's!"code gate"' }];
+		expect(assembleExpression(intents)).toBe('s!"code gate"');
+	});
+
+	it('quotes subtype names containing a space or hyphen', () => {
+		expect(assembleExpression([{ kind: 'subtype', value: 'code gate', negated: false }])).toBe(
+			's:"code gate"'
+		);
+		expect(
+			assembleExpression([{ kind: 'subtype', value: 'consumer-grade', negated: true }])
+		).toBe('s!"consumer-grade"');
+	});
+
+	it('emits boolean fields as 1, or 0 when negated', () => {
+		expect(assembleExpression([{ kind: 'boolean', field: 'is_unique', negated: false }])).toBe(
+			'u:1'
+		);
+		expect(
+			assembleExpression([{ kind: 'boolean', field: 'trash_ability', negated: true }])
+		).toBe('trash_ability:0');
+	});
+
+	it('emits numeric equality with a colon', () => {
+		expect(
+			assembleExpression([{ kind: 'numeric', field: 'cost', operator: '=', value: 0 }])
+		).toBe('o:0');
+	});
+
+	it('writes a numeric field without a short keyword by name', () => {
+		expect(
+			assembleExpression([
+				{ kind: 'numeric', field: 'num_printed_subroutines', operator: '>', value: 2 }
+			])
+		).toBe('num_printed_subroutines>2');
+	});
+
+	it('emits negated set', () => {
+		expect(assembleExpression([{ kind: 'set', value: 'core', negated: true }])).toBe('e!core');
 	});
 
 	it('orders side before faction before type', () => {
