@@ -2,11 +2,12 @@
 	import type { PageServerData, PageData } from './$types';
 	import { NRDB_API_URL } from '$lib/constants';
 	import Meta from '$lib/components/Meta.svelte';
-	import CardMeta from '$lib/components/card/Meta.svelte';
 	import CardImage from '$lib/components/card/CardImage.svelte';
 	import CardCost from '$lib/components/card/CardCost.svelte';
 	import CardStat from '$lib/components/card/CardStat.svelte';
 	import CardStats from '$lib/components/card/CardStats.svelte';
+	import PrintingSelector from '$lib/components/card/PrintingSelector.svelte';
+	import PrintingCredits from '$lib/components/card/PrintingCredits.svelte';
 	import { getCardModalStats } from '$lib/components/card/modal-stats';
 	import Review from '$lib/components/review/Item.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -33,6 +34,26 @@
 	const subtypes = $derived(
 		data.card.attributes.card_subtype_ids.map((subtype) => card_sub_types[subtype]).join(', ')
 	);
+
+	const printings = $derived(
+		[...data.printings].sort((a, b) =>
+			b.attributes.date_release.localeCompare(a.attributes.date_release)
+		)
+	);
+
+	let selection: { card_id: string; printing_id: string } | null = $state(null);
+
+	const printing = $derived.by(() => {
+		const id =
+			selection?.card_id === data.card.id
+				? selection.printing_id
+				: data.card.attributes.latest_printing_id;
+		return printings.find((item) => item.id === id) ?? printings[0];
+	});
+
+	const select_printing = (printing_id: string) => {
+		selection = { card_id: data.card.id, printing_id };
+	};
 </script>
 
 <Meta title={data.card.attributes.title}>
@@ -63,8 +84,22 @@
 	>
 		<aside class="rail">
 			<div class="cover">
-				<CardImage card={data.card} hasTransition={true} href={null} />
+				{#if !printing || printing.id === data.card.attributes.latest_printing_id}
+					<CardImage card={data.card} hasTransition={true} href={null} />
+				{:else}
+					<CardImage card={printing} href={null} />
+				{/if}
 			</div>
+
+			{#if printings.length > 1}
+				<div class="printings">
+					<PrintingSelector
+						{printings}
+						selected_id={printing?.id}
+						onselect={select_printing}
+					/>
+				</div>
+			{/if}
 
 			<div class="actions">
 				<Button href={localizeHref(`/decklists/search?cards[]=${data.card.id}`)}>
@@ -149,77 +184,18 @@
 						</div>
 					{/if}
 
-					{#if data.printings[0]?.attributes.flavor}
-						<p class="flavor">{data.printings[0].attributes.flavor}</p>
+					{#if printing?.attributes.flavor}
+						<p class="flavor">{printing.attributes.flavor}</p>
+					{/if}
+
+					{#if printing}
+						<hr />
+						<PrintingCredits {printing} />
 					{/if}
 				</div>
 			</div>
 
-			{#if data.printings.length > 0 && data.printings[0].attributes.illustrator_ids.length > 0}
-				<p>
-					<a
-						href={localizeHref(
-							`/illustrators/${data.printings[0].attributes.illustrator_ids[0]}`
-						)}
-						class="underline"
-					>
-						Illustrated by {data.printings[0].attributes.display_illustrators}
-					</a>
-				</p>
-			{/if}
-
-			<div>
-				<div>
-					<p>Cycle</p>
-					{#each data.card.attributes.card_cycle_ids as cycle_id, index}
-						<a href={localizeHref(`/cycles/${cycle_id}`)} class="underline">
-							{data.card.attributes.card_cycle_names[index]}
-						</a>
-					{/each}
-				</div>
-				<hr />
-				<div>
-					<p>sets</p>
-					{#each data.card.attributes.card_set_ids as set_id, index}
-						<a href={localizeHref(`/sets/${set_id}`)} class="underline">
-							{data.card.attributes.card_set_names[index]}
-						</a>
-					{/each}
-				</div>
-				<hr />
-				<div>
-					<p>legality</p>
-				</div>
-			</div>
-
 			<div style="display: grid; gap: 1rem;">
-				<!-- PRINTINGS/ALTERNATIVE-ARTS -->
-				{#if data.printings.length > 1}
-					<div class="box">
-						<!-- TODO(i18n) -->
-						<h2>Prints &amp; Alternative Arts</h2>
-						<div>
-							<div
-								style="display: grid; grid-template-columns: repeat(5, minmax(auto, 1fr)); gap: 1rem;"
-							>
-								{#each data.printings as printing (printing.id)}
-									<CardMeta card={printing} title={false}>
-										<CardImage card={printing} href={null} />
-										<!-- <pre>{JSON.stringify(printing, null, 2)}</pre> -->
-										{#snippet content()}
-											Illusrated by <a
-												href={localizeHref(
-													`/illustrators/${printing.attributes.illustrator_ids[0]}`
-												)}>{printing.attributes.display_illustrators}</a
-											>
-										{/snippet}
-									</CardMeta>
-								{/each}
-							</div>
-						</div>
-					</div>
-				{/if}
-
 				<!-- RULINGS -->
 				{#await data.rulings}
 					<Ghost />

@@ -5,6 +5,7 @@
 	import CardCost from './CardCost.svelte';
 	import CardStat from './CardStat.svelte';
 	import CardStats from './CardStats.svelte';
+	import { get_illustrator_credits } from './illustrators';
 	import { getCardModalStats } from './modal-stats';
 	import FormatText from '$lib/components/FormatText.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -17,24 +18,6 @@
 	}
 
 	let { card, printing }: Props = $props();
-
-	const get_illustrator_credits = (printing: Printing) => {
-		const { display_illustrators, illustrator_ids, illustrator_names } = printing.attributes;
-		if (illustrator_names.length) {
-			return illustrator_names.map((name, index) => ({
-				name,
-				id: illustrator_ids[index]
-			}));
-		}
-		if (!display_illustrators) return [];
-
-		return [
-			{
-				name: display_illustrators,
-				id: illustrator_ids.length === 1 ? illustrator_ids[0] : undefined
-			}
-		];
-	};
 
 	const attributes = $derived(printing?.attributes ?? card.attributes);
 	const illustrators = $derived(printing ? get_illustrator_credits(printing) : []);
