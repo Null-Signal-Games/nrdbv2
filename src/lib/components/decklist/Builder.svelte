@@ -61,7 +61,7 @@
 		active_filters.flatMap((filter) => (filter.kind === 'faction' ? [filter.id] : []))
 	);
 	let type_filters = $derived(
-		active_filters.flatMap((filter) => (filter.kind === 'cardType' ? [filter.id] : []))
+		active_filters.flatMap((filter) => (filter.kind === 'card_type' ? [filter.id] : []))
 	);
 
 	let faction_toggles = $derived<ToolbarOption<FactionIds>[]>(
@@ -126,7 +126,7 @@
 
 	const on_toggle_type_change = (card_type_id: CardTypeIds) => {
 		search_input = toggleFilterInInput(interpretation, {
-			kind: 'cardType',
+			kind: 'card_type',
 			id: card_type_id
 		});
 	};

@@ -12,7 +12,7 @@ describe('natural-language filter synchronization', () => {
 		expect(interpretation.expression).toBe('f:haas_bioroid t:ice');
 		expect(collectActiveFilters(interpretation)).toEqual([
 			{ kind: 'faction', id: 'haas_bioroid' },
-			{ kind: 'cardType', id: 'ice' }
+			{ kind: 'card_type', id: 'ice' }
 		]);
 	});
 

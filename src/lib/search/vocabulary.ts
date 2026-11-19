@@ -263,8 +263,8 @@ export const NUMERIC_FIELD_MAP = phraseMap<string>({
 	sub: 'num_printed_subroutines'
 });
 
-export function wordToField(word: string): string | undefined {
-	return NUMERIC_FIELD_MAP.get(word.trim().toLowerCase().replace(/\s+/g, ' '));
+export function findNumericField(phrase: string): string | undefined {
+	return NUMERIC_FIELD_MAP.get(phrase.trim().toLowerCase().replace(/\s+/g, ' '));
 }
 
 // Every numeric field phrase joined with `|` for the numeric regexes. Longer phrases go

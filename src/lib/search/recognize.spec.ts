@@ -4,15 +4,15 @@ import type {
 	NumericIntent,
 	AgendaRatioIntent,
 	FactionIntent,
-	TypeIntent,
-	Intent
+	CardTypeIntent,
+	IntentOrConnective
 } from './intents';
 import { populateSubtypeMap } from './vocabulary';
 import { SUBTYPE_FIXTURE } from './subtypes.fixture';
 
 beforeAll(() => populateSubtypeMap(SUBTYPE_FIXTURE));
 
-const recognizedIntents = (remainder: string): Intent[] =>
+const recognizedIntents = (remainder: string): IntentOrConnective[] =>
 	recognizeIntents(remainder).map(({ intent }) => intent);
 
 describe('normalizeInput', () => {
@@ -114,7 +114,7 @@ describe('extractNumericIntents', () => {
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'p',
-			op: '>',
+			operator: '>',
 			value: 5
 		});
 		expect(remainder.trim()).toBe('');
@@ -126,7 +126,7 @@ describe('extractNumericIntents', () => {
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'p',
-			op: '>',
+			operator: '>',
 			value: 5
 		});
 	});
@@ -136,7 +136,7 @@ describe('extractNumericIntents', () => {
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'o',
-			op: '>',
+			operator: '>',
 			value: 5
 		});
 	});
@@ -147,14 +147,14 @@ describe('extractNumericIntents', () => {
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'p',
-			op: '<',
+			operator: '<',
 			value: 2
 		});
-		expect(intents[1]).toMatchObject({ kind: 'or_marker' });
+		expect(intents[1]).toMatchObject({ kind: 'or' });
 		expect(intents[2]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'p',
-			op: '>',
+			operator: '>',
 			value: 5
 		});
 	});
@@ -165,14 +165,14 @@ describe('extractNumericIntents', () => {
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'p',
-			op: '<',
+			operator: '<',
 			value: 2
 		});
-		expect(intents[1]).toMatchObject({ kind: 'or_marker' });
+		expect(intents[1]).toMatchObject({ kind: 'or' });
 		expect(intents[2]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'p',
-			op: '>',
+			operator: '>',
 			value: 5
 		});
 	});
@@ -183,14 +183,14 @@ describe('extractNumericIntents', () => {
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'h',
-			op: ':',
+			operator: ':',
 			value: 1
 		});
-		expect(intents[1]).toMatchObject({ kind: 'or_marker' });
+		expect(intents[1]).toMatchObject({ kind: 'or' });
 		expect(intents[2]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'h',
-			op: ':',
+			operator: ':',
 			value: 2
 		});
 	});
@@ -200,7 +200,7 @@ describe('extractNumericIntents', () => {
 		expect(intents[0]).toMatchObject<NumericIntent>({
 			kind: 'numeric',
 			field: 'o',
-			op: ':',
+			operator: ':',
 			value: 0
 		});
 	});
@@ -208,7 +208,7 @@ describe('extractNumericIntents', () => {
 	it('extracts agenda ratio with s suffix', () => {
 		const { intents } = extractNumericIntents('5/3s');
 		expect(intents[0]).toMatchObject<AgendaRatioIntent>({
-			kind: 'agendaRatio',
+			kind: 'agenda_ratio',
 			advancement: 5,
 			points: 3
 		});
@@ -217,7 +217,7 @@ describe('extractNumericIntents', () => {
 	it('extracts agenda ratio without s suffix', () => {
 		const { intents } = extractNumericIntents('4/2');
 		expect(intents[0]).toMatchObject<AgendaRatioIntent>({
-			kind: 'agendaRatio',
+			kind: 'agenda_ratio',
 			advancement: 4,
 			points: 2
 		});
@@ -278,19 +278,19 @@ describe('recognizeIntents', () => {
 		expect(intents[0]).toMatchObject({ kind: 'side', value: 'corp' });
 	});
 
-	it('"runner identity" produces a single type intent', () => {
+	it('"runner identity" produces a single card type intent', () => {
 		const intents = recognizedIntents('runner identity');
 		expect(intents).toHaveLength(1);
-		expect(intents[0]).toMatchObject<TypeIntent>({
-			kind: 'type',
+		expect(intents[0]).toMatchObject<CardTypeIntent>({
+			kind: 'card_type',
 			value: 'runner_identity',
 			negated: false
 		});
 	});
 
-	it('"or" produces an or_marker intent', () => {
+	it('"or" produces an or connective', () => {
 		const intents = recognizedIntents('shaper or criminal');
-		expect(intents[1]).toMatchObject({ kind: 'or_marker' });
+		expect(intents[1]).toMatchObject({ kind: 'or' });
 	});
 
 	it('drops bare digits silently', () => {
@@ -323,10 +323,10 @@ describe('recognizeIntents', () => {
 		expect(intents[0]).toMatchObject({ kind: 'boolean', field: 'u', value: 1 });
 	});
 
-	it('recognizes ids as array-valued type', () => {
+	it('recognizes ids as array-valued card type', () => {
 		const intents = recognizedIntents('ids');
-		expect(intents[0]).toMatchObject<TypeIntent>({
-			kind: 'type',
+		expect(intents[0]).toMatchObject<CardTypeIntent>({
+			kind: 'card_type',
 			value: ['corp_identity', 'runner_identity'],
 			negated: false
 		});

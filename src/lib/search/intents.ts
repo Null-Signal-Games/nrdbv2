@@ -10,8 +10,8 @@ export interface FactionIntent {
 	value: FactionIds | FactionIds[];
 	negated: boolean;
 }
-export interface TypeIntent {
-	kind: 'type';
+export interface CardTypeIntent {
+	kind: 'card_type';
 	value: CardTypeIds | CardTypeIds[];
 	negated: boolean;
 }
@@ -33,11 +33,11 @@ export interface CycleIntent {
 export interface NumericIntent {
 	kind: 'numeric';
 	field: string;
-	op: string;
+	operator: string;
 	value: number;
 }
 export interface AgendaRatioIntent {
-	kind: 'agendaRatio';
+	kind: 'agenda_ratio';
 	advancement: number;
 	points: number;
 }
@@ -55,14 +55,10 @@ export interface FreeformIntent {
 	word: string;
 }
 
-export interface OrMarkerIntent {
-	kind: 'or_marker';
-}
-
 export type Intent =
 	| SideIntent
 	| FactionIntent
-	| TypeIntent
+	| CardTypeIntent
 	| SubtypeIntent
 	| SetIntent
 	| CycleIntent
@@ -70,12 +66,16 @@ export type Intent =
 	| AgendaRatioIntent
 	| BooleanIntent
 	| SemanticIntent
-	| FreeformIntent
-	| OrMarkerIntent;
+	| FreeformIntent;
 
-export type StructuredIntent = Exclude<Intent, OrMarkerIntent>;
+// The word "or" between two intents. Intents without one between them are ANDed.
+export interface Connective {
+	kind: 'or';
+}
+
+export type IntentOrConnective = Intent | Connective;
 
 export interface IntentMatch {
-	intent: Intent;
+	intent: IntentOrConnective;
 	phrase: string;
 }
