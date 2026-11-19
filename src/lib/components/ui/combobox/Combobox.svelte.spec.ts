@@ -1,6 +1,6 @@
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import Combobox, { type ComboboxItem, type ComboboxSearch } from './Combobox.svelte';
 
 const SURE_GAMBLE = { id: 'sure_gamble', title: 'Sure Gamble' };
@@ -35,6 +35,10 @@ async function render_combobox(options: RenderOptions = {}) {
 }
 
 describe('Combobox', () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	it('lists matching items while typing and adds the clicked item to the selection', async () => {
 		const { onchange } = await render_combobox();
 
@@ -150,5 +154,34 @@ describe('Combobox', () => {
 		await expect
 			.element(page.getByRole('button', { name: 'Remove Sure Gamble' }))
 			.toBeDisabled();
+	});
+
+	it('shows no options and logs when the search fails', async () => {
+		const error_log = vi.spyOn(console, 'error').mockImplementation(() => {});
+		await render_combobox({ search: () => Promise.reject(new Error('search is down')) });
+
+		await page.getByRole('combobox', { name: 'Contains cards' }).fill('car');
+		await vi.waitFor(() => expect(error_log).toHaveBeenCalled());
+		await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+	});
+
+	it('ignores a slower earlier response', async () => {
+		let resolve_first: (found: ComboboxItem[]) => void = () => {};
+		const search = (query: string) =>
+			query === 'c'
+				? new Promise<ComboboxItem[]>((resolve) => (resolve_first = resolve))
+				: Promise.resolve([CARNIVORE]);
+
+		await render_combobox({ search });
+		const input = page.getByRole('combobox', { name: 'Contains cards' });
+		await input.fill('c');
+		await input.fill('car');
+		await expect.element(page.getByRole('option', { name: 'Carnivore' })).toBeVisible();
+
+		resolve_first([COOKBOOK]);
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		await expect
+			.element(page.getByRole('option', { name: 'Cookbook' }))
+			.not.toBeInTheDocument();
 	});
 });

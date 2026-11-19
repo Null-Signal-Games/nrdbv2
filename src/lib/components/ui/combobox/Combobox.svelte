@@ -43,6 +43,7 @@
 	let results = $state<T[]>([]);
 	let field_element = $state<HTMLDivElement | null>(null);
 	let input_element = $state<HTMLInputElement | null>(null);
+	let latest_request = 0;
 
 	const has_query = $derived(query.trim().length > 0);
 
@@ -56,13 +57,23 @@
 
 	$effect(() => {
 		const text = query.trim();
+		const request_id = ++latest_request;
 
 		if (!text) {
 			results = [];
 			return;
 		}
 
-		void Promise.resolve(search(text)).then((found) => (results = found));
+		void (async () => {
+			try {
+				const found = await search(text);
+				if (request_id === latest_request) results = found;
+			} catch (error) {
+				if (request_id !== latest_request) return;
+				console.error('[COMBOBOX] Search failed:', error);
+				results = [];
+			}
+		})();
 	});
 
 	function select_ids(ids: string[]) {
