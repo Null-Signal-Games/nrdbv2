@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
 
 	const rulings = (async () => {
 		const response = await fetch(
-			`${NRDB_API_URL}/rulings?filter[card_id]=${params.slug}&page[size]=10`
+			`${NRDB_API_URL}/rulings?filter[card_id]=${params.slug}&page[size]=100`
 		);
 		const json = await response.json();
 		return json.data;

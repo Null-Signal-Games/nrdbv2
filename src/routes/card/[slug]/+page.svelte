@@ -8,6 +8,7 @@
 	import CardStats from '$lib/components/card/CardStats.svelte';
 	import PrintingSelector from '$lib/components/card/PrintingSelector.svelte';
 	import PrintingCredits from '$lib/components/card/PrintingCredits.svelte';
+	import CardRulings from '$lib/components/card/CardRulings.svelte';
 	import { getCardModalStats } from '$lib/components/card/modal-stats';
 	import Review from '$lib/components/review/Item.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -19,8 +20,6 @@
 	import Container from '$lib/components/Container.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { next, previous } from '$lib/paraglide/messages';
-	import Ghost from '$lib/components/Ghost.svelte';
-	import RulingItem from '$lib/components/Ruling.svelte';
 	import HeaderImage from '$lib/components/HeaderImage.svelte';
 
 	interface Props {
@@ -195,29 +194,11 @@
 				</div>
 			</div>
 
-			<div style="display: grid; gap: 1rem;">
-				<!-- RULINGS -->
-				{#await data.rulings}
-					<Ghost />
-				{:then rulings}
-					<!-- <pre>{JSON.stringify(rulings, null, 2)}</pre> -->
-					<div class="box rulings">
-						<!-- TODO: i18n value for header -->
-						<h2>Rulings</h2>
-						{#if rulings.length > 0}
-							<ul>
-								{#each rulings as ruling (ruling.id)}
-									<RulingItem data={ruling} />
-								{/each}
-							</ul>
-						{:else}
-							<p>No rulings found for this card.</p>
-						{/if}
-					</div>
-				{:catch error}
-					<p>error loading rulings: {error.message}</p>
-				{/await}
+			{#key data.card.id}
+				<CardRulings rulings={data.rulings} />
+			{/key}
 
+			<div style="display: grid; gap: 1rem;">
 				<!-- REVIEWS -->
 				{#await data.reviews}
 					Loading reviews...

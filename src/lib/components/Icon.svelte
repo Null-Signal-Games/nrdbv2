@@ -82,6 +82,8 @@
 		certificate: 'certificate',
 		rotation: 'rotation',
 		heart: 'heart',
+		check: 'circle-check',
+		question: 'circle-question',
 		star: 'star',
 		comment: 'comment',
 		alwaysberunning: 'alwaysberunning',
