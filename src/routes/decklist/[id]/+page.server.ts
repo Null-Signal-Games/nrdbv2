@@ -1,5 +1,6 @@
 import { NRDB_API_URL } from '$lib/constants';
 import { fetch_card_sets } from '$lib/server/card_sets';
+import sanitize from 'sanitize-html';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
@@ -24,6 +25,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		decklist,
 		identity,
 		cards,
-		sets: await fetch_card_sets(fetch, cards ?? [])
+		sets: await fetch_card_sets(fetch, cards ?? []),
+		writeup: decklist.attributes.notes?.trim() ? sanitize(decklist.attributes.notes) : null
 	};
 };

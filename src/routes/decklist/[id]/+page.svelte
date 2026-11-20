@@ -10,6 +10,7 @@
 	import DeckExportMenu from '$lib/components/decklist/DeckExportMenu.svelte';
 	import DeckHeader from '$lib/components/decklist/DeckHeader.svelte';
 	import DeckDetails from '$lib/components/decklist/DeckDetails.svelte';
+	import DeckWriteup from '$lib/components/decklist/DeckWriteup.svelte';
 
 	interface Props {
 		data: {
@@ -17,6 +18,7 @@
 			decklist: Decklist;
 			cards: TCard[];
 			sets: TSet[];
+			writeup: string | null;
 		};
 	}
 
@@ -64,12 +66,20 @@
 		{/snippet}
 	</DeckHeader>
 
-	<DeckDetails
-		identity={data.identity}
-		decklist={data.decklist}
-		cards={data.cards}
-		sets={data.sets}
-	/>
+	<div class="decklist__body" class:decklist__body--writeup={data.writeup}>
+		<div class="decklist__deck">
+			<DeckDetails
+				identity={data.identity}
+				decklist={data.decklist}
+				cards={data.cards}
+				sets={data.sets}
+			/>
+		</div>
+
+		{#if data.writeup}
+			<DeckWriteup html={data.writeup} />
+		{/if}
+	</div>
 </Container>
 
 <Printer decklist={data.decklist} cards={data.cards} />
@@ -88,5 +98,24 @@
 
 	.decklist__byline a {
 		color: var(--text);
+	}
+
+	.decklist__body {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--space-8);
+		align-items: start;
+	}
+
+	.decklist__body--writeup {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 40rem);
+	}
+
+	.decklist__body--writeup .decklist__deck {
+		position: sticky;
+		top: var(--space-4);
+		max-block-size: calc(100dvh - 2 * var(--space-4));
+		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 </style>
