@@ -1,5 +1,5 @@
 import type { CardTypeIds, FactionIds } from '$lib/types';
-import type { BooleanField, NumericField } from './intents';
+import type { BooleanField, ComparisonOperator, NumericField } from './intents';
 
 // id/name pairs for dynamic vocab, decoupled from any store/filter type.
 export interface VocabOption {
@@ -142,6 +142,11 @@ export const TEXT_MAP = phraseMap<string[]>({
 export const SET_MAP = new Map<string, string>();
 export const CYCLE_MAP = new Map<string, string>();
 
+export function maxWordsIn(...maps: Map<string, unknown>[]): number {
+	const phrases = maps.flatMap((map) => [...map.keys()]);
+	return Math.max(...phrases.map((phrase) => phrase.split(/\s+/).length));
+}
+
 // The maps recognizeIntents looks phrases up in. Numeric field phrases are matched
 // separately, and side phrases are single words.
 const PHRASE_MAPS: Map<string, unknown>[] = [
@@ -158,10 +163,7 @@ const PHRASE_MAPS: Map<string, unknown>[] = [
 let maxPhraseWords: number | null = null;
 
 export function getMaxPhraseWords(): number {
-	if (maxPhraseWords === null) {
-		const phrases = PHRASE_MAPS.flatMap((map) => [...map.keys()]);
-		maxPhraseWords = Math.max(...phrases.map((phrase) => phrase.split(/\s+/).length));
-	}
+	maxPhraseWords ??= maxWordsIn(...PHRASE_MAPS);
 	return maxPhraseWords;
 }
 
@@ -270,3 +272,20 @@ export function buildNumericFieldPattern(): string {
 		.map((phrase) => phrase.replace(/[-]/g, '\\-').replace(/\s+/g, '\\s+'))
 		.join('|');
 }
+
+export const COMPARISON_PREFIX_MAP = phraseMap<ComparisonOperator>({
+	'greater than or equal to': '>=',
+	'less than or equal to': '<=',
+	'at least': '>=',
+	'at most': '<=',
+	'greater than': '>',
+	'more than': '>',
+	'less than': '<',
+	'fewer than': '<'
+});
+
+export const COMPARISON_SUFFIX_MAP = phraseMap<ComparisonOperator>({
+	'or more': '>=',
+	'or fewer': '<=',
+	'or less': '<='
+});
