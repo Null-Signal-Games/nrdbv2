@@ -1,6 +1,7 @@
 import type {
 	AgendaRatioIntent,
 	ComparisonOperator,
+	Intent,
 	IntentMatch,
 	IntentOrConnective,
 	NumericIntent,
@@ -205,9 +206,7 @@ export function recognizeIntents(remainder: string): IntentMatch[] {
 	return matches;
 }
 
-// Matches the longest phrase at index i and returns words consumed. At each length the
-// lookup order is text > boolean > faction > card type > subtype > set > cycle > side.
-// Side comes last and only matches single words, so "corp identity" stays a card type.
+// Matches the longest phrase at index i and returns words consumed.
 function matchAt(
 	words: string[],
 	i: number,
@@ -217,65 +216,51 @@ function matchAt(
 	const maxLen = Math.min(getMaxPhraseWords(), words.length - i);
 
 	for (let len = maxLen; len >= 1; len--) {
-		const phrase = words.slice(i, i + len).join(' ');
-
-		const phrases = TEXT_MAP.get(phrase);
-		if (phrases) {
-			intents.push({ kind: 'text', phrases });
+		const intent = intentForPhrase(words.slice(i, i + len).join(' '), negated);
+		if (intent) {
+			intents.push(intent);
 			return len;
-		}
-
-		const boolean = BOOLEAN_MAP.get(phrase);
-		if (boolean) {
-			intents.push({ kind: 'boolean', field: boolean, negated });
-			return len;
-		}
-
-		const faction = FACTION_MAP.get(phrase);
-		if (faction) {
-			intents.push({ kind: 'faction', value: faction, negated });
-			return len;
-		}
-
-		const cardType = CARD_TYPE_MAP.get(phrase);
-		if (cardType) {
-			intents.push({ kind: 'card_type', value: cardType, negated });
-			return len;
-		}
-
-		const subtype = SUBTYPE_MAP.get(phrase);
-		if (subtype) {
-			intents.push({ kind: 'subtype', value: subtype, negated });
-			return len;
-		}
-
-		const set = SET_MAP.get(phrase);
-		if (set) {
-			intents.push({ kind: 'set', value: set, negated });
-			return len;
-		}
-
-		const cycle = CYCLE_MAP.get(phrase);
-		if (cycle) {
-			intents.push({ kind: 'cycle', value: cycle, negated });
-			return len;
-		}
-
-		const side = len === 1 ? SIDE_MAP.get(phrase) : undefined;
-		if (side) {
-			intents.push({ kind: 'side', value: side, negated });
-			return 1;
 		}
 	}
 
-	const word = words[i];
-	if (word === 'or') {
-		intents.push({ kind: 'or' });
-		return 1;
-	}
-	// bare digits are leftovers from the numeric pre-pass
-	if (/^\d+$/.test(word)) return 1;
-
-	intents.push({ kind: 'freeform', word });
+	const intent = intentForWord(words[i]);
+	if (intent) intents.push(intent);
 	return 1;
+}
+
+// The lookup order is text > boolean > faction > card type > subtype > set > cycle > side.
+// Side phrases are single words and come last, so "corp identity" stays a card type.
+function intentForPhrase(phrase: string, negated: boolean): Intent | undefined {
+	const phrases = TEXT_MAP.get(phrase);
+	if (phrases !== undefined) return { kind: 'text', phrases };
+
+	const field = BOOLEAN_MAP.get(phrase);
+	if (field !== undefined) return { kind: 'boolean', field, negated };
+
+	const faction = FACTION_MAP.get(phrase);
+	if (faction !== undefined) return { kind: 'faction', value: faction, negated };
+
+	const cardType = CARD_TYPE_MAP.get(phrase);
+	if (cardType !== undefined) return { kind: 'card_type', value: cardType, negated };
+
+	const subtype = SUBTYPE_MAP.get(phrase);
+	if (subtype !== undefined) return { kind: 'subtype', value: subtype, negated };
+
+	const set = SET_MAP.get(phrase);
+	if (set !== undefined) return { kind: 'set', value: set, negated };
+
+	const cycle = CYCLE_MAP.get(phrase);
+	if (cycle !== undefined) return { kind: 'cycle', value: cycle, negated };
+
+	const side = SIDE_MAP.get(phrase);
+	if (side !== undefined) return { kind: 'side', value: side, negated };
+
+	return undefined;
+}
+
+function intentForWord(word: string): IntentOrConnective | null {
+	if (word === 'or') return { kind: 'or' };
+	// a bare number is one the numeric patterns found no field for
+	if (/^\d+$/.test(word)) return null;
+	return { kind: 'freeform', word };
 }
