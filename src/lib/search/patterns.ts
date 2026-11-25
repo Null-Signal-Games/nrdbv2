@@ -38,14 +38,18 @@ export const RE_BARE_NUMBER_OR_FIELD = new RegExp(
 );
 export const RE_BARE_NUMBER_FIELD = new RegExp(`\\b(\\d+)\\s+(${NUMERIC_FIELD_PATTERN})\\b`, 'gi');
 
-// A quoted phrase, optionally preceded by an explicit field/operator prefix
+// A quoted phrase, optionally preceded by a literal field/operator prefix
 // (e.g. x:"end the run", s!"virus"). Group 1 is the prefix when present (the quote is
-// part of explicit NRDB syntax); when absent the quote is a bare title/text phrase.
+// part of literal NRDB syntax); when absent the quote is a bare title/text phrase.
 // Group 2 is the quoted value.
 export const RE_QUOTED_TERM = /([A-Za-z_]+(?:<=|>=|[:!<>]))?"([^"]+)"/g;
 
-// A quoted group in literal syntax, optionally negated: (x:"tag" or x:"damage").
+// A parenthesized group containing a quoted phrase, optionally negated:
+// (x:"tag" or x:"damage"), !(x:"tag" or x:"damage").
 export const RE_QUOTED_GROUP = /!?\([^()]*"[^"]+"[^()]*\)/g;
+
+const PUNCTUATION = '[,.;!?]+';
+export const RE_TRAILING_PUNCTUATION = new RegExp(`${PUNCTUATION}$`);
 
 // A quoted term swapped out for a positional placeholder. The placeholder is delimited by
 // NULL so it survives lowercasing/normalization and the numeric pre-pass untouched, and is a
