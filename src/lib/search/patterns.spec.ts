@@ -19,6 +19,7 @@ import {
 	RE_SINGLE_FIELD_AT_END,
 	RE_SINGLE_FIELD_AT_START,
 	RE_BARE_NUMBER_FIELD,
+	RE_QUOTED_GROUP,
 	RE_QUOTED_TERM
 } from './patterns';
 
@@ -323,7 +324,7 @@ describe('RE_QUOTED_TERM', () => {
 		expect(m?.[2]).toBe('once per turn');
 	});
 
-	it('captures an explicit field/operator prefix with its quoted value', () => {
+	it('captures a literal field/operator prefix with its quoted value', () => {
 		const m = match(RE_QUOTED_TERM, 'x:"end the run"');
 		expect(m?.[1]).toBe('x:');
 		expect(m?.[2]).toBe('end the run');
@@ -362,4 +363,21 @@ describe('RE_QUOTED_TERM', () => {
 		expect(matches(RE_QUOTED_TERM, '"unclosed')).toBe(false));
 	it('does not match when no quotes present', () =>
 		expect(matches(RE_QUOTED_TERM, 'plain text')).toBe(false));
+});
+
+describe('RE_QUOTED_GROUP', () => {
+	it('matches a parenthesized group containing a quoted phrase', () => {
+		expect(match(RE_QUOTED_GROUP, 'ice (x:"tag" or x:"damage") sentry')?.[0]).toBe(
+			'(x:"tag" or x:"damage")'
+		);
+	});
+
+	it('includes a leading negation', () => {
+		expect(match(RE_QUOTED_GROUP, '!(x:"tag" or x:"damage")')?.[0]).toBe(
+			'!(x:"tag" or x:"damage")'
+		);
+	});
+
+	it('does not match a group without quotes', () =>
+		expect(matches(RE_QUOTED_GROUP, '(f:shaper or f:anarch)')).toBe(false));
 });
