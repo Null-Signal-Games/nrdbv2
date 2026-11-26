@@ -7,7 +7,6 @@ type Token = Parameters<JwtCallback>[0]['token'] & {
 	idToken?: string;
 	refreshToken?: string;
 	expiresAt?: number;
-	error?: 'RefreshTokenError';
 };
 
 interface Options {
@@ -22,8 +21,7 @@ export const EXPIRY_BUFFER_SECONDS = 30;
 async function refreshAccessToken(
 	{ issuer, clientId, clientSecret, fetcher = fetch }: Options,
 	token: Token
-): Promise<Token> {
-	const rejected: Token = { ...token, accessToken: undefined, error: 'RefreshTokenError' };
+): Promise<Token | null> {
 	const unavailable: Token = { ...token, accessToken: undefined };
 
 	let response: Response;
@@ -39,13 +37,13 @@ async function refreshAccessToken(
 			}),
 			signal: AbortSignal.timeout(10_000)
 		});
-		if (response.status === 400 || response.status === 401) return rejected;
+		if (response.status === 400 || response.status === 401) return null;
 		if (!response.ok) return unavailable;
 		result = await response.json();
 	} catch {
 		return unavailable;
 	}
-	if (!result.access_token || !result.expires_in) return rejected;
+	if (!result.access_token || !result.expires_in) return null;
 
 	return {
 		...token,
@@ -66,11 +64,9 @@ export function createAuthCallbacks(options: Options): Callbacks {
 					idToken: account.id_token,
 					accessToken: account.access_token,
 					refreshToken: account.refresh_token,
-					expiresAt: account.expires_at,
-					error: undefined
+					expiresAt: account.expires_at
 				};
 			}
-			if (saved.error) return saved;
 			if (
 				saved.accessToken &&
 				saved.expiresAt &&
@@ -79,7 +75,7 @@ export function createAuthCallbacks(options: Options): Callbacks {
 				return saved;
 			}
 			if (!saved.refreshToken) {
-				return { ...saved, accessToken: undefined, error: 'RefreshTokenError' };
+				return null;
 			}
 			return refreshAccessToken(options, saved);
 		},
@@ -87,7 +83,6 @@ export function createAuthCallbacks(options: Options): Callbacks {
 			const saved = token as Token;
 			session.accessToken = saved.accessToken;
 			session.idToken = saved.idToken;
-			session.error = saved.error;
 			return session;
 		}
 	};

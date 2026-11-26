@@ -10,7 +10,7 @@
 	let { children }: Props = $props();
 
 	$effect(() => {
-		if (!page.data.session || page.data.session.error === 'RefreshTokenError') {
+		if (!page.data.session) {
 			signIn('nsg-keycloak');
 		}
 	});

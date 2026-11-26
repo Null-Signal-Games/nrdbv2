@@ -50,24 +50,20 @@ afterEach(() => {
 });
 
 describe('Keycloak token refresh', () => {
-	it('persists the refresh token and expiry on login and clears previous errors', async () => {
+	it('persists the refresh token and expiry on login', async () => {
 		const { run, fetcher } = setup();
 		expect(
-			await run(
-				{ ...oldToken, error: 'RefreshTokenError' },
-				{
-					access_token: 'login-access',
-					refresh_token: 'login-refresh',
-					id_token: 'login-id',
-					expires_at: nowSeconds + tokenLifetimeSeconds
-				}
-			)
+			await run(oldToken, {
+				access_token: 'login-access',
+				refresh_token: 'login-refresh',
+				id_token: 'login-id',
+				expires_at: nowSeconds + tokenLifetimeSeconds
+			})
 		).toMatchObject({
 			accessToken: 'login-access',
 			refreshToken: 'login-refresh',
 			idToken: 'login-id',
-			expiresAt: nowSeconds + tokenLifetimeSeconds,
-			error: undefined
+			expiresAt: nowSeconds + tokenLifetimeSeconds
 		});
 		expect(fetcher).not.toHaveBeenCalled();
 	});
@@ -89,7 +85,6 @@ describe('Keycloak token refresh', () => {
 			idToken: 'new-id',
 			expiresAt: nowSeconds + tokenLifetimeSeconds
 		});
-		expect(token?.error).toBeUndefined();
 		const [url, options] = fetcher.mock.calls[0];
 		expect(url).toBe('https://identity.test/realms/test/protocol/openid-connect/token');
 		expect(options.method).toBe('POST');
@@ -127,11 +122,9 @@ describe('Keycloak token refresh', () => {
 		['revoked refresh token', () => response({ error: 'invalid_grant' }, 400)],
 		['rejected client credentials', () => response({ error: 'invalid_client' }, 401)],
 		['malformed response', () => response({ access_token: 'new-access' })]
-	])('requires reauthentication after %s', async (_label, result) => {
+	])('signs out after %s', async (_label, result) => {
 		const { run, fetcher } = setup(vi.fn().mockImplementation(result));
-		const token = await run();
-		expect(token).toMatchObject({ accessToken: undefined, error: 'RefreshTokenError' });
-		await run(token!);
+		expect(await run()).toBeNull();
 		expect(fetcher).toHaveBeenCalledTimes(1);
 	});
 
@@ -148,19 +141,14 @@ describe('Keycloak token refresh', () => {
 		const { run } = setup(fetcher);
 		const token = await run();
 		expect(token).toMatchObject({ accessToken: undefined, refreshToken: 'old-refresh' });
-		expect(token?.error).toBeUndefined();
 		const retried = await run(token!);
 		expect(retried).toMatchObject({ accessToken: 'new-access' });
-		expect(retried?.error).toBeUndefined();
 		expect(fetcher).toHaveBeenCalledTimes(2);
 	});
 
-	it('requires a fresh login for legacy sessions without a refresh token', async () => {
+	it('signs out legacy sessions without a refresh token', async () => {
 		const { run, fetcher } = setup();
-		expect(await run({ ...oldToken, refreshToken: undefined })).toMatchObject({
-			accessToken: undefined,
-			error: 'RefreshTokenError'
-		});
+		expect(await run({ ...oldToken, refreshToken: undefined })).toBeNull();
 		expect(fetcher).not.toHaveBeenCalled();
 	});
 

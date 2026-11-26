@@ -8,7 +8,7 @@ export const fetch_private = async (
 	init: RequestInit = {}
 ): Promise<Response> => {
 	const session = await event.locals.auth();
-	if (!session || session.error === 'RefreshTokenError') error(401, 'Sign in to continue.');
+	if (!session) error(401, 'Sign in to continue.');
 	if (!session.accessToken) error(503, 'Your session could not be refreshed. Try again.');
 
 	const headers = new Headers(init.headers);
