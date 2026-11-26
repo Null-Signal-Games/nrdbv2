@@ -77,34 +77,38 @@ function scan(input: string): Token[] {
 const MAX_COMPARISON_PREFIX_WORDS = maxWordsIn(COMPARISON_PREFIX_MAP);
 const MAX_COMPARISON_SUFFIX_WORDS = maxWordsIn(COMPARISON_SUFFIX_MAP);
 
-function mergeComparisons(tokens: Token[]): Token[] {
-	const withOperators = mergeRuns(tokens, (i) => {
-		const phrase = findLongestPhrase(tokens, i, MAX_COMPARISON_PREFIX_WORDS, (text) =>
-			COMPARISON_PREFIX_MAP.get(text)
-		);
-		return phrase && { run: phrase.run, text: phrase.value };
-	});
+interface RunReplacement {
+	run: Token[];
+	text: string;
+}
 
-	return mergeRuns(withOperators, (i) => {
-		const number = withOperators[i];
-		if (!isNumber(number)) return null;
-		const suffix = findLongestPhrase(
-			withOperators,
-			i + 1,
-			MAX_COMPARISON_SUFFIX_WORDS,
-			(text) => COMPARISON_SUFFIX_MAP.get(text)
-		);
-		return suffix && { run: [number, ...suffix.run], text: `${suffix.value}${number.text}` };
-	});
+function mergeComparisons(tokens: Token[]): Token[] {
+	return mergeRuns(mergeRuns(tokens, findPrefixOperator), findSuffixedComparison);
+}
+
+function findPrefixOperator(tokens: Token[], i: number): RunReplacement | null {
+	const phrase = findLongestPhrase(tokens, i, MAX_COMPARISON_PREFIX_WORDS, (text) =>
+		COMPARISON_PREFIX_MAP.get(text)
+	);
+	return phrase && { run: phrase.run, text: phrase.value };
+}
+
+function findSuffixedComparison(tokens: Token[], i: number): RunReplacement | null {
+	const number = tokens[i];
+	if (!isNumber(number)) return null;
+	const suffix = findLongestPhrase(tokens, i + 1, MAX_COMPARISON_SUFFIX_WORDS, (text) =>
+		COMPARISON_SUFFIX_MAP.get(text)
+	);
+	return suffix && { run: [number, ...suffix.run], text: `${suffix.value}${number.text}` };
 }
 
 function mergeRuns(
 	tokens: Token[],
-	findRun: (i: number) => { run: Token[]; text: string } | null
+	findRun: (tokens: Token[], i: number) => RunReplacement | null
 ): Token[] {
 	const merged: Token[] = [];
 	for (let i = 0; i < tokens.length;) {
-		const found = findRun(i);
+		const found = findRun(tokens, i);
 		if (found) {
 			const { run, text } = found;
 			merged.push({
