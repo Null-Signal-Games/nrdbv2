@@ -66,10 +66,15 @@ export const actions: Actions = {
 	save: async (event) => {
 		let draft;
 		try {
-			const { identity_card_id, side_id, card_slots } = JSON.parse(
+			const { name, identity_card_id, side_id, card_slots } = JSON.parse(
 				String((await event.request.formData()).get('draft'))
 			);
-			draft = { identity_card_id, side_id, card_slots };
+			draft = {
+				name: (typeof name === 'string' && name.trim()) || 'Untitled deck',
+				identity_card_id,
+				side_id,
+				card_slots
+			};
 		} catch {
 			return fail(400, { message: 'The deck could not be read.' });
 		}
@@ -84,7 +89,6 @@ export const actions: Actions = {
 						type: 'decks',
 						attributes: {
 							...draft,
-							name: 'Untitled deck',
 							follows_basic_deckbuilding_rules: true,
 							notes: '',
 							tags: []

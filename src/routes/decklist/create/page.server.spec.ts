@@ -53,6 +53,16 @@ describe('save deck', () => {
 		});
 	});
 
+	it('saves the deck name', async () => {
+		const fetcher = vi.fn().mockResolvedValueOnce(response({ ...deck, id: 'new-deck' }, 201));
+
+		await expect(
+			actions.save(event(fetcher, JSON.stringify({ ...draft, name: '  Fast Advance  ' })))
+		).rejects.toMatchObject({ status: 303 });
+
+		expect(JSON.parse(fetcher.mock.calls[0][1].body).data.attributes.name).toBe('Fast Advance');
+	});
+
 	it.each([
 		['no draft', null],
 		['invalid JSON', '{']

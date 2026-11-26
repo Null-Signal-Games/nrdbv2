@@ -20,6 +20,7 @@
 
 	let { data, form }: Props = $props();
 
+	let name = $state('');
 	let deck = $state<CardSlots>({});
 
 	let catalog = $derived({
@@ -42,7 +43,7 @@
 </script>
 
 {#if identity}
-	<DeckBar on_change_identity={decklistNav.clearIdentity}>
+	<DeckBar bind:name on_change_identity={decklistNav.clearIdentity}>
 		{#snippet actions()}
 			{#if form?.message}
 				<span class="save-error" role="alert">{form.message}</span>
@@ -53,6 +54,7 @@
 						type="hidden"
 						name="draft"
 						value={JSON.stringify({
+							name,
 							identity_card_id: identity.id,
 							side_id: identity.attributes.side_id,
 							card_slots: deck
