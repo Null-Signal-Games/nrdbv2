@@ -51,6 +51,8 @@ export const RE_QUOTED_GROUP = /!?\([^()]*"[^"]+"[^()]*\)/g;
 const PUNCTUATION = '[,.;!?]+';
 export const RE_TRAILING_PUNCTUATION = new RegExp(`${PUNCTUATION}$`);
 
+export const RE_NUMBER = /^\d+$/;
+
 // A quoted term swapped out for a positional placeholder. The placeholder is delimited by
 // NULL so it survives lowercasing/normalization and the numeric pre-pass untouched, and is a
 // single whitespace-free token so recognizeIntents keeps it whole. Restoring it in place
