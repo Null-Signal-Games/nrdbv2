@@ -1,4 +1,10 @@
-import { RE_NUMBER, RE_QUOTED_GROUP, RE_QUOTED_TERM, RE_TRAILING_PUNCTUATION } from './patterns';
+import {
+	RE_NUMBER,
+	RE_OPERATOR,
+	RE_QUOTED_GROUP,
+	RE_QUOTED_TERM,
+	RE_TRAILING_PUNCTUATION
+} from './patterns';
 import { COMPARISON_PREFIX_MAP, COMPARISON_SUFFIX_MAP, maxWordsIn } from './vocabulary';
 
 export interface Token {
@@ -83,7 +89,9 @@ interface RunReplacement {
 }
 
 function mergeComparisons(tokens: Token[]): Token[] {
-	return mergeRuns(mergeRuns(tokens, findPrefixOperator), findSuffixedComparison);
+	const withOperators = mergeRuns(tokens, findPrefixOperator);
+	const withPrefixed = mergeRuns(withOperators, findPrefixedComparison);
+	return mergeRuns(withPrefixed, findSuffixedComparison);
 }
 
 function findPrefixOperator(tokens: Token[], i: number): RunReplacement | null {
@@ -100,6 +108,13 @@ function findSuffixedComparison(tokens: Token[], i: number): RunReplacement | nu
 		COMPARISON_SUFFIX_MAP.get(text)
 	);
 	return suffix && { run: [number, ...suffix.run], text: `${suffix.value}${number.text}` };
+}
+
+function findPrefixedComparison(tokens: Token[], i: number): RunReplacement | null {
+	const operator = tokens[i];
+	const number = tokens[i + 1];
+	if (!isOperator(operator) || !number || !isNumber(number)) return null;
+	return { run: [operator, number], text: `${operator.text}${number.text}` };
 }
 
 function mergeRuns(
@@ -124,6 +139,10 @@ function mergeRuns(
 		}
 	}
 	return merged;
+}
+
+function isOperator(token: Token): boolean {
+	return !token.verbatim && RE_OPERATOR.test(token.text);
 }
 
 function isNumber(token: Token): boolean {

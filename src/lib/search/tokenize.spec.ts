@@ -21,17 +21,33 @@ describe('tokenize - words', () => {
 	});
 });
 
-describe('tokenize - comparisons written in words', () => {
-	it('merges a comparison phrase into one token covering the phrase', () => {
+describe('tokenize - comparisons', () => {
+	it('merges a comparison into one token covering its source span', () => {
+		const spaced = 'cost >= 3';
+		const [, spacedComparison] = tokenize(spaced);
+		expect(spacedComparison.text).toBe('>=3');
+		expect(source(spaced, spacedComparison)).toBe('>= 3');
+
 		const prefixed = 'cost greater than or equal to 3';
-		const [, operator] = tokenize(prefixed);
-		expect(operator.text).toBe('>=');
-		expect(source(prefixed, operator)).toBe('greater than or equal to');
+		const [, prefixedComparison] = tokenize(prefixed);
+		expect(prefixedComparison.text).toBe('>=3');
+		expect(source(prefixed, prefixedComparison)).toBe('greater than or equal to 3');
 
 		const suffixed = '2 or more strength';
-		const [comparison] = tokenize(suffixed);
-		expect(comparison.text).toBe('>=2');
-		expect(source(suffixed, comparison)).toBe('2 or more');
+		const [suffixedComparison] = tokenize(suffixed);
+		expect(suffixedComparison.text).toBe('>=2');
+		expect(source(suffixed, suffixedComparison)).toBe('2 or more');
+	});
+
+	it('leaves a comparison operator alone without a plain number after it', () => {
+		const input = 'cost greater than or equal to';
+		const [, operator] = tokenize(input);
+		expect(operator.text).toBe('>=');
+		expect(source(input, operator)).toBe('greater than or equal to');
+
+		expect(texts('strength >')).toEqual(['strength', '>']);
+		expect(texts('strength > "5"')).toEqual(['strength', '>', '"5"']);
+		expect(texts('> not 5 strength')).toEqual(['>', '5', 'strength']);
 	});
 
 	it('leaves "or more" alone without a number in front', () => {
@@ -70,8 +86,7 @@ describe('tokenize - negation', () => {
 	it('does not negate a comparison or quoted syntax', () => {
 		expect(tokenize('not more than 3')).toMatchObject([
 			{ text: 'not', negated: false },
-			{ text: '>', negated: false },
-			{ text: '3', negated: false }
+			{ text: '>3', negated: false }
 		]);
 		expect(tokenize('not "end the run"')).toMatchObject([
 			{ text: 'not', negated: false },
