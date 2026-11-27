@@ -19,6 +19,7 @@ import {
 	RE_SINGLE_FIELD_AT_END,
 	RE_SINGLE_FIELD_AT_START,
 	RE_BARE_NUMBER_FIELD,
+	RE_OPERATOR,
 	RE_QUOTED_GROUP,
 	RE_QUOTED_TERM
 } from './patterns';
@@ -380,4 +381,14 @@ describe('RE_QUOTED_GROUP', () => {
 
 	it('does not match a group without quotes', () =>
 		expect(matches(RE_QUOTED_GROUP, '(f:shaper or f:anarch)')).toBe(false));
+});
+
+describe('token shapes', () => {
+	it('RE_OPERATOR matches the four comparison symbols', () => {
+		for (const operator of ['<', '<=', '>', '>=']) {
+			expect(matches(RE_OPERATOR, operator)).toBe(true);
+		}
+		expect(matches(RE_OPERATOR, '=')).toBe(false);
+		expect(matches(RE_OPERATOR, '>3')).toBe(false);
+	});
 });
